@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+*.log
+.vite
+*.tsbuildinfo
+
+# variable d'environnement locale (client_id Google, clés…) — jamais commitée
+.env
+.env.local
+.env.*.local
