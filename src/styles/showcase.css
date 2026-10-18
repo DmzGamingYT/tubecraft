@@ -5975,6 +5975,23 @@
   border-color: color-mix(in srgb, var(--sc-accent) 36%, transparent);
 }
 
+/* Déjà vue : simple relance, sans la mise en avant de la première visite. */
+.sc-mobilemenu__tour--quiet {
+  color: var(--sc-dim);
+  border-color: transparent;
+  letter-spacing: 0.08em;
+}
+
+.sc-mobilemenu__tour--quiet:hover {
+  color: var(--sc-ink);
+  border-color: transparent;
+}
+
+.sc-mobilemenu__refresh {
+  font-size: 12px;
+  line-height: 1;
+}
+
 .sc-mobilemenu__cta {
   width: 100%;
   min-height: 46px;
@@ -6013,6 +6030,29 @@
 }
 
 .sc-hero__collection:hover {
+  color: var(--sc-ink);
+}
+
+/* Relance discrète de la visite, une fois celle-ci déjà vue. */
+.sc-tourlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-family: var(--sc-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sc-dim);
+  transition: color 0.2s ease;
+}
+
+.sc-tourlink span {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.sc-tourlink:hover {
   color: var(--sc-ink);
 }
 

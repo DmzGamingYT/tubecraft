@@ -1,9 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import type { OpenSourceApp } from '../data/apps';
 import { proposals, proposalStatusLabel } from '../data/proposals';
 import { DemoFrame, PulseCraftDemo, SpotifyCraftDemo, TubeCraftDemo } from './showcase/AppDemo';
 import { AppGallery } from './showcase/AppGallery';
 import { GuidedTour, type TourStep } from './showcase/GuidedTour';
+import { hasSeenTour, rememberTour } from './showcase/tourMemory';
 import { UnderTheHood } from './showcase/UnderTheHood';
 import { IdeaPreview } from './showcase/IdeaPreview';
 import { DownloadShowcase } from './download/DownloadShowcase';
@@ -311,6 +320,14 @@ export function ShowcaseSite({
   const [galleryApp, setGalleryApp] = useState<OpenSourceApp | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  /** la visite a déjà été lancée : on ne la remet plus en avant */
+  const [tourSeen, setTourSeen] = useState(hasSeenTour);
+  /**
+   * Le bouton reste affiché pendant la visite elle-même : il disparaît
+   * seulement à la fermeture, pour que l'arrière-plan ne bouge pas sous le
+   * projecteur de la première étape.
+   */
+  const tourOffered = !tourSeen || tourOpen;
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const tourReturnRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -323,16 +340,46 @@ export function ShowcaseSite({
   useHeroParallax(rootRef);
 
   const startTour = useCallback(() => {
-    tourReturnRef.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // `body` n'est pas une cible de retour : sans ce filtre, un lancement
+    // programmatique renverrait le focus sur la page entière.
+    const focused = document.activeElement;
+    const active =
+      focused instanceof HTMLElement &&
+      focused !== document.body &&
+      focused !== document.documentElement
+        ? focused
+        : null;
+    // Depuis le menu mobile, l'élément déclencheur disparaît avec le menu :
+    // le focus revient au bouton d'ouverture, qui reste dans la barre.
+    const fromMenu = !!active && !!mobileMenuRef.current?.contains(active);
+    tourReturnRef.current = fromMenu ? menuButtonRef.current : active;
     setMenuOpen(false);
+    rememberTour();
+    setTourSeen(true);
     setTourOpen(true);
   }, []);
 
   const closeTour = useCallback(() => {
     setTourOpen(false);
-    tourReturnRef.current?.focus();
   }, []);
+
+  // Après la fermeture, le focus revient à l'entrée de visite encore présente :
+  // à la première visite, le bouton vient d'être remplacé par le lien discret.
+  // L'effet de mise en page court après le rendu, sans dépendre d'une frame
+  // d'animation (qui n'arrive pas dans un onglet en arrière-plan).
+  const tourWasOpen = useRef(false);
+  useLayoutEffect(() => {
+    if (tourOpen) {
+      tourWasOpen.current = true;
+      return;
+    }
+    if (!tourWasOpen.current) return;
+    tourWasOpen.current = false;
+    const back = tourReturnRef.current?.isConnected
+      ? tourReturnRef.current
+      : rootRef.current?.querySelector<HTMLElement>('[data-tour-start]');
+    back?.focus({ preventScroll: true });
+  }, [tourOpen]);
 
   const openGallery = (app: OpenSourceApp) => {
     returnFocusRef.current =
@@ -574,16 +621,23 @@ export function ShowcaseSite({
             </button>
             <button
               type="button"
-              className="sc-mobilemenu__tour"
+              data-tour-start
+              className={`sc-mobilemenu__tour${tourOffered ? '' : ' sc-mobilemenu__tour--quiet'}`}
               onClick={() => {
                 setMenuOpen(false);
                 startTour();
               }}
             >
-              <span className="sc-mobilemenu__play" aria-hidden>
-                ▶
-              </span>
-              Visite guidée
+              {tourOffered ? (
+                <span className="sc-mobilemenu__play" aria-hidden>
+                  ▶
+                </span>
+              ) : (
+                <span className="sc-mobilemenu__refresh" aria-hidden>
+                  ↻
+                </span>
+              )}
+              {tourOffered ? 'Visite guidée' : 'Revoir la visite'}
             </button>
           </div>
 
@@ -686,17 +740,30 @@ export function ShowcaseSite({
                 Voir sur GitHub <span aria-hidden>↗</span>
               </a>
             )}
-            <button type="button" className="sc-btn sc-btn--line sc-btn--tour" onClick={startTour}>
-              <span className="sc-btn__play" aria-hidden>
-                ▶
-              </span>
-              Visite guidée
-            </button>
+            {tourOffered ? (
+              <button
+                type="button"
+                data-tour-start
+                className="sc-btn sc-btn--line sc-btn--tour"
+                onClick={startTour}
+              >
+                <span className="sc-btn__play" aria-hidden>
+                  ▶
+                </span>
+                Visite guidée
+              </button>
+            ) : null}
           </div>
 
           <a href="#collection" className="sc-hero__collection">
             ou explorer la collection <span aria-hidden>↓</span>
           </a>
+
+          {tourOffered ? null : (
+            <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
+              <span aria-hidden>↻</span> Revoir la visite guidée
+            </button>
+          )}
 
           <p className="sc-hero__meta">
             Open source sur GitHub · Web · Sans compte · Aucun abonnement
