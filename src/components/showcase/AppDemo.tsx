@@ -619,10 +619,12 @@ function PulseRail({ active = 0 }: { active?: number }) {
 
 function PulseRings() {
   const rings = [
-    { r: 41, pct: 87, color: '#ff4d6d' },
+    { r: 42, pct: 87, color: '#ff4d6d' },
     { r: 32, pct: 100, color: '#c9ff3d' },
-    { r: 23, pct: 63, color: '#38d9ff' },
+    { r: 22, pct: 63, color: '#38d9ff' },
   ];
+  // Un trait plus fin que l'écart entre anneaux : sans cela, les trois cercles
+  // se touchent et l'ensemble ressemble à un seul donut épais.
   return (
     <span className="pc__ringwrap">
       <svg viewBox="0 0 100 100" aria-hidden>
@@ -630,14 +632,14 @@ function PulseRings() {
           const circumference = 2 * Math.PI * ring.r;
           return (
             <g key={ring.color} transform="rotate(-90 50 50)">
-              <circle cx="50" cy="50" r={ring.r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="9" />
+              <circle cx="50" cy="50" r={ring.r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="7" />
               <circle
                 cx="50"
                 cy="50"
                 r={ring.r}
                 fill="none"
                 stroke={ring.color}
-                strokeWidth="9"
+                strokeWidth="7"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={circumference * (1 - ring.pct / 100)}
@@ -680,16 +682,21 @@ function PulseTodayScene() {
       <div className="pc__grid">
         <div className="pc__card pc__ringcard">
           <span className="pc__cardtitle">Objectifs du jour</span>
-          <PulseRings />
-          <span className="pc__legendRow">
-            <i style={{ background: '#ff4d6d' }} /> Bouger <b>520</b> / 600 kcal
-          </span>
-          <span className="pc__legendRow">
-            <i style={{ background: '#c9ff3d' }} /> Entraînement <b>30</b> / 30 min
-          </span>
-          <span className="pc__legendRow">
-            <i style={{ background: '#38d9ff' }} /> Hydratation <b>1 250</b> / 2 000 ml
-          </span>
+          <div className="pc__ringbody">
+            <PulseRings />
+            <div className="pc__legend">
+              <span className="pc__legendRow">
+                <i style={{ background: '#ff4d6d' }} /> Bouger <b>520</b> / 600 kcal
+              </span>
+              <span className="pc__legendRow">
+                <i style={{ background: '#c9ff3d' }} /> Entraînement <b>30</b> / 30 min
+              </span>
+              <span className="pc__legendRow">
+                <i style={{ background: '#38d9ff' }} /> Hydratation <b>1 250</b> / 2 000 ml
+              </span>
+            </div>
+          </div>
+          <span className="pc__ringfoot">Remplis par vos séances et votre hydratation.</span>
         </div>
 
         <div className="pc__stack">
@@ -718,6 +725,31 @@ function PulseTodayScene() {
               <em>30 à 45 min, échauffement complet. Encore 750 ml d’eau.</em>
             </div>
             <span className="pc__aibadge">IA</span>
+          </div>
+
+          <div className="pc__card pc__readiness">
+            <span className="pc__cardtitle">Forme du jour</span>
+            <div className="pc__gauge">
+              <span>
+                <b>88</b>
+                <i>/ 100</i>
+              </span>
+            </div>
+            <div className="pc__factors">
+              {[
+                ['Sommeil', 87, '#b48cff'],
+                ['Charge', 86, '#c9ff3d'],
+                ['FC repos', 95, '#38d9ff'],
+              ].map(([label, value, color]) => (
+                <span key={String(label)}>
+                  <em>{label}</em>
+                  <span className="pc__track">
+                    <i style={{ width: `${value}%`, background: String(color) }} />
+                  </span>
+                  <b>{value}</b>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -918,16 +950,7 @@ export function PulseCraftDemo({
     <div className={`pc pc--${scene}${cycle ? ' pc--cycle' : ''}`} data-scene={scene} aria-hidden>
       <div className="pc__top">
         <span className="pc__brand">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden>
-            <path
-              d="M3 13h4l2-7 3.5 12 2.5-9 1.5 4H21"
-              fill="none"
-              stroke="#c9ff3d"
-              strokeWidth="2.1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span className="pc__brandicon" aria-hidden />
           PulseCraft
         </span>
         <span className="pc__topdate">dimanche 18 octobre</span>

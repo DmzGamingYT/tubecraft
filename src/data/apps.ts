@@ -41,6 +41,24 @@ export interface OpenSourceApp {
 /** Profil GitHub de l'auteur, utilisé comme lien de repli et dans le pied de page. */
 export const githubProfile = 'https://github.com/DmzGamingYT';
 
+/**
+ * Adresse de lancement d'une app servie hors de ce dépôt.
+ *
+ * Au build, `VITE_PULSECRAFT_URL` / `VITE_SPOTIFYCRAFT_URL` permettent de
+ * pointer une vraie instance publique (`./pulsecraft/` quand la vitrine et
+ * l'app sont déployées ensemble). En développement, on retombe sur le serveur
+ * local pour que « Lancer » marche vraiment ; en production sans variable, la
+ * carte ne propose que le code plutôt qu'un lien mort.
+ */
+function launchUrl(envValue: string | undefined, localPort: number): string | undefined {
+  const configured = envValue?.trim();
+  if (configured) return configured;
+  return import.meta.env.DEV ? `http://127.0.0.1:${localPort}/` : undefined;
+}
+
+const pulsecraftUrl = launchUrl(import.meta.env.VITE_PULSECRAFT_URL, 5186);
+const spotifycraftUrl = launchUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
+
 export const apps: OpenSourceApp[] = [
   {
     id: 'tubecraft',
@@ -66,8 +84,8 @@ export const apps: OpenSourceApp[] = [
     accent: '#1ed760',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM'],
     license: 'MIT',
-    // Serveur de développement local de SpotifyCraft (`npm run dev`, port 5184).
-    url: 'http://127.0.0.1:5184/',
+    // Instance publique via `VITE_SPOTIFYCRAFT_URL`, sinon serveur local (5184).
+    ...(spotifycraftUrl ? { url: spotifycraftUrl } : {}),
     source: 'https://github.com/DmzGamingYT/spotifycraft',
   },
   {
@@ -80,8 +98,8 @@ export const apps: OpenSourceApp[] = [
     accent: '#c9ff3d',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM', 'Tauri 2'],
     license: 'MIT',
-    // Serveur de développement local de PulseCraft (`npm run dev`, port 5186).
-    url: 'http://127.0.0.1:5186/',
+    // Instance publique via `VITE_PULSECRAFT_URL`, sinon serveur local (5186).
+    ...(pulsecraftUrl ? { url: pulsecraftUrl } : {}),
     source: 'https://github.com/DmzGamingYT/pulsecraft',
   },
 ];

@@ -9219,3 +9219,300 @@
 .sc-demo:not(.is-live) .pc * {
   animation-play-state: paused;
 }
+
+/* ------------------------------------------------- alignement de la maquette PulseCraft
+   Le cadre de démo a un aspect fixe : la scène doit occuper toute la hauteur
+   disponible (sinon un grand vide apparaît sous les cartes), les anneaux se
+   placent à côté de leur légende, et la barre d'onglets mobile disparaît dès
+   que le cadre est assez large pour un écran d'ordinateur. */
+
+.pc__scene {
+  flex: 1;
+  min-height: 0;
+}
+
+.pc__grid {
+  flex: 1;
+  min-height: 0;
+}
+
+.pc__ringcard {
+  justify-content: space-between;
+}
+
+.pc__ringbody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
+}
+
+.pc__ringwrap {
+  width: 10.5em;
+  height: 10.5em;
+  margin: 0;
+  flex: none;
+}
+
+.pc__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  min-width: 0;
+}
+
+.pc__ringfoot {
+  flex: none;
+  font-size: 0.55em;
+  line-height: 1.4;
+  color: rgba(241, 244, 236, 0.34);
+}
+
+.pc__coachcard {
+  flex: 1;
+}
+
+.pc__readiness {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: 0.85em;
+}
+
+.pc__score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3em;
+}
+
+.pc__score b {
+  font-size: 2.6em;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.pc__score span {
+  font-size: 0.62em;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__score em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 0.55em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(201, 255, 61, 0.8);
+}
+
+.pc__factors {
+  display: grid;
+  gap: 0.45em;
+}
+
+.pc__factors > span {
+  display: grid;
+  grid-template-columns: 4.6em minmax(0, 1fr) 2em;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.58em;
+}
+
+.pc__factors em {
+  font-style: normal;
+  color: rgba(241, 244, 236, 0.48);
+}
+
+.pc__factors b {
+  font-size: 1em;
+  text-align: right;
+  color: #f1f4ec;
+}
+
+.pc__track {
+  display: block;
+  height: 0.34em;
+  border-radius: 9em;
+  background: rgba(241, 244, 236, 0.09);
+  overflow: hidden;
+}
+
+.pc__track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+@container (min-width: 470px) {
+  .pc__tabs {
+    display: none;
+  }
+}
+
+@container (min-width: 900px) {
+  .pc__readiness {
+    display: flex;
+  }
+
+  .pc__coachcard {
+    flex: none;
+  }
+}
+
+@container (max-width: 470px) {
+  .pc__ringbody {
+    flex-direction: column;
+    gap: 0.55em;
+  }
+
+  .pc__ringwrap {
+    width: 8.4em;
+    height: 8.4em;
+  }
+
+  .pc__ringfoot {
+    display: none;
+  }
+
+  .pc__score em {
+    display: none;
+  }
+}
+
+/* Petits cadres : la barre d'onglets remplace le rail, jamais les deux. */
+@container (max-width: 469px) {
+  .pc__rail {
+    display: none;
+  }
+}
+
+/* Pastille de marque : même verre liquide que l'icône de l'app. */
+.pc__brandicon {
+  position: relative;
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  border-radius: 0.42em;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 32% 26%, #f8ffe4 0%, #c9ff3d 34%, #2fc7aa 68%, #0b6b60 100%);
+  box-shadow:
+    inset 0 0.05em 0.1em rgba(255, 255, 255, 0.8),
+    inset 0 -0.08em 0.14em rgba(0, 0, 0, 0.35),
+    0 0.25em 0.5em -0.22em rgba(201, 255, 61, 0.7);
+}
+
+.pc__brandicon::after {
+  content: '';
+  position: absolute;
+  top: 0.12em;
+  left: 0.2em;
+  width: 0.66em;
+  height: 0.3em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  transform: rotate(-26deg);
+}
+
+/* Les scènes courtes (activité, sommeil, coach, progrès) se centrent dans la
+   hauteur au lieu de laisser un vide en bas ; la scène « aujourd'hui » remplit
+   déjà via sa grille, on ne la recentre pas (sinon elle perd sa marge basse). */
+.pc--activity .pc__scene,
+.pc--sleep .pc__scene,
+.pc--coach .pc__scene,
+.pc--progress .pc__scene {
+  justify-content: center;
+}
+
+/* Jauge de forme : remplit la carte au lieu d'un score flottant. */
+.pc__gauge {
+  position: relative;
+  width: 7em;
+  height: 7em;
+  flex: none;
+  margin: 0.1em auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(#c9ff3d 0 88%, rgba(241, 244, 236, 0.09) 88% 100%);
+  box-shadow: 0 0.5em 1.2em -0.6em rgba(201, 255, 61, 0.55);
+}
+
+.pc__gauge::before {
+  content: '';
+  position: absolute;
+  inset: 0.55em;
+  border-radius: 50%;
+  background: #101412;
+  border: 1px solid rgba(241, 244, 236, 0.07);
+}
+
+.pc__gauge span {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.pc__gauge b {
+  font-size: 1.9em;
+  letter-spacing: -0.05em;
+}
+
+.pc__gauge i {
+  margin-top: 0.3em;
+  font-style: normal;
+  font-size: 0.45em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+@container (max-width: 1099px) {
+  .pc__factors {
+    display: none;
+  }
+}
+
+@container (max-width: 999px) {
+  .pc__readiness {
+    display: none;
+  }
+}
+
+/* Cadre intermédiaire : un anneau un peu plus compact laisse respirer la carte
+   et préserve la marge basse du cadre. */
+@container (min-width: 471px) and (max-width: 760px) {
+  .pc__ringwrap {
+    width: 9em;
+    height: 9em;
+  }
+}
+
+/* Entrée de scène : fondu seul. Une transformation laissée en pause (démos hors
+   écran) décalait tout le contenu de quelques pixels vers le bas. */
+@keyframes pc-scene-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.sc-demo.is-paused .pc__content,
+.sc-demo:not(.is-live) .pc__content {
+  animation-play-state: running;
+}
+
+/* Le contenu de la carte coach se centre verticalement quand la carte est
+   étirée pour aligner la colonne de droite. */
+.pc__coachcard {
+  align-items: center;
+}
+
+.pc__ringcenter i {
+  font-size: 0.44em;
+  letter-spacing: 0.08em;
+}
