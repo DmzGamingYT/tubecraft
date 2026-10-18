@@ -25,9 +25,17 @@ function RouterLink({ href, className, children }: ShowcaseLinkProps) {
 export function Showcase() {
   useEffect(() => {
     setPageMeta(
-      'L’Atelier — mes apps open source',
-      'Une collection d’applications open source qui refusent l’abonnement et la télémétrie. La première : TubeCraft, un client YouTube complet.'
+      'Craftline — mes apps open source',
+      'Craftline, une collection d’applications open source qui refusent l’abonnement et la télémétrie. La première : TubeCraft, un client YouTube complet.'
     );
+
+    // La favicon de TubeCraft n’a rien à faire sur la vitrine de la collection.
+    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    const previous = icon?.getAttribute('href');
+    icon?.setAttribute('href', `${import.meta.env.BASE_URL}craftline.svg`);
+    return () => {
+      if (previous) icon?.setAttribute('href', previous);
+    };
   }, []);
 
   return (

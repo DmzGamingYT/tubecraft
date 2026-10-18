@@ -239,6 +239,10 @@ profondes (`/watch`, `/channel`, `/search`) fonctionnent au rechargement.
 
 ## Vitrine autonome (`/apps`)
 
+La collection s’appelle **Craftline** : un C ouvert et un triangle de lecture sur une tuile
+rouge, dessinés dans `CraftlineMark.tsx` et repris par le favicon. Le nom relie les apps
+TubeCraft, SpotifyCraft et PulseCraft.
+
 La présentation des apps open source existe à deux endroits, à partir du **même composant**
 (`src/components/ShowcaseSite.tsx`) :
 

@@ -7,6 +7,7 @@ import { GuidedTour, type TourStep } from './showcase/GuidedTour';
 import { UnderTheHood } from './showcase/UnderTheHood';
 import { IdeaPreview } from './showcase/IdeaPreview';
 import { DownloadShowcase } from './download/DownloadShowcase';
+import { CraftlineMark } from './CraftlineMark';
 
 /**
  * Contenu de la vitrine, partagé par deux entrées :
@@ -195,7 +196,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour="hero"]',
     title: 'Des outils qu’on possède vraiment.',
-    text: 'Bienvenue dans L’Atelier. La visite dure une minute : elle va vous montrer la collection, les démos, l’architecture et l’installation — sans rien télécharger.',
+    text: 'Bienvenue dans Craftline. La visite dure une minute : elle va vous montrer la collection, les démos, l’architecture et l’installation — sans rien télécharger.',
     duration: 5600,
   },
   {
@@ -384,12 +385,12 @@ export function ShowcaseSite({
       <span className="sc-progress" aria-hidden />
 
       <header className="sc-nav">
-        <a href="#top" className="sc-brand" aria-label="L’Atelier — haut de page">
+        <a href="#top" className="sc-brand" aria-label="Craftline — haut de page">
           <span className="sc-brand__mark" aria-hidden>
-            A
+            <CraftlineMark />
           </span>
           <span className="sc-brand__text">
-            L’Atelier<span className="sc-brand__dim">.apps</span>
+            Craftline<span className="sc-brand__dot">.</span>
           </span>
         </a>
 
@@ -1046,10 +1047,10 @@ export function ShowcaseSite({
       <footer className="sc-footer">
         <div className="sc-footer__brand">
           <span className="sc-brand__mark" aria-hidden>
-            A
+            <CraftlineMark />
           </span>
           <div>
-            <strong>L’Atelier</strong>
+            <strong>Craftline</strong>
             <p>Des apps open source, faites pour durer.</p>
           </div>
         </div>
