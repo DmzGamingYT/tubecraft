@@ -3,6 +3,7 @@ import { useStore, type NotifLevel } from '../store';
 import type { Video } from '../types';
 import { compactNumber } from '../lib/format';
 import { useClickOutside } from '../lib/hooks';
+import { watchUrl } from '../lib/url';
 import { IconClock, IconDislike, IconLike, IconShare } from './icons';
 
 /** J'aime / Je n'aime pas / Partager — état persistant. */
@@ -16,11 +17,13 @@ export function LikeBar({ video }: { video: Video }) {
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const likeCount = video.likes + (liked ? 1 : 0);
+  // likes réels (Return YouTube Dislike) + action locale
+  const likeCount = (video.likes ?? 0) + (liked ? 1 : 0);
+  const dislikeCount = video.dislikes ?? 0;
   const split = likeCount >= 1000;
 
   const share = async () => {
-    const url = `${window.location.origin}/watch?v=${video.id}`;
+    const url = watchUrl(video.id);
     try {
       if (navigator.share) await navigator.share({ title: video.title, url });
       else await navigator.clipboard.writeText(url);
@@ -42,16 +45,21 @@ export function LikeBar({ video }: { video: Video }) {
           title="J’aime"
         >
           <IconLike width={22} height={22} />
-          <span>{compactNumber(likeCount)}</span>
+          <span>{likeCount > 0 ? compactNumber(likeCount) : 'J’aime'}</span>
         </button>
         <span className="actions__divider" />
         <button
           className={`actions__btn actions__btn--dislike${disliked ? ' actions__btn--on' : ''}`}
           onClick={() => toggleDislike(video.id)}
           aria-pressed={disliked}
-          title="Je n’aime pas"
+          title={
+            dislikeCount > 0
+              ? `Je n’aime pas (${dislikeCount.toLocaleString('fr-FR')})`
+              : 'Je n’aime pas'
+          }
         >
           <IconDislike width={22} height={22} />
+          {dislikeCount > 0 && <span>{compactNumber(dislikeCount)}</span>}
         </button>
       </div>
 

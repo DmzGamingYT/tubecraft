@@ -1,9 +1,13 @@
 node_modules
 dist
+dist-showcase
 .DS_Store
 *.log
 .vite
 *.tsbuildinfo
+
+# état local de l’agent (identifiant de projet), pas du code source
+.freebuff/
 
 # variable d'environnement locale (client_id Google, clés…) — jamais commitée
 .env

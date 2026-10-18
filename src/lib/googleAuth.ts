@@ -56,6 +56,8 @@ declare global {
 }
 
 let loadPromise: Promise<void> | null = null;
+let gsiInitialized = false;
+let credentialHandler: ((payload: GooglePayload) => void) | null = null;
 
 /** Charge le script officiel GSI une seule fois. */
 export function loadGoogleScript(): Promise<void> {
@@ -98,13 +100,17 @@ export function renderGoogleButton(
   container: HTMLElement,
   onCredential: (payload: GooglePayload) => void
 ): Promise<void> {
+  credentialHandler = onCredential;
   return loadGoogleScript().then(() => {
     const gsi = window.google;
     if (!gsi) throw new Error();
-    gsi.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID as string,
-      callback: (response) => onCredential(decodeJwtPayload(response.credential)),
-    });
+    if (!gsiInitialized) {
+      gsi.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID as string,
+        callback: (response) => credentialHandler?.(decodeJwtPayload(response.credential)),
+      });
+      gsiInitialized = true;
+    }
     gsi.accounts.id.renderButton(container, {
       theme: 'filled_black',
       size: 'large',

@@ -1,6 +1,6 @@
 import type { Video } from '../types';
 import { videos, shorts, channels } from './catalog';
-import { getDynamicVideo, getAllDynamicVideos } from './dynamic';
+import { getDynamicChannel, getDynamicVideo, getAllDynamicVideos } from './dynamic';
 
 export { videos, shorts, categories, channels, thumbFor, thumbLargeFor, generatedAt } from './catalog';
 
@@ -16,16 +16,16 @@ export function getVideo(id: string | null | undefined): Video | undefined {
 
 export function getChannel(id: string | null | undefined) {
   if (!id) return undefined;
-  const known = channelIndex.get(id);
+  const known = channelIndex.get(id) ?? getDynamicChannel(id);
   if (known) return known;
-  // chaîne découverte via la recherche LIVE : on l'a connaît par ses vidéos
+  // chaîne découverte via la recherche LIVE : on la reconnaît par ses vidéos
   const sample = getAllDynamicVideos().find((v) => v.channelId === id);
   if (!sample) return undefined;
   return {
     id,
     name: sample.channelName,
     handle: '',
-    avatar: '',
+    avatar: sample.channelAvatar ?? '',
     subscribers: '',
     banner: undefined,
   };

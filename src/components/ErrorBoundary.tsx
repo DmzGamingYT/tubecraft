@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { APP_BASE } from '../lib/url';
 
 interface Props {
   children: ReactNode;
@@ -31,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
           {error.message}
           <br />
           <br />
-          <a href="/" onClick={() => this.setState({ error: null })}>
+          <a href={`${APP_BASE === '/' ? '' : APP_BASE}/`} onClick={() => this.setState({ error: null })}>
             Recharger l’accueil
           </a>
         </p>

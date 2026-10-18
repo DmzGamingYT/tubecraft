@@ -1,19 +1,51 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { categories, recommendFor, shorts, videosByCategory, generatedAt } from '../data';
+import {
+  categories,
+  generatedAt,
+  getVideo,
+  recommendFor,
+  shorts,
+  videosByCategory,
+} from '../data';
 import { useStore } from '../store';
+import type { Video } from '../types';
 import { ChipBar } from '../components/ChipBar';
 import { VideoCard } from '../components/VideoCard';
+
+const PAGE_SIZE = 24;
 
 export function Home() {
   const [params, setParams] = useSearchParams();
   const user = useStore((s) => s.user);
   const history = useStore((s) => s.history);
   const subscribed = useStore((s) => s.subscribed);
+  const dismissed = useStore((s) => s.dismissed);
+  const dismissVideo = useStore((s) => s.dismissVideo);
+  const restoreDismissed = useStore((s) => s.restoreDismissed);
+  const [visible, setVisible] = useState(PAGE_SIZE);
   const category = params.get('c') ?? 'Toutes';
-  const videos = videosByCategory(category);
+  const videos = videosByCategory(category).filter((v) => !dismissed.includes(v.id));
+
+  useEffect(() => setVisible(PAGE_SIZE), [category]);
 
   // compte connecté → un rayon « Recommandés pour vous » bâti sur l'historique
   const recos = user && category === 'Toutes' ? recommendFor(history, subscribed, 8) : [];
+
+  // « Reprendre la lecture » : vidéos commencées mais pas terminées
+  const resume = useMemo(() => {
+    if (category !== 'Toutes') return [];
+    const progress = useStore.getState().progress;
+    return history
+      .map((id) => getVideo(id))
+      .filter((video): video is Video => Boolean(video))
+      .filter((video) => {
+        const seconds = progress[video.id] ?? 0;
+        if (seconds < 10) return false;
+        return !video.duration || seconds < video.duration * 0.95;
+      })
+      .slice(0, 4);
+  }, [history, category]);
 
   return (
     <div className="page">
@@ -45,6 +77,25 @@ export function Home() {
         </section>
       )}
 
+      {resume.length > 0 && (
+        <section className="recos" aria-label="Reprendre la lecture">
+          <h2 className="recos__title">Reprendre la lecture</h2>
+          <section className="grid">
+            {resume.map((video) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                progress={
+                  video.duration
+                    ? (useStore.getState().progress[video.id] ?? 0) / video.duration
+                    : undefined
+                }
+              />
+            ))}
+          </section>
+        </section>
+      )}
+
       {recos.length > 0 && (
         <section className="recos" aria-label="Recommandations personnalisées">
           <h2 className="recos__title">
@@ -55,21 +106,39 @@ export function Home() {
           </p>
           <section className="grid">
             {recos.map((v) => (
-              <VideoCard key={v.id} video={v} />
+              <VideoCard key={v.id} video={v} onDismiss={() => dismissVideo(v.id)} />
             ))}
           </section>
         </section>
       )}
 
       <section className="grid">
-        {videos.map((v) => (
-          <VideoCard key={v.id} video={v} />
+        {videos.slice(0, visible).map((v) => (
+          <VideoCard key={v.id} video={v} onDismiss={() => dismissVideo(v.id)} />
         ))}
       </section>
+
+      {visible < videos.length && (
+        <div className="loadmore">
+          <button className="btn btn--ghost" onClick={() => setVisible((n) => n + PAGE_SIZE)}>
+            Charger plus ({videos.length - visible} restantes)
+          </button>
+        </div>
+      )}
 
       {videos.length === 0 && (
         <p className="empty">
           Aucune vidéo dans cette catégorie. Essayez une autre catégorie ou lancez une recherche.
+        </p>
+      )}
+
+      {dismissed.length > 0 && (
+        <p className="page__footnote">
+          {dismissed.length} vidéo{dismissed.length > 1 ? 's' : ''} masquée
+          {dismissed.length > 1 ? 's' : ''}.{' '}
+          <button className="linkbtn" onClick={restoreDismissed}>
+            Tout restaurer
+          </button>
         </p>
       )}
 

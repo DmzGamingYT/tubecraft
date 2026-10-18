@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "showcase",
+    "src/components/ShowcaseSite.tsx",
+    "src/data/apps.ts",
+    "src/vite-env.d.ts",
+    "vite.showcase.config.ts"
+  ]
+}

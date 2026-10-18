@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { subscribedVideos } from '../data';
 import { useStore } from '../store';
 import { useClickOutside } from '../lib/hooks';
+import { IconBell } from './icons';
 import { Thumb } from './Thumb';
 
 /** Cloche de notifications : nouveautés des chaînes abonnées (niveau « Aucune » exclu). */
@@ -32,7 +33,7 @@ export function NotificationsBell() {
         aria-label="Notifications"
         title="Notifications"
       >
-        🔔
+        <IconBell width={22} height={22} />
         {unseen.length > 0 && <span className="bellcount">{unseen.length > 9 ? '9+' : unseen.length}</span>}
       </button>
 

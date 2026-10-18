@@ -15,9 +15,37 @@ const titles: Record<Kind, string> = {
   watchLater: 'Regarder plus tard',
 };
 
+function groupByDay(
+  items: Video[],
+  dates: Record<string, number>
+): Array<{ label: string; videos: Video[] }> {
+  const groups: Array<{ label: string; videos: Video[] }> = [];
+  for (const video of items) {
+    const label = dayLabel(dates[video.id]);
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.videos.push(video);
+    else groups.push({ label, videos: [video] });
+  }
+  return groups;
+}
+
+function dayLabel(timestamp?: number): string {
+  if (!timestamp) return 'Plus tôt';
+  const day = new Date(timestamp);
+  day.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today.getTime() - day.getTime()) / 86_400_000);
+  if (diff <= 0) return "Aujourd'hui";
+  if (diff === 1) return 'Hier';
+  if (diff < 7) return `Il y a ${diff} jours`;
+  return day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
 export function Feed({ kind }: { kind: Kind }) {
   const subscribed = useStore((s) => s.subscribed);
   const history = useStore((s) => s.history);
+  const historyDates = useStore((s) => s.historyDates);
   const liked = useStore((s) => s.liked);
   const watchLater = useStore((s) => s.watchLater);
   const progress = useStore((s) => s.progress);
@@ -48,6 +76,28 @@ export function Feed({ kind }: { kind: Kind }) {
     .map((id) => ({ id, video: subscribedVideos([id])[0] }))
     .filter((c) => c.video);
 
+  // historique : regroupé par jour (comme YouTube), en conservant l'ordre récent
+  const historyGroups = kind === 'history' ? groupByDay(items, historyDates) : null;
+
+  const renderCard = (v: Video, i: number) => {
+    const seconds = progress[v.id] ?? 0;
+    const ratio = v.duration && seconds > 0 ? seconds / v.duration : 0;
+    return (
+      <VideoCard
+        key={`${v.id}-${i}`}
+        video={v}
+        progress={kind === 'history' && ratio > 0 && ratio < 0.98 ? ratio : undefined}
+        onRemove={
+          kind === 'history'
+            ? () => removeFromHistory(v.id)
+            : kind === 'watchLater'
+              ? () => toggleWatchLater(v.id)
+              : undefined
+        }
+      />
+    );
+  };
+
   return (
     <div className="page">
       <header className="page__head">
@@ -68,6 +118,13 @@ export function Feed({ kind }: { kind: Kind }) {
             )}
           </div>
         )}
+        {kind === 'watchLater' && items.length > 0 && (
+          <div className="headtools">
+            <Link className="btn btn--primary" to={`/watch?v=${items[0].id}&list=watch-later`}>
+              ▶ Tout lire
+            </Link>
+          </div>
+        )}
       </header>
 
       {kind === 'subs' && channels.length > 0 && (
@@ -81,26 +138,14 @@ export function Feed({ kind }: { kind: Kind }) {
         </div>
       )}
 
-      <section className="grid">
-        {items.map((v, i) => {
-          const seconds = progress[v.id] ?? 0;
-          const ratio = v.duration && seconds > 0 ? seconds / v.duration : 0;
-          return (
-            <VideoCard
-              key={`${v.id}-${i}`}
-              video={v}
-              progress={kind === 'history' && ratio > 0 && ratio < 0.98 ? ratio : undefined}
-              onRemove={
-                kind === 'history'
-                  ? () => removeFromHistory(v.id)
-                  : kind === 'watchLater'
-                    ? () => toggleWatchLater(v.id)
-                    : undefined
-              }
-            />
-          );
-        })}
-      </section>
+      {historyGroups
+        ? historyGroups.map((group) => (
+            <section key={group.label} className="historygroup">
+              <h2 className="historygroup__title">{group.label}</h2>
+              <div className="grid">{group.videos.map((v, i) => renderCard(v, i))}</div>
+            </section>
+          ))
+        : <section className="grid">{items.map((v, i) => renderCard(v, i))}</section>}
 
       {items.length === 0 && (
         <div className="empty">

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { shorts as catalogShorts, getChannel, getVideo } from '../data';
-import { searchYouTube } from '../api/search';
+import { searchYouTube } from '../api/youtube';
 import { useLockBodyScroll } from '../lib/hooks';
+import { setPageMeta } from '../lib/meta';
+import { watchUrl } from '../lib/url';
 import { useStore } from '../store';
 import type { Video } from '../types';
 import { Avatar } from '../components/Avatar';
@@ -14,28 +16,32 @@ export function Shorts() {
   const [active, setActive] = useState(0);
   const [note, setNote] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const addToHistory = useStore((s) => s.addToHistory);
 
   useLockBodyScroll(true);
+
+  useEffect(() => {
+    setPageMeta('Shorts — TubeCraft');
+  }, []);
 
   // repli : si le catalogue n'a pas de Shorts, on en cherche en direct
   useEffect(() => {
     if (catalogShorts.length > 0) return;
-    let cancelled = false;
+    const controller = new AbortController();
     setNote('Chargement des Shorts depuis YouTube…');
-    searchYouTube('#shorts')
-      .then((r) => {
-        if (cancelled) return;
-        const list = r.results
-          .map((x) => getVideo(x.videoId))
-          .filter((v): v is Video => Boolean(v))
+    searchYouTube('#shorts', { signal: controller.signal })
+      .then((response) => {
+        const list = response.results
+          .map((result) => getVideo(result.videoId))
+          .filter((video): video is Video => Boolean(video))
           .slice(0, 20);
         setItems(list);
         setNote(list.length ? '' : 'Aucun Short trouvé.');
       })
-      .catch(() => !cancelled && setNote('Impossible de charger les Shorts.'));
-    return () => {
-      cancelled = true;
-    };
+      .catch(() => {
+        if (!controller.signal.aborted) setNote('Impossible de charger les Shorts.');
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -52,24 +58,32 @@ export function Shorts() {
       },
       { root, threshold: 0.6 }
     );
-    root.querySelectorAll('.short').forEach((el) => observer.observe(el));
+    root.querySelectorAll('.short').forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, [items]);
+
+  // un Short vu entre dans l'historique, comme sur YouTube
+  useEffect(() => {
+    const current = items[active];
+    if (current) addToHistory(current.id);
+  }, [active, items, addToHistory]);
 
   const goTo = (index: number) => {
     const target = Math.min(items.length - 1, Math.max(0, index));
     setActive(target);
-    const el = containerRef.current?.querySelector<HTMLElement>(`.short[data-index="${target}"]`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const element = containerRef.current?.querySelector<HTMLElement>(
+      `.short[data-index="${target}"]`
+    );
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-        e.preventDefault();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+        event.preventDefault();
         goTo(active + 1);
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-        e.preventDefault();
+      } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+        event.preventDefault();
         goTo(active - 1);
       }
     };
@@ -85,7 +99,7 @@ export function Shorts() {
             key={video.id}
             video={video}
             index={index}
-            playing={Math.abs(index - active) <= 1}
+            playing={index === active}
             active={index === active}
             onNext={() => goTo(index + 1)}
           />
@@ -95,8 +109,8 @@ export function Shorts() {
 
       {items.length > 1 && (
         <div className="shorts__dots" aria-hidden>
-          {items.slice(0, 12).map((v, i) => (
-            <span key={v.id} className={i === active ? 'on' : ''} />
+          {items.slice(0, 12).map((video, index) => (
+            <span key={video.id} className={index === active ? 'on' : ''} />
           ))}
         </div>
       )}
@@ -128,11 +142,13 @@ function ShortItem({
 
   const share = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/watch?v=${video.id}`);
+      const url = watchUrl(video.id);
+      if (navigator.share) await navigator.share({ title: video.title, url });
+      else await navigator.clipboard.writeText(url);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      /* ignore */
+      /* partage annulé */
     }
   };
 
@@ -147,16 +163,16 @@ function ShortItem({
             allowFullScreen
           />
         ) : (
-          <img src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`} alt="" loading="lazy" />
+          <img src={`https://i.ytimg.com/vi/${video.id}/frame0.jpg`} alt="" loading="lazy" />
         )}
       </div>
 
       <div className="short__info">
         <Link className="short__channel" to={`/channel/${encodeURIComponent(video.channelId)}`}>
-          <Avatar name={video.channelName} src={channel?.avatar} size={36} />
+          <Avatar name={video.channelName} src={channel?.avatar ?? video.channelAvatar} size={36} />
           <span>{video.channelName}</span>
         </Link>
-        {!subscribed && (
+        {video.channelId && !subscribed && (
           <button className="subscribe subscribe--small" onClick={() => toggleSubscribe(video.channelId)}>
             S’abonner
           </button>
@@ -171,7 +187,9 @@ function ShortItem({
           aria-label="J’aime"
         >
           <IconLike width={24} height={24} />
-          <span>{video.likes > 999 ? `${Math.round(video.likes / 1000)} k` : video.likes}</span>
+          {video.likes > 0 && (
+            <span>{video.likes > 999 ? `${Math.round(video.likes / 1000)} k` : video.likes}</span>
+          )}
         </button>
         <button
           className={`rail__btn${disliked ? ' rail__btn--on' : ''}`}

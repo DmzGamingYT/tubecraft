@@ -1,10 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { useClickOutside } from '../lib/hooks';
 import { AccountMenu } from './AccountMenu';
 import { NotificationsBell } from './NotificationsBell';
-import { IconClose, IconMenu, IconMoon, IconSearch, IconSun } from './icons';
+import { IconClose, IconDownload, IconMenu, IconMoon, IconSearch, IconSun } from './icons';
 
 interface Props {
   onBurger: () => void;
@@ -19,13 +19,25 @@ export function TopBar({ onBurger }: Props) {
   const [mobileSearch, setMobileSearch] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestOpen, setSuggestOpen] = useState(false);
-  const searchRef = useClickOutside<HTMLFormElement>(() => setSuggestOpen(false));
+  const [activeIndex, setActiveIndex] = useState(-1);
+  // Les suggestions ne s'ouvrent que sur une action de l'utilisateur (frappe,
+  // focus, flèches) : au chargement d'une URL /search, le panneau doit rester
+  // fermé pour ne pas masquer les résultats.
+  const interactedRef = useRef(false);
+  const searchRef = useClickOutside<HTMLFormElement>(() => {
+    interactedRef.current = false;
+    setSuggestOpen(false);
+    setActiveIndex(-1);
+  });
 
   // suit l'URL pour rester synchronisé avec la page de résultats
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (location.pathname === '/search') setQuery(params.get('q') ?? '');
     else setQuery('');
+    interactedRef.current = false;
+    setSuggestOpen(false);
+    setActiveIndex(-1);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -44,7 +56,8 @@ export function TopBar({ onBurger }: Props) {
         if (cancelled) return;
         const list = Array.isArray(data?.suggestions) ? data.suggestions : [];
         setSuggestions(list);
-        setSuggestOpen(list.length > 0);
+        setActiveIndex(-1);
+        setSuggestOpen(interactedRef.current && list.length > 0);
       } catch {
         if (!cancelled) setSuggestions([]);
       }
@@ -60,7 +73,42 @@ export function TopBar({ onBurger }: Props) {
     const q = query.trim();
     if (!q) return;
     navigate(`/search?q=${encodeURIComponent(q)}`);
+    interactedRef.current = false;
+    setSuggestOpen(false);
+    setActiveIndex(-1);
     setMobileSearch(false);
+  };
+
+  const chooseSuggestion = (value: string) => {
+    setQuery(value);
+    navigate(`/search?q=${encodeURIComponent(value)}`);
+    interactedRef.current = false;
+    setSuggestOpen(false);
+    setActiveIndex(-1);
+    setMobileSearch(false);
+  };
+
+  const onSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      if (suggestOpen) {
+        e.preventDefault();
+        setSuggestOpen(false);
+        setActiveIndex(-1);
+      }
+      return;
+    }
+    if (!suggestOpen || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((index) => (index + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((index) => (index <= 0 ? suggestions.length - 1 : index - 1));
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      const value = suggestions[activeIndex];
+      if (value) chooseSuggestion(value);
+    }
   };
 
   return (
@@ -76,45 +124,58 @@ export function TopBar({ onBurger }: Props) {
             </svg>
           </span>
           <span className="logo__text">
-            TubeCraft<sup>FR</sup>
+            TubeCraft<span className="logo__sup">FR</span>
           </span>
         </Link>
       </div>
 
       <form
         ref={searchRef}
-        className={`searchform${mobileSearch ? ' searchform--open' : ''}`}
+        className={`searchform${mobileSearch ? ' searchform--open' : ''}${
+          suggestOpen && suggestions.length > 0 ? ' searchform--suggest' : ''
+        }`}
         onSubmit={submit}
         role="search"
       >
         <div className="searchform__field">
           <input
+            id="global-search"
             value={query}
-            onFocus={() => suggestions.length > 0 && setSuggestOpen(true)}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher"
+            onFocus={() => {
+              interactedRef.current = true;
+              if (suggestions.length > 0) setSuggestOpen(true);
+            }}
+            onChange={(e) => {
+              interactedRef.current = true;
+              setQuery(e.target.value);
+              setSuggestOpen(true);
+            }}
+            onKeyDown={onSearchKeyDown}
+            placeholder="Rechercher ( / )"
+            autoComplete="off"
             aria-label="Rechercher des vidéos"
             aria-autocomplete="list"
             aria-expanded={suggestOpen}
+            aria-controls="search-suggestions"
+            aria-activedescendant={
+              suggestOpen && activeIndex >= 0 ? `search-suggestion-${activeIndex}` : undefined
+            }
           />
           {suggestOpen && suggestions.length > 0 && (
-            <ul className="searchsuggestions" role="listbox">
+            <ul className="searchsuggestions" role="listbox" id="search-suggestions">
               {suggestions.map((s, i) => (
-                <li key={`${s}-${i}`} role="option">
-                  <button
-                    type="button"
-                    className="searchsuggestions__item"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      setQuery(s);
-                      navigate(`/search?q=${encodeURIComponent(s)}`);
-                      setSuggestOpen(false);
-                      setMobileSearch(false);
-                    }}
-                  >
-                    <IconSearch width={16} height={16} />
-                    <span>{s}</span>
-                  </button>
+                <li
+                  key={`${s}-${i}`}
+                  id={`search-suggestion-${i}`}
+                  role="option"
+                  aria-selected={i === activeIndex}
+                  className={`searchsuggestions__item${i === activeIndex ? ' is-active' : ''}`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onMouseEnter={() => setActiveIndex(i)}
+                  onClick={() => chooseSuggestion(s)}
+                >
+                  <IconSearch width={16} height={16} />
+                  <span>{s}</span>
                 </li>
               ))}
             </ul>
@@ -143,6 +204,14 @@ export function TopBar({ onBurger }: Props) {
         >
           <IconSearch />
         </button>
+        <Link
+          to="/download"
+          className="iconbtn"
+          aria-label="Installer TubeCraft sur cet appareil"
+          title="Installer TubeCraft"
+        >
+          <IconDownload width={22} height={22} />
+        </Link>
         <NotificationsBell />
         <button
           className="iconbtn"

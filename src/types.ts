@@ -1,3 +1,5 @@
+export type NotifLevel = 'all' | 'personalized' | 'none';
+
 export interface Channel {
   id: string;
   name: string;
@@ -5,6 +7,10 @@ export interface Channel {
   avatar: string;
   subscribers: string;
   banner?: string;
+  /** description publique de la chaîne (renseignée à la volée) */
+  description?: string;
+  /** « 287 vidéos », fourni par la page chaîne */
+  videoCount?: string;
 }
 
 export interface Video {
@@ -21,6 +27,14 @@ export interface Video {
   tags: string[];
   likes: number;
   isShort?: boolean;
+  /** libellé compact renvoyé par YouTube (« 19 M ») */
+  likesText?: string;
+  /** dislikes réels via Return YouTube Dislike (facultatif) */
+  dislikes?: number | null;
+  /** avatar de la chaîne quand il est connu */
+  channelAvatar?: string;
+  /** badge de statut (« En direct », « Première »…) */
+  statusText?: string;
 }
 
 export interface Comment {
@@ -50,4 +64,20 @@ export interface SearchResult {
   publishedAt: string;
   thumbnail: string;
   isShort: boolean;
+  statusText?: string;
+}
+
+/** Page de lecture enrichie par le proxy (métadonnées + suggestions réelles). */
+export interface VideoPage {
+  video: Video;
+  channel: Channel | null;
+  related: Video[];
+}
+
+export interface SponsorSegment {
+  category: string;
+  actionType: string;
+  start: number;
+  end: number;
+  uuid: string;
 }

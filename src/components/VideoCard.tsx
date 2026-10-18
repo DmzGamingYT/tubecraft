@@ -12,9 +12,11 @@ interface Props {
   /** barre de progression (historique) 0..1 */
   progress?: number;
   onRemove?: () => void;
+  /** « Pas intéressé » (accueil) */
+  onDismiss?: () => void;
 }
 
-export function VideoCard({ video, variant = 'grid', progress, onRemove }: Props) {
+export function VideoCard({ video, variant = 'grid', progress, onRemove, onDismiss }: Props) {
   const watchUrl = `/watch?v=${video.id}`;
   const channelUrl = `/channel/${encodeURIComponent(video.channelId)}`;
 
@@ -57,6 +59,12 @@ export function VideoCard({ video, variant = 'grid', progress, onRemove }: Props
             <p className="card__desc">{video.description}</p>
           )}
         </div>
+
+        {onDismiss && (
+          <button className="card__dismiss" onClick={onDismiss} title="Pas intéressé">
+            ✕
+          </button>
+        )}
 
         {onRemove && (
           <button className="card__remove" onClick={onRemove} title="Retirer de la liste">

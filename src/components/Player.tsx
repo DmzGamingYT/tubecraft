@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
-import type { Video } from '../types';
-import { formatDuration } from '../lib/format';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import type { SponsorSegment, Video } from '../types';
 import { useStore } from '../store';
 
 /* --- chargement unique de l'API IFrame de YouTube ------------------------- */
@@ -12,387 +11,389 @@ declare global {
   }
 }
 
-let apiPromise: Promise<any> | null = null;
+/**
+ * Une promesse d'API **par fenêtre** : le lecteur peut être déplacé dans une
+ * fenêtre Picture-in-Picture, et l'API YouTube doit alors y être chargée aussi
+ * (c'est la fenêtre qui possède l'iframe qui reçoit ses messages).
+ */
+const apiPromises = new WeakMap<Window, Promise<any>>();
 
-function loadYouTubeApi(): Promise<any> {
-  if (window.YT?.Player) return Promise.resolve(window.YT);
-  if (apiPromise) return apiPromise;
-  apiPromise = new Promise((resolve) => {
-    const previous = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
+function loadYouTubeApi(view: Window): Promise<any> {
+  const target = view as Window & { YT?: any };
+  if (target.YT?.Player) return Promise.resolve(target.YT);
+  const known = apiPromises.get(view);
+  if (known) return known;
+
+  const promise = new Promise((resolve, reject) => {
+    const previous = target.onYouTubeIframeAPIReady;
+    target.onYouTubeIframeAPIReady = () => {
       previous?.();
-      resolve(window.YT);
+      resolve(target.YT);
     };
-    const script = document.createElement('script');
+    const script = view.document.createElement('script');
     script.src = 'https://www.youtube.com/iframe_api';
     script.async = true;
-    document.head.appendChild(script);
+    script.onerror = () => reject(new Error('API IFrame YouTube indisponible'));
+    view.document.head.appendChild(script);
+    target.setTimeout(() => reject(new Error('Délai dépassé pour l’API YouTube')), 12_000);
   });
-  return apiPromise;
+  apiPromises.set(view, promise);
+  return promise;
 }
 
 interface Props {
   video: Video;
+  /** seconde de reprise */
   startAt?: number;
+  /** enchainer automatiquement sur la vidéo suivante de TubeCraft */
   autoplayNext: boolean;
   onEnded?: () => void;
+  /** segments SponsorBlock à sauter */
+  segments?: SponsorSegment[];
+  /** lecture en boucle (YouTube exige `playlist` pour l’iframe) */
+  loop: boolean;
+  /** vitesse et volume persistés dans les réglages */
+  speed: number;
+  volume: number;
+  captions: boolean;
+  /** état lecture/pause, pour les commandes du mini-lecteur */
+  onPlayingChange?: (playing: boolean) => void;
 }
 
-/**
- * Lecteur basé sur l'API IFrame de YouTube : reprise de lecture, vitesse,
- * sous-titres, mode théâtre, raccourcis clavier et partage horodaté.
- * Les contrôles natifs de YouTube restent disponibles.
- */
-export function Player({ video, startAt = 0, autoplayNext, onEnded }: Props) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
-  const [ready, setReady] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(startAt);
-  const [duration, setDuration] = useState(video.duration ?? 0);
-  const [copied, setCopied] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(() => {
-    const v = useStore.getState().settings.volume;
-    return typeof v === 'number' ? v : 100;
-  });
-  const containerRef = useRef<HTMLDivElement>(null);
+/** Commandes exposées à l'hôte (mini-lecteur, chapitres cliquables). */
+export interface PlayerHandle {
+  /**
+   * déplace la lecture ; `false` si le lecteur n'est pas encore prêt.
+   * `resume` relance la lecture après le déplacement (utile pour un chapitre),
+   * à laisser à `false` quand on se déplace dans une vidéo en pause.
+   */
+  seekTo: (seconds: number, resume?: boolean) => boolean;
+  getCurrentTime: () => number;
+  /** durée totale en secondes (0 tant que le lecteur ne la connaît pas) */
+  getDuration: () => number;
+  play: () => void;
+  pause: () => void;
+  isPlaying: () => boolean;
+}
 
-  const speed = useStore((s) => s.settings.speed);
-  const captions = useStore((s) => s.settings.captions);
-  const loop = useStore((s) => s.settings.loop ?? false);
-  const theater = useStore((s) => s.settings.theater);
-  const setSetting = useStore((s) => s.setSetting);
-  const saveProgress = useStore((s) => s.saveProgress);
+const SAVE_EVERY_MS = 5_000;
+const SPONSOR_LABELS: Record<string, string> = {
+  sponsor: 'Sponsor',
+  selfpromo: 'Autopromotion',
+  interaction: 'Demande d’abonnement',
+  intro: 'Intro',
+  outro: 'Outro',
+  preview: 'Aperçu',
+  music_offtopic: 'Musique hors sujet',
+  filler: 'Remplissage',
+};
+
+/**
+ * Lecteur YouTube officiel (iframe + API IFrame). TubeCraft ne gère que :
+ * - la reprise de lecture (?t= / position mémorisée) ;
+ * - la sauvegarde espacée de la position (moins d'écritures localStorage) ;
+ * - l'enchaînement vers la suggestion suivante ;
+ * - le saut automatique des segments SponsorBlock ;
+ * - lecture/pause et l'état du lecteur pour le mini-lecteur.
+ */
+export const Player = forwardRef<PlayerHandle, Props>(function Player(
+  {
+    video,
+    startAt = 0,
+    autoplayNext,
+    onEnded,
+    segments = [],
+    loop,
+    speed,
+    volume,
+    captions,
+    onPlayingChange,
+  },
+  ref
+) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
   const autoplayNextRef = useRef(autoplayNext);
   autoplayNextRef.current = autoplayNext;
-  const loopRef = useRef(loop);
-  loopRef.current = loop;
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
+  const segmentsRef = useRef(segments);
+  segmentsRef.current = segments;
+  const playingRef = useRef(false);
+  const onPlayingChangeRef = useRef(onPlayingChange);
+  onPlayingChangeRef.current = onPlayingChange;
+  const lastSavedRef = useRef(0);
+  const skippedRef = useRef(new Set<string>());
+  const [sponsorNotice, setSponsorNotice] = useState('');
+  const [failed, setFailed] = useState(false);
 
-  const applySettings = useCallback(() => {
-    const player = playerRef.current;
-    if (!player?.setPlaybackRate) return;
-    try {
-      player.setPlaybackRate(speed);
-      if (captions) player.loadModule?.('captions');
-      else player.unloadModule?.('captions');
-    } catch {
-      /* le module captions n'est pas toujours disponible */
-    }
-  }, [speed, captions]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      seekTo(seconds: number, resume = true) {
+        const player = playerRef.current;
+        if (!player?.seekTo) return false;
+        try {
+          player.seekTo(Math.max(0, seconds), true);
+          if (!resume) return true;
+          // `playVideo()` immédiat annule parfois le seek : on laisse au
+          // lecteur le temps d'appliquer la position avant de relancer.
+          window.setTimeout(() => {
+            if (playerRef.current !== player) return;
+            try {
+              player.playVideo?.();
+            } catch {
+              /* lecteur détruit entre-temps */
+            }
+          }, 450);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      getCurrentTime() {
+        try {
+          const time = Number(playerRef.current?.getCurrentTime?.() ?? 0);
+          return Number.isFinite(time) ? time : 0;
+        } catch {
+          // la fenêtre du lecteur peut être en train de se fermer (PiP)
+          return 0;
+        }
+      },
+      getDuration() {
+        try {
+          const duration = Number(playerRef.current?.getDuration?.() ?? 0);
+          return Number.isFinite(duration) && duration > 0 ? duration : 0;
+        } catch {
+          return 0;
+        }
+      },
+      play() {
+        try {
+          playerRef.current?.playVideo?.();
+        } catch {
+          /* lecteur détruit */
+        }
+      },
+      pause() {
+        try {
+          playerRef.current?.pauseVideo?.();
+        } catch {
+          /* lecteur détruit */
+        }
+      },
+      isPlaying() {
+        return playingRef.current;
+      },
+    }),
+    []
+  );
 
-  // création du lecteur
+  // création du lecteur (une fois par vidéo, par position de reprise)
   useEffect(() => {
     let disposed = false;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    // la fenêtre qui contient l'iframe : la page, ou la fenêtre Picture-in-Picture
+    const view = wrap.ownerDocument.defaultView ?? window;
 
-    loadYouTubeApi().then((YT) => {
-      if (disposed || !hostRef.current) return;
-      playerRef.current = new YT.Player(hostRef.current, {
-        videoId: video.id,
-        playerVars: {
-          start: Math.max(0, Math.floor(startAt)),
-          autoplay: 1,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          hl: 'fr',
-          cc_load_policy: captions ? 1 : 0,
-        },
-        events: {
-          onReady: (event: any) => {
-            setReady(true);
-            setDuration(event.target.getDuration?.() || video.duration || 0);
-            const v = useStore.getState().settings.volume;
-            const vol = typeof v === 'number' ? v : (event.target.getVolume?.() ?? 100);
-            event.target.setVolume?.(vol);
-            setVolume(vol);
-            setMuted(event.target.isMuted?.() ?? false);
-            applySettings();
+    // YT.Player remplace l'élément hôte : on lui donne un div jetable.
+    const host = view.document.createElement('div');
+    host.className = 'player__host';
+    wrap.appendChild(host);
+    setFailed(false);
+    lastSavedRef.current = 0;
+    skippedRef.current.clear();
+
+    const reportPlaying = (value: boolean) => {
+      if (playingRef.current === value) return;
+      playingRef.current = value;
+      onPlayingChangeRef.current?.(value);
+    };
+
+    /** la lecture a-t-elle atteint la fin de la vidéo ? */
+    const reachedEnd = () => {
+      try {
+        const player = playerRef.current;
+        const duration = Number(player?.getDuration?.() ?? 0);
+        const time = Number(player?.getCurrentTime?.() ?? 0);
+        // direct ou durée inconnue : on ne peut pas trancher, on enchaîne
+        if (!Number.isFinite(duration) || duration <= 0) return true;
+        return time >= duration - 15;
+      } catch {
+        return true;
+      }
+    };
+
+    loadYouTubeApi(view)
+      .then((YT) => {
+        if (disposed) return;
+        const reportReady = () => {
+          applyPlaybackSettings();
+          // l'autoplay a pu démarrer pendant le chargement du lecteur
+          try {
+            if (playerRef.current?.getPlayerState?.() === 1) reportPlaying(true);
+          } catch {
+            /* état indisponible avant la première lecture */
+          }
+        };
+        playerRef.current = new YT.Player(host, {
+          videoId: video.id,
+          playerVars: {
+            start: Math.max(0, Math.floor(startAt)),
+            autoplay: 1,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            hl: 'fr',
+            cc_load_policy: captions ? 1 : 0,
+            loop: loop ? 1 : 0,
+            ...(loop ? { playlist: video.id } : {}),
           },
-          onStateChange: (event: any) => {
-            const state = event.data;
-            setPlaying(state === 1);
-            if (state === 0) {
-              if (loopRef.current) {
-                playerRef.current?.seekTo?.(0, true);
-                playerRef.current?.playVideo?.();
-              } else if (autoplayNextRef.current) {
-                onEndedRef.current?.();
-              }
-            }
-            if (state === 1) setDuration(event.target.getDuration?.() || 0);
+          events: {
+            onReady: reportReady,
+            onStateChange: (event: any) => {
+              // `destroy()` peut émettre un état 0 : ne pas relancer une
+              // navigation alors qu'on quitte déjà la vidéo
+              if (disposed) return;
+              const state = event.data;
+              // 1 = lecture, 2 = pause, 0 = fin (3 = mise en mémoire tampon)
+              if (state === 0 || state === 2) reportPlaying(false);
+              else if (state === 1) reportPlaying(true);
+              if (state === 0 || state === 2) saveNow();
+              // Un état 0 peut aussi être émis quand la vidéo n'est pas lisible :
+              // on n'enchaîne que si la lecture a réellement atteint la fin,
+              // sinon la file d'attente se viderait d'un coup.
+              if (state === 0 && autoplayNextRef.current && reachedEnd()) onEndedRef.current?.();
+            },
           },
-        },
-      });
-    });
+        });
+      })
+      .catch(() => !disposed && setFailed(true));
 
     return () => {
       disposed = true;
+      saveNow();
+      reportPlaying(false);
       const player = playerRef.current;
       playerRef.current = null;
-      setReady(false);
-      setPlaying(false);
       try {
         player?.destroy?.();
       } catch {
         /* ignore */
       }
+      host.remove();
     };
-    // la vidéo change -> nouveau lecteur ; les autres réglages passent par applySettings
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [video.id]);
+  }, [video.id, startAt]);
 
-  // suivi de la position (barre de progression + reprise de lecture)
+  const applyPlaybackSettings = () => {
+    const player = playerRef.current;
+    if (!player) return;
+    const current = useStore.getState().settings;
+    try {
+      player.setPlaybackRate?.(current.speed);
+      player.setVolume?.(current.volume);
+      if (current.captions) player.loadModule?.('captions');
+      else player.unloadModule?.('captions');
+    } catch {
+      /* certains réglages ne sont pas disponibles avant la première lecture */
+    }
+  };
+
+  const saveNow = () => {
+    const player = playerRef.current;
+    if (!player?.getCurrentTime) return;
+    let time = 0;
+    try {
+      time = Number(player.getCurrentTime()) || 0;
+    } catch {
+      return;
+    }
+    if (time > 1) {
+      useStore.getState().saveProgress(video.id, time);
+      lastSavedRef.current = time;
+    }
+  };
+
+  // Les réglages changés depuis la page Paramètres s'appliquent à chaud.
   useEffect(() => {
-    if (!ready) return;
+    playerRef.current?.setPlaybackRate?.(speed);
+  }, [speed]);
+
+  useEffect(() => {
+    playerRef.current?.setVolume?.(volume);
+  }, [volume]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player?.loadModule) return;
+    if (captions) player.loadModule('captions');
+    else player.unloadModule?.('captions');
+  }, [captions]);
+
+  // Position : sauvegarde espacée + saut des segments SponsorBlock.
+  useEffect(() => {
     const tick = window.setInterval(() => {
       const player = playerRef.current;
       if (!player?.getCurrentTime) return;
-      const time = player.getCurrentTime() || 0;
-      setCurrent(time);
-      if (time > 1) saveProgress(video.id, time);
-    }, 2000);
-    return () => window.clearInterval(tick);
-  }, [ready, video.id, saveProgress]);
-
-  useEffect(() => {
-    applySettings();
-  }, [applySettings]);
-
-  // raccourcis clavier (comme YouTube) — ignorés quand on écrit dans un champ
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
-      const player = playerRef.current;
-      if (!player) return;
-      const seconds = player.getCurrentTime?.() ?? 0;
-      if (/^[0-9]$/.test(event.key)) {
-        event.preventDefault();
-        seekTo(((video.duration || duration || 0) * Number(event.key)) / 10);
+      let time = 0;
+      try {
+        time = Number(player.getCurrentTime()) || 0;
+      } catch {
         return;
       }
-      switch (event.key) {
-        case 'k':
-        case ' ':
-          event.preventDefault();
-          playing ? player.pauseVideo?.() : player.playVideo?.();
-          break;
-        case 'j':
-          player.seekTo?.(Math.max(0, seconds - 10), true);
-          break;
-        case 'l':
-          player.seekTo?.(seconds + 10, true);
-          break;
-        case 'ArrowRight':
-          player.seekTo?.(seconds + 5, true);
-          break;
-        case 'ArrowLeft':
-          player.seekTo?.(Math.max(0, seconds - 5), true);
-          break;
-        case 'm':
-          event.preventDefault();
-          player.isMuted?.() ? player.unMute?.() : player.mute?.();
-          setMuted(player.isMuted?.() ?? false);
-          break;
-        case 'c':
-          setSetting('captions', !captions);
-          break;
-        case 't':
-          setSetting('theater', !theater);
-          break;
-        case 'f':
-          event.preventDefault();
-          if (document.fullscreenElement) void document.exitFullscreen?.();
-          else void containerRef.current?.requestFullscreen?.();
-          break;
-        default:
-          break;
+      if (time <= 1) return;
+
+      if (Math.abs(time - lastSavedRef.current) >= SAVE_EVERY_MS / 1000) {
+        useStore.getState().saveProgress(video.id, time);
+        lastSavedRef.current = time;
       }
+
+      const segment = segmentsRef.current.find(
+        (s) =>
+          s.actionType === 'skip' &&
+          time >= s.start - 0.3 &&
+          time < s.end - 0.75 &&
+          !skippedRef.current.has(s.uuid || `${s.start}-${s.end}`)
+      );
+      if (segment && player.seekTo) {
+        skippedRef.current.add(segment.uuid || `${segment.start}-${segment.end}`);
+        player.seekTo(segment.end, true);
+        setSponsorNotice(`Sponsor ignoré · ${SPONSOR_LABELS[segment.category] ?? segment.category}`);
+        window.setTimeout(() => setSponsorNotice(''), 3_500);
+      }
+    }, 1_000);
+    return () => window.clearInterval(tick);
+  }, [video.id]);
+
+  // Dernière chance de sauvegarder la position avant de quitter l'onglet.
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') saveNow();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [playing, captions, theater, setSetting, duration]);
-
-  const toggleMute = () => {
-    const player = playerRef.current;
-    if (!player) return;
-    if (player.isMuted?.()) player.unMute?.();
-    else player.mute?.();
-    setMuted(player.isMuted?.() ?? !muted);
-    setVolume(player.getVolume?.() ?? volume);
-  };
-
-  const toggleFullscreen = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    try {
-      if (document.fullscreenElement) void document.exitFullscreen?.();
-      else void el.requestFullscreen?.();
-    } catch {
-      /* fullscreen non supporté */
-    }
-  };
-
-  const shareAtCurrentTime = async () => {
-    const seconds = Math.floor(playerRef.current?.getCurrentTime?.() ?? current);
-    const url = `${window.location.origin}/watch?v=${video.id}&t=${seconds}s`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* presse-papiers refusé */
-    }
-  };
-
-  const seekTo = (seconds: number) => {
-    playerRef.current?.seekTo?.(seconds, true);
-    setCurrent(seconds);
-  };
-
-  const percent = duration > 0 ? Math.min(100, (current / duration) * 100) : 0;
+    window.addEventListener('pagehide', saveNow);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('pagehide', saveNow);
+      document.removeEventListener('visibilitychange', onHide);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video.id]);
 
   return (
-    <div className="player2">
-      <div ref={containerRef} className={`player${theater ? ' player--theater' : ''}`}>
-        <div ref={hostRef} className="player__host" />
-      </div>
-
-      <div className="playbar">
-        <button
-          className="playbar__btn"
-          onClick={() => (playing ? playerRef.current?.pauseVideo?.() : playerRef.current?.playVideo?.())}
-          aria-label={playing ? 'Pause (k)' : 'Lecture (k)'}
-          title={playing ? 'Pause (k)' : 'Lecture (k)'}
-        >
-          {playing ? '❚❚' : '▶'}
-        </button>
-
-        <button
-          className="playbar__btn"
-          onClick={() => seekTo(Math.max(0, current - 10))}
-          aria-label="Reculer de 10 secondes (j)"
-          title="Reculer de 10 s (j)"
-        >
-          ↺10
-        </button>
-
-        <button
-          className="playbar__btn"
-          onClick={() => seekTo(current + 10)}
-          aria-label="Avancer de 10 secondes (l)"
-          title="Avancer de 10 s (l)"
-        >
-          ↻10
-        </button>
-
-        <span className="playbar__time">
-          {formatDuration(Math.floor(current))} / {formatDuration(Math.floor(duration))}
-        </span>
-
-        <input
-          className="playbar__range"
-          type="range"
-          min={0}
-          max={Math.max(1, Math.floor(duration))}
-          value={Math.floor(current)}
-          onChange={(e) => seekTo(Number(e.target.value))}
-          aria-label="Position de lecture"
-          style={{ '--progress': `${percent}%` } as CSSProperties}
-        />
-
-        <label className="playbar__select">
-          <span className="sr-only">Vitesse de lecture</span>
-          <select
-            value={speed}
-            onChange={(e) => setSetting('speed', Number(e.target.value))}
-            title="Vitesse de lecture"
-          >
-            {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((s) => (
-              <option key={s} value={s}>
-                {s}×
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <button
-          className={`playbar__btn playbar__btn--text${captions ? ' on' : ''}`}
-          onClick={() => setSetting('captions', !captions)}
-          title="Sous-titres (c)"
-        >
-          CC
-        </button>
-
-        <button
-          className={`playbar__btn playbar__btn--text${autoplayNext ? ' on' : ''}`}
-          onClick={() => setSetting('autoplayNext', !autoplayNext)}
-          title="Lecture automatique de la vidéo suivante"
-        >
-          Autoplay
-        </button>
-
-        <button
-          className={`playbar__btn playbar__btn--text${loop ? ' on' : ''}`}
-          onClick={() => setSetting('loop', !loop)}
-          title="Lire en boucle"
-          aria-label="Lire en boucle"
-        >
-          🔁
-        </button>
-
-        <button
-          className={`playbar__btn playbar__btn--text${theater ? ' on' : ''}`}
-          onClick={() => setSetting('theater', !theater)}
-          title="Mode théâtre (t)"
-        >
-          Théâtre
-        </button>
-
-        <button
-          className={`playbar__btn playbar__btn--text${muted ? ' on' : ''}`}
-          onClick={toggleMute}
-          title={muted ? 'Réactiver le son (m)' : 'Couper le son (m)'}
-          aria-label={muted ? 'Réactiver le son' : 'Couper le son'}
-        >
-          {muted ? '🔇' : '🔊'}
-        </button>
-
-        <input
-          className="playbar__volume"
-          type="range"
-          min={0}
-          max={100}
-          value={muted ? 0 : volume}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            const player = playerRef.current;
-            player?.setVolume?.(v);
-            player?.unMute?.();
-            setVolume(v);
-            setMuted(v === 0);
-            setSetting('volume', v);
-          }}
-          aria-label="Volume"
-          title="Volume"
-        />
-
-        <button
-          className="playbar__btn playbar__btn--text"
-          onClick={toggleFullscreen}
-          title="Plein écran"
-          aria-label="Plein écran"
-        >
-          ⛶
-        </button>
-
-        <button className="playbar__btn playbar__btn--text" onClick={shareAtCurrentTime} title="Copier le lien à cet instant">
-          {copied ? 'Lien copié !' : 'Partager ici'}
-        </button>
-      </div>
+    <div className="player">
+      <div className="player__wrap" ref={wrapRef} />
+      {failed && (
+        <p className="player__error">
+          Le lecteur YouTube n’a pas pu se charger. Vérifiez votre connexion ou ouvrez la vidéo sur
+          YouTube.
+        </p>
+      )}
+      {sponsorNotice && (
+        <p className="player__notice" role="status" aria-live="polite">
+          {sponsorNotice}
+        </p>
+      )}
     </div>
   );
-}
+});

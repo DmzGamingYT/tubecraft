@@ -3,9 +3,9 @@ import { allVideos, categories, getChannel } from '../data';
 import { useStore } from '../store';
 import { Avatar } from './Avatar';
 import {
-  IconCastle, IconClock, IconGames, IconGrowth, IconHistory, IconHome, IconKitchen, IconLike,
-  IconMovie, IconMusicNote, IconNature, IconSchool, IconScience, IconShorts, IconSport,
-  IconSubs, IconTech, IconTravel,
+  IconCastle, IconClock, IconDownload, IconGames, IconGear, IconGrowth, IconHistory, IconHome,
+  IconKitchen, IconLike, IconMovie, IconMusicNote, IconNature, IconQueue, IconSchool, IconScience,
+  IconShorts, IconSport, IconSparkle, IconSubs, IconTech, IconTravel,
 } from './icons';
 
 type Mode = 'full' | 'mini' | 'drawer';
@@ -39,7 +39,7 @@ const main = [
 
 const library = [
   { to: '/history', label: 'Historique', icon: <IconHistory /> },
-  { to: '/playlists', label: 'Playlists', icon: <IconShorts /> },
+  { to: '/playlists', label: 'Playlists', icon: <IconQueue /> },
   { to: '/watch-later', label: 'Regarder plus tard', icon: <IconClock /> },
   { to: '/liked', label: 'Vidéos likées', icon: <IconLike /> },
 ];
@@ -71,7 +71,7 @@ export function Sidebar({ mode, onNavigate }: Props) {
               to={item.to}
               className={`sidebar__item${isActive(item.to) ? ' sidebar__item--active' : ''}`}
               onClick={onNavigate}
-              title={item.label}
+              title={mini ? item.label : undefined}
             >
               <span className="sidebar__icon">{item.icon}</span>
               {!mini && <span className="sidebar__label">{item.label}</span>}
@@ -89,7 +89,7 @@ export function Sidebar({ mode, onNavigate }: Props) {
               to={item.to}
               className={`sidebar__item${isActive(item.to) ? ' sidebar__item--active' : ''}`}
               onClick={onNavigate}
-              title={item.label}
+              title={mini ? item.label : undefined}
             >
               <span className="sidebar__icon">{item.icon}</span>
               {!mini && <span className="sidebar__label">{item.label}</span>}
@@ -106,7 +106,8 @@ export function Sidebar({ mode, onNavigate }: Props) {
             <div className="sidebar__title">Abonnements</div>
             {channels.length === 0 ? (
               <p className="sidebar__hint">
-                Aucun abonnement pour l’ouvrez une vidéo et cliquez sur <strong>S’abonner</strong>.
+                Aucun abonnement pour le moment. Ouvrez une vidéo et cliquez sur{' '}
+                <strong>S’abonner</strong>.
               </p>
             ) : (
               <ul>
@@ -139,7 +140,6 @@ export function Sidebar({ mode, onNavigate }: Props) {
                       location.pathname === '/' && activeCategory === cat ? ' sidebar__item--active' : ''
                     }`}
                     onClick={onNavigate}
-                    title={cat}
                   >
                     <span className="sidebar__icon sidebar__icon--cat">{categoryIcons[cat] ?? <IconGrowth />}</span>
                     <span className="sidebar__label">{cat}</span>
@@ -156,6 +156,45 @@ export function Sidebar({ mode, onNavigate }: Props) {
           </p>
         </>
       )}
+
+      <hr className="sidebar__sep" />
+      <ul className="sidebar__group">
+        <li>
+          <Link
+            to="/download"
+            className={`sidebar__item${isActive('/download') ? ' sidebar__item--active' : ''}`}
+            onClick={onNavigate}
+            title={mini ? 'Télécharger TubeCraft' : undefined}
+            aria-label="Télécharger l’app"
+          >
+            <span className="sidebar__icon">
+              <IconDownload />
+            </span>
+            {!mini && <span className="sidebar__label">Télécharger l’app</span>}
+          </Link>
+        </li>
+        <li>
+          <Link to="/apps" className="sidebar__item" onClick={onNavigate} title={mini ? 'La collection d’apps' : undefined}>
+            <span className="sidebar__icon">
+              <IconSparkle />
+            </span>
+            {!mini && <span className="sidebar__label">La collection d’apps</span>}
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/settings"
+            className={`sidebar__item${isActive('/settings') ? ' sidebar__item--active' : ''}`}
+            onClick={onNavigate}
+            title={mini ? 'Paramètres' : undefined}
+          >
+            <span className="sidebar__icon">
+              <IconGear />
+            </span>
+            {!mini && <span className="sidebar__label">Paramètres</span>}
+          </Link>
+        </li>
+      </ul>
     </nav>
   );
 }

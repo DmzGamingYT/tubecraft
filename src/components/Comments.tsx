@@ -3,19 +3,9 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../store';
 import type { Comment } from '../types';
 import { timeAgo } from '../lib/format';
+import { fetchComments, type LiveComment } from '../api/youtube';
 import { Avatar } from './Avatar';
 import { IconLike, IconTrash } from './icons';
-
-interface LiveComment {
-  id: string;
-  author: string;
-  avatar: string;
-  channelId: string;
-  text: string;
-  publishedAt: string;
-  likes: string;
-  replies: string;
-}
 
 interface Props {
   videoId: string;
@@ -24,45 +14,63 @@ interface Props {
 /** Référence stable : `?? []` dans un sélecteur zustand provoquerait une boucle de rendu. */
 const NO_COMMENTS: Comment[] = [];
 
-/** Section commentaires : commentaires RÉELS YouTube + vos commentaires locaux. */
+/** Section commentaires : commentaires RÉELS YouTube (paginés) + vos commentaires locaux. */
 export function Comments({ videoId }: Props) {
   const stored = useStore((s) => s.comments[videoId]);
   const localComments = stored ?? NO_COMMENTS;
   const addComment = useStore((s) => s.addComment);
   const likeComment = useStore((s) => s.likeComment);
   const deleteComment = useStore((s) => s.deleteComment);
+  const user = useStore((s) => s.user);
 
-  const [live, setLive] = useState<LiveComment[] | null>(null);
+  const [live, setLive] = useState<LiveComment[]>([]);
   const [liveCount, setLiveCount] = useState('');
+  const [continuation, setContinuation] = useState<string | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
+  const [loadingMore, setLoadingMore] = useState(false);
   const [draft, setDraft] = useState('');
   const [sort, setSort] = useState<'top' | 'newest'>('top');
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     setStatus('loading');
-    setLive(null);
+    setLive([]);
+    setContinuation(null);
     setLiveCount('');
 
-    fetch(`/yt/api/comments?v=${encodeURIComponent(videoId)}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d) => {
-        if (cancelled) return;
-        setLive(Array.isArray(d.comments) ? d.comments : []);
-        setLiveCount(typeof d.count === 'string' ? d.count : '');
+    fetchComments({ videoId }, controller.signal)
+      .then((page) => {
+        setLive(page.comments ?? []);
+        setLiveCount(typeof page.count === 'string' ? page.count : '');
+        setContinuation(page.continuation ?? null);
         setStatus('ok');
       })
       .catch(() => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         setLive([]);
         setStatus('error');
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => controller.abort();
   }, [videoId]);
+
+  const loadMore = async () => {
+    if (!continuation || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await fetchComments({ continuation });
+      setLive((current) => {
+        const seen = new Set(current.map((c) => c.id));
+        return [...current, ...page.comments.filter((c) => !seen.has(c.id))];
+      });
+      setContinuation(page.continuation ?? null);
+    } catch {
+      /* on garde la page déjà chargée */
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -73,7 +81,7 @@ export function Comments({ videoId }: Props) {
     setReplyTo(null);
   };
 
-  const total = localComments.length + (live?.length ?? 0);
+  const total = localComments.length + live.length;
   const displayCount = liveCount || (total > 0 ? String(total) : '');
 
   return (
@@ -100,7 +108,7 @@ export function Comments({ videoId }: Props) {
       )}
 
       <form className="comments__composer" onSubmit={submit}>
-        <Avatar name="Vous" size={40} />
+        <Avatar name={user?.name ?? 'Vous'} src={user?.photo} size={40} />
         <div className="comments__composer-body">
           <input
             className="comments__input"
@@ -129,54 +137,60 @@ export function Comments({ videoId }: Props) {
         )
           .filter((c) => !c.parentId)
           .map((c) => (
-          <li key={c.id} className="comment comment--local">
-            <Avatar name={c.author} size={40} />
-            <div className="comment__body">
-              <div className="comment__head">
-                <span className="comment__author">{c.author}</span>
-                <span className="comment__time">{timeAgo(c.createdAt)}</span>
+            <li key={c.id} className="comment comment--local">
+              <Avatar name={user?.name ?? c.author} src={user?.photo} size={40} />
+              <div className="comment__body">
+                <div className="comment__head">
+                  <span className="comment__author">{c.author}</span>
+                  <span className="comment__time">{timeAgo(c.createdAt)}</span>
+                </div>
+                <p className="comment__text">{c.text}</p>
+                <div className="comment__actions">
+                  <button className="comment__action" onClick={() => likeComment(videoId, c.id)}>
+                    <IconLike width={16} height={16} /> {c.likes > 0 ? c.likes : ''}
+                  </button>
+                  <button className="comment__action" onClick={() => deleteComment(videoId, c.id)}>
+                    <IconTrash width={16} height={16} /> Supprimer
+                  </button>
+                  <button className="comment__action" onClick={() => setReplyTo(c.id)}>
+                    Répondre
+                  </button>
+                </div>
               </div>
-              <p className="comment__text">{c.text}</p>
-              <div className="comment__actions">
-                <button className="comment__action" onClick={() => likeComment(videoId, c.id)}>
-                  <IconLike width={16} height={16} /> {c.likes > 0 ? c.likes : ''}
-                </button>
-                <button className="comment__action" onClick={() => deleteComment(videoId, c.id)}>
-                  <IconTrash width={16} height={16} /> Supprimer
-                </button>
-                <button className="comment__action" onClick={() => setReplyTo(c.id)}>
-                  Répondre
-                </button>
-              </div>
-            </div>
-            {localComments.filter((r) => r.parentId === c.id).length > 0 && (
-              <ul className="comment__replies">
-                {localComments
-                  .filter((r) => r.parentId === c.id)
-                  .map((r) => (
-                    <li key={r.id} className="comment comment--local comment--reply">
-                      <Avatar name={r.author} size={32} />
-                      <div className="comment__body">
-                        <div className="comment__head">
-                          <span className="comment__author">{r.author}</span>
-                          <span className="comment__time">{timeAgo(r.createdAt)}</span>
+              {localComments.filter((r) => r.parentId === c.id).length > 0 && (
+                <ul className="comment__replies">
+                  {localComments
+                    .filter((r) => r.parentId === c.id)
+                    .map((r) => (
+                      <li key={r.id} className="comment comment--local comment--reply">
+                        <Avatar name={user?.name ?? r.author} src={user?.photo} size={32} />
+                        <div className="comment__body">
+                          <div className="comment__head">
+                            <span className="comment__author">{r.author}</span>
+                            <span className="comment__time">{timeAgo(r.createdAt)}</span>
+                          </div>
+                          <p className="comment__text">{r.text}</p>
+                          <div className="comment__actions">
+                            <button
+                              className="comment__action"
+                              onClick={() => likeComment(videoId, r.id)}
+                            >
+                              <IconLike width={16} height={16} /> {r.likes > 0 ? r.likes : ''}
+                            </button>
+                            <button
+                              className="comment__action"
+                              onClick={() => deleteComment(videoId, r.id)}
+                            >
+                              <IconTrash width={16} height={16} /> Supprimer
+                            </button>
+                          </div>
                         </div>
-                        <p className="comment__text">{r.text}</p>
-                        <div className="comment__actions">
-                          <button className="comment__action" onClick={() => likeComment(videoId, r.id)}>
-                            <IconLike width={16} height={16} /> {r.likes > 0 ? r.likes : ''}
-                          </button>
-                          <button className="comment__action" onClick={() => deleteComment(videoId, r.id)}>
-                            <IconTrash width={16} height={16} /> Supprimer
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </li>
-        ))}
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </li>
+          ))}
 
         {status === 'loading' &&
           [0, 1, 2].map((i) => (
@@ -189,7 +203,7 @@ export function Comments({ videoId }: Props) {
             </li>
           ))}
 
-        {live?.map((c) => (
+        {live.map((c) => (
           <li key={c.id} className="comment">
             {c.channelId ? (
               <Link to={`/channel/${encodeURIComponent(c.channelId)}`} className="comment__avatar-link">
@@ -214,12 +228,18 @@ export function Comments({ videoId }: Props) {
           </li>
         ))}
 
-        {status === 'ok' && live?.length === 0 && localComments.length === 0 && (
+        {status === 'ok' && live.length === 0 && localComments.length === 0 && (
           <li className="comments__empty">
             Aucun commentaire pour l’instant. Soyez le premier à réagir.
           </li>
         )}
       </ul>
+
+      {status === 'ok' && continuation && (
+        <button className="btn btn--ghost comments__more" onClick={loadMore} disabled={loadingMore}>
+          {loadingMore ? 'Chargement…' : 'Charger plus de commentaires'}
+        </button>
+      )}
     </section>
   );
 }

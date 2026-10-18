@@ -137,6 +137,12 @@ export const IconFire = (p: P) => (
   </svg>
 );
 
+export const IconDownload = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M480-320 284-516q-11-11-11-28t11-28q11-11 28-11t28 11l100 100v-288q0-17 11.5-28.5T480-800q17 0 28.5 11.5T520-760v288l100-100q11-11 28-11t28 11q11 11 11 28t-11 28L480-320Zm-320 200q-17 0-28.5-11.5T120-160q0-17 11.5-28.5T160-200h640q17 0 28.5 11.5T840-160q0 17-11.5 28.5T800-120H160Z" />
+  </svg>
+);
+
 export const IconPlay = (p: P) => (
   <svg {...base24(p)}>
     <path d="M8 5v14l11-7z" />
@@ -146,6 +152,55 @@ export const IconPlay = (p: P) => (
 export const IconClose = (p: P) => (
   <svg {...base(p)}>
     <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
+  </svg>
+);
+
+/** Pause (grille 24). */
+export const IconPause = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M6 19h4V5H6v14Zm8-14v14h4V5h-4Z" />
+  </svg>
+);
+
+/** Vidéo suivante (grille 24). */
+export const IconNext = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="m6 18 8.5-6L6 6v12Zm10-12v12h2V6h-2Z" />
+  </svg>
+);
+
+/** File d’attente : lignes + lecture (grille 24). */
+export const IconQueue = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M3 6h12v2H3V6Zm0 5h12v2H3v-2Zm0 5h8v2H3v-2Zm12-4.5v7l6-3.5-6-3.5Z" />
+  </svg>
+);
+
+/** Picture-in-Picture (grille 24). */
+export const IconPip = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M19 11h-8v6h8v-6Zm4 8V5c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2Zm-2 .02H3V5h18v14.02Z" />
+  </svg>
+);
+
+/** Volume (grille 24). */
+export const IconVolume = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M3 9v6h4l5 4V5L7 9H3Zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02ZM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77Z" />
+  </svg>
+);
+
+/** Son coupé (grille 24). */
+export const IconVolumeOff = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63Zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71ZM4.27 3 3 4.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3ZM12 4 9.91 6.09 12 8.18V4Z" />
+  </svg>
+);
+
+/** Agrandir / revenir à la vidéo (grille 24). */
+export const IconExpand = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M4 20v-6h2v4h4v2H4Zm10 0v-2h4v-4h2v6h-6ZM4 10V4h6v2H6v4H4Zm14 0V6h-4V4h6v6h-2Z" />
   </svg>
 );
 
@@ -229,5 +284,33 @@ export const IconSport = (p: P) => (
 export const IconGrowth = (p: P) => (
   <svg {...base(p)}>
     <path d="M272-160q-30 0-51-21t-21-51q0-21 12-39.5t32-26.5l156-62v-90q-48 55-108 87.5T162-322q-17 2-29.5-9.5T120-360q0-17 11-29t28-14q55-8 101-34t84-71l54-64q12-14 28-21t34-7h40q18 0 34 7t28 21l54 64q38 45 84 71t101 34q17 2 28 14t11 29q0 17-12.5 28.5T798-322q-70-8-130-40.5T560-450v90l156 62q20 8 32 26.5t12 39.5q0 30-21 51t-51 21H400v-20q0-26 17-43t43-17h120q9 0 14.5-5.5T600-260q0-9-5.5-14.5T580-280H460q-42 0-71 29t-29 71v20h-88Zm208-480q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
+  </svg>
+);
+
+/** Cloche de notifications (contour, grille 24). */
+export const IconBell = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2Zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6Z" />
+  </svg>
+);
+
+/** Enveloppe (connexion par e-mail). */
+export const IconMail = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z" />
+  </svg>
+);
+
+/** Engrenage (paramètres). */
+export const IconGear = (p: P) => (
+  <svg {...base(p)}>
+    <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z" />
+  </svg>
+);
+
+/** Étincelles « IA » (grille 24). */
+export const IconSparkle = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z" />
   </svg>
 );

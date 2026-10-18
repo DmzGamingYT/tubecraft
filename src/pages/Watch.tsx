@@ -1,191 +1,345 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getChannel, getVideo, relatedVideos, videosFromChannel } from '../data';
 import { formatDuration } from '../lib/format';
+import { parseChapters, parseTimestamp } from '../lib/chapters';
+import { setPageMeta } from '../lib/meta';
+import { appUrl } from '../lib/url';
 import { useStore } from '../store';
+import type { Video, VideoPage } from '../types';
+import { fetchVideoPage } from '../api/youtube';
 import { LikeBar, SaveMenu, SubscribeButton } from '../components/Actions';
 import { Avatar } from '../components/Avatar';
 import { Comments } from '../components/Comments';
-import { Player } from '../components/Player';
+import { PlayerSlot, usePlayerHost } from '../components/PlayerHost';
+import { VideoSummaryCard } from '../components/VideoSummary';
 import { VideoCard } from '../components/VideoCard';
+
+type LoadState = 'idle' | 'loading' | 'ok' | 'error';
 
 export function Watch() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const id = params.get('v');
-  const startParam = params.get('t');
-  const video = getVideo(id);
+  const catalogVideo = getVideo(id);
 
-  const addToHistory = useStore((s) => s.addToHistory);
+  const [details, setDetails] = useState<VideoPage | null>(null);
+  const [loadState, setLoadState] = useState<LoadState>('idle');
+  const [descOpen, setDescOpen] = useState(false);
+  const player = usePlayerHost();
+
   const saveProgress = useStore((s) => s.saveProgress);
-  const storedProgress = useStore((s) => (id ? (s.progress[id] ?? 0) : 0));
   const autoplayNext = useStore((s) => s.settings.autoplayNext);
   const theater = useStore((s) => s.settings.theater);
+  const sponsorBlock = useStore((s) => s.settings.sponsorBlock);
+  const aiSummary = useStore((s) => s.settings.aiSummary);
   const playlistId = params.get('list');
   const playlists = useStore((s) => s.playlists);
-  const [descOpen, setDescOpen] = useState(false);
+  const watchLater = useStore((s) => s.watchLater);
 
-  const chapters = (() => {
-    const desc = video?.description ?? '';
-    const matches = [...desc.matchAll(/(?:^|\s)(\d{1,2}(?::\d{2}){1,2})\s+([^]+?)(?=\s+\d{1,2}(?::\d{2}){1,2}(?:\s|$)|$)/g)];
-    const list = matches
-      .map((m) => {
-        const parts = m[1].split(':').map((p) => parseInt(p, 10));
-        if (parts.some((n) => Number.isNaN(n))) return null;
-        const sec = parts.reduce((acc, p) => acc * 60 + p, 0);
-        return { sec, title: m[2].trim().replace(/^[:*\s]+|[:*\s]+$/g, '') };
-      })
-      .filter((c): c is { sec: number; title: string } => Boolean(c));
-    // on garde les chapitres dans l'ordre chronologique uniquement
-    const ordered: { sec: number; title: string }[] = [];
-    let last = -1;
-    for (const c of list) {
-      if (c.sec > last && c.title.length > 0) {
-        ordered.push(c);
-        last = c.sec;
-      }
-    }
-    return ordered;
-  })();
-
-  const videoId = video?.id;
-  const videoTitle = video?.title;
+  /* ---------------------------------------------------------- métadonnées */
 
   useEffect(() => {
-    if (!videoId || !videoTitle) return;
-    addToHistory(videoId);
-    const previous = document.title;
-    document.title = `${videoTitle} — TubeCraft`;
-    window.scrollTo({ top: 0 });
-    return () => {
-      document.title = previous;
-    };
-  }, [videoId, videoTitle, addToHistory]);
+    if (!id) return;
+    const controller = new AbortController();
+    setDetails(null);
+    setLoadState('loading');
 
-  useEffect(() => setDescOpen(false), [videoId]);
+    fetchVideoPage(id, controller.signal)
+      .then((page) => {
+        setDetails(page);
+        setLoadState('ok');
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setLoadState('error');
+      });
 
-  const playlist = playlistId ? playlists.find((p) => p.id === playlistId) : undefined;
-  const queue = useMemo(
-    () => (playlist ? playlist.videoIds.map((v) => getVideo(v)).filter(Boolean) : []),
-    [playlist]
+    return () => controller.abort();
+  }, [id]);
+
+  // une autre vidéo = on repart du haut, même si le lecteur reste monté
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [id]);
+
+  const video: Video | undefined = details?.video ?? catalogVideo;
+  const channel = details?.channel ?? (video ? getChannel(video.channelId) : undefined);
+  const related = useMemo(
+    () => (details?.related.length ? details.related : video ? relatedVideos(video, 16) : []),
+    [details, video]
   );
 
-  if (!video) {
+  // reprendre au bon endroit sans abonner toute la page au store « progress »
+  const resumeAt = useMemo(() => {
+    if (!id) return 0;
+    const seconds = parseTimestamp(params.get('t'));
+    if (seconds > 0) return seconds;
+    const stored = useStore.getState().progress[id] ?? 0;
+    const duration = catalogVideo?.duration ?? null;
+    if (stored > 5 && (!duration || stored < duration - 10)) return stored;
+    return 0;
+    // on ne veut recalculer que lorsqu'on change de vidéo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, params, catalogVideo?.duration]);
+
+  /* ------------------------------------------------------------- chapitres */
+
+  // retour depuis le mini-lecteur : la vidéo tourne déjà, pas de « reprise à… »
+  const alreadyPlaying = useMemo(() => player.currentVideoId() === id, [player, id]);
+
+  // un lien « ?t=… » cliqué pendant la lecture déplace le lecteur existant
+  const timestamp = params.get('t');
+  // `undefined` = premier rendu (le démarrage à la bonne seconde est déjà
+  // géré par `startAt`) ; les changements suivants déplacent le lecteur.
+  const previousTimestamp = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const previous = previousTimestamp.current;
+    previousTimestamp.current = timestamp;
+    if (previous === undefined || previous === timestamp) return;
+    const seconds = parseTimestamp(timestamp);
+    if (seconds <= 0) return;
+    player.seekTo(seconds);
+    document.querySelector('.player-slot')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [timestamp, player]);
+
+  const chapters = useMemo(
+    () => parseChapters(video?.description ?? ''),
+    [video?.description]
+  );
+
+  /* -------------------------------------------------------- titre / partage */
+
+  useEffect(() => {
+    if (!video) return;
+    setPageMeta(
+      `${video.title} — TubeCraft`,
+      video.description ? video.description.slice(0, 160) : undefined
+    );
+  }, [video]);
+
+  useEffect(() => setDescOpen(false), [id]);
+
+  const queue = useMemo(() => {
+    const playlist = playlistId ? playlists.find((p) => p.id === playlistId) : undefined;
+    const isWatchLater = playlistId === 'watch-later';
+    if (playlist) return playlist.videoIds.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
+    if (isWatchLater) return watchLater.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
+    return [];
+  }, [playlistId, playlists, watchLater]);
+
+  const playlist =
+    playlistId && playlistId !== 'watch-later'
+      ? playlists.find((p) => p.id === playlistId)
+      : undefined;
+  const isWatchLater = playlistId === 'watch-later';
+  const queueIndex = queue.findIndex((item) => item.id === id);
+
+  // File d'attente du mini-lecteur : la playlist en cours, sinon les suggestions.
+  const upNext = useMemo(
+    () => (queue.length > 0 && queueIndex >= 0 ? queue.slice(queueIndex + 1) : related),
+    [queue, queueIndex, related]
+  );
+  const queueLabel = playlist
+    ? `Playlist « ${playlist.name} »`
+    : isWatchLater
+      ? 'Regarder plus tard'
+      : 'À suivre';
+
+  useEffect(() => {
+    player.setUpNext(upNext, queueLabel);
+  }, [player, upNext, queueLabel]);
+
+  if (!id) {
     return (
       <div className="page">
         <p className="empty">
-          Cette vidéo n’est pas disponible dans le clone (elle a peut-être été ouverte depuis un lien
-          direct). Lancez une recherche pour la retrouver. <Link to="/">Retour à l’accueil</Link>
+          Aucune vidéo sélectionnée. <Link to="/">Retour à l’accueil</Link>
         </p>
       </div>
     );
   }
 
-  const channel = getChannel(video.channelId);
-  const channelName = channel?.name ?? video.channelName;
-  const subscribers = channel?.subscribers ?? '';
-  const fromChannel = videosFromChannel(video.channelId)
-    .filter((v) => v.id !== video.id)
-    .slice(0, 4);
-  const related = relatedVideos(video, 16);
+  if (!video && loadState === 'error') {
+    return (
+      <div className="page">
+        <p className="empty">
+          Cette vidéo n’est pas disponible : YouTube ne répond pas et elle n’est pas dans le
+          catalogue. <Link to="/">Retour à l’accueil</Link>
+        </p>
+      </div>
+    );
+  }
 
-  // reprise : ?t=42s prioritaire, sinon la position mémorisée (si l'on n'est pas à la fin)
-  const parsedStart = startParam ? parseInt(startParam.replace(/\D/g, ''), 10) || 0 : 0;
-  const resumeAt =
-    parsedStart > 0
-      ? parsedStart
-      : storedProgress > 5 && (!video.duration || storedProgress < video.duration - 10)
-        ? storedProgress
-        : 0;
+  // pendant le chargement d'une vidéo inconnue, on affiche déjà le lecteur
+  const display: Video =
+    video ??
+    ({
+      id,
+      title: 'Chargement…',
+      channelId: '',
+      channelName: '',
+      duration: null,
+      views: '',
+      viewsCount: 0,
+      publishedAt: '',
+      description: '',
+      category: '',
+      tags: [],
+      likes: 0,
+    } satisfies Video);
+
+  const channelName = channel?.name ?? display.channelName;
+  const subscribers = channel?.subscribers ?? '';
+  const fromChannel = (
+    details?.related.length
+      ? details.related.filter((v) => v.channelId === display.channelId && v.id !== display.id)
+      : videosFromChannel(display.channelId).filter((v) => v.id !== display.id)
+  ).slice(0, 4);
+  // YouTube renvoie souvent les vidéos de la même chaîne en tête des
+  // suggestions : on les retire de « Suggestions » pour éviter le doublon
+  // avec la rangée « Autres vidéos de … » juste au-dessus.
+  const channelVideoIds = new Set(fromChannel.map((v) => v.id));
+  const suggestions = related.filter((v) => !channelVideoIds.has(v.id));
 
   const nextVideo = related[0];
-  const queueIndex = queue.findIndex((v) => v?.id === video.id);
   const nextInQueue = queueIndex >= 0 ? queue[queueIndex + 1] : undefined;
+  const listParam = playlist ? `&list=${playlist.id}` : isWatchLater ? '&list=watch-later' : '';
+
+  /** chapitre cliqué : on déplace le lecteur, sinon on recharge au bon timestamp */
+  const seekToChapter = (seconds: number) => {
+    if (player.seekTo(seconds)) {
+      document.querySelector('.player')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    navigate(`/watch?v=${display.id}&t=${seconds}s${listParam}`);
+  };
 
   const goNext = () => {
     const next = nextInQueue ?? nextVideo;
     if (next) {
-      saveProgress(video.id, 0);
-      navigate(`/watch?v=${next.id}${playlist ? `&list=${playlist.id}` : ''}`);
+      saveProgress(display.id, 0);
+      navigate(`/watch?v=${next.id}${listParam}`);
     }
   };
+
+  const loadingMeta = loadState === 'loading' || (loadState === 'idle' && !catalogVideo);
+  const youtubeUrl = `https://www.youtube.com/watch?v=${display.id}`;
 
   return (
     <div className={`watch${theater ? ' watch--theater' : ''}`}>
       <div className="watch__main">
-        <Player
-          key={`${video.id}-${resumeAt}`}
-          video={video}
-          startAt={resumeAt}
-          autoplayNext={autoplayNext}
-          onEnded={goNext}
-        />
+        <PlayerSlot video={display} startAt={resumeAt} onEnded={goNext} />
 
-        {resumeAt > 0 && (
+        {resumeAt > 0 && !alreadyPlaying && (
           <p className="watch__resume">
             Reprise à {formatDuration(resumeAt)}{' '}
-            <button className="linkbtn" onClick={() => navigate(`/watch?v=${video.id}`)}>
+            <button
+              className="linkbtn"
+              onClick={() => {
+                player.seekTo(0);
+                navigate(`/watch?v=${display.id}${listParam}`, { replace: true });
+              }}
+            >
               recommencer du début
             </button>
           </p>
         )}
 
-        <h1 className="watch__title">{video.title}</h1>
+        {loadingMeta && !catalogVideo ? (
+          <div className="watch__skeleton">
+            <span className="skeleton skeleton--line" style={{ width: '70%', height: 24 }} />
+            <span className="skeleton skeleton--line" style={{ width: '35%' }} />
+          </div>
+        ) : (
+          <h1 className="watch__title">{display.title}</h1>
+        )}
 
         <div className="watch__bar">
-          <Link className="watch__channel" to={`/channel/${encodeURIComponent(video.channelId)}`}>
-            <Avatar name={channelName} src={channel?.avatar} size={40} />
+          <Link className="watch__channel" to={`/channel/${encodeURIComponent(display.channelId)}`}>
+            <Avatar name={channelName || 'Chaîne'} src={channel?.avatar ?? display.channelAvatar} size={40} />
             <span className="watch__channel-text">
-              <strong>{channelName}</strong>
+              <strong>{channelName || 'Chaîne inconnue'}</strong>
               {subscribers && <span className="muted">{subscribers}</span>}
             </span>
           </Link>
 
           <div className="watch__bar-right">
-            <LikeBar video={video} />
-            <SaveMenu video={video} />
-            <SubscribeButton channelId={video.channelId} />
+            <LikeBar video={display} />
+            <SaveMenu video={display} />
+            {display.channelId && <SubscribeButton channelId={display.channelId} />}
           </div>
         </div>
 
-        {playlist && (
+        {(playlist || isWatchLater) && (
           <div className="queuebar">
             <span className="queuebar__label">
-              Playlist : <strong>{playlist.name}</strong> ({queueIndex + 1}/{queue.length})
+              {playlist ? 'Playlist' : 'Regarder plus tard'} :{' '}
+              <strong>{playlist?.name ?? 'file d’attente'}</strong> ({queueIndex + 1}/{queue.length})
             </span>
             <button className="btn btn--ghost" onClick={goNext} disabled={!nextInQueue}>
-              Vidéo suivante de la playlist
+              Vidéo suivante
             </button>
-            <Link className="btn btn--ghost" to={`/playlist/${playlist.id}`}>
-              Voir la playlist
-            </Link>
+            {playlist ? (
+              <Link className="btn btn--ghost" to={`/playlist/${playlist.id}`}>
+                Voir la playlist
+              </Link>
+            ) : (
+              <Link className="btn btn--ghost" to="/watch-later">
+                Voir Regarder plus tard
+              </Link>
+            )}
           </div>
         )}
 
         <div className={`desc${descOpen ? ' desc--open' : ''}`}>
           <div className="desc__stats">
-            {video.views}
-            {video.publishedAt ? ` • ${video.publishedAt}` : ''}
-            {video.category ? ` • ${video.category}` : ''}
+            {display.views || 'Vues indisponibles'}
+            {display.publishedAt ? ` • ${display.publishedAt}` : ''}
+            {display.category ? ` • ${display.category}` : ''}
+            {sponsorBlock && <span className="desc__sponsor"> • SponsorBlock actif</span>}
           </div>
-          <p className="desc__text">{video.description || 'Aucune description fournie par la chaîne.'}</p>
-          {video.tags.length > 0 && (
+          <p className="desc__text">
+            {display.description || (loadState === 'loading' ? 'Chargement de la description…' : 'Aucune description fournie par la chaîne.')}
+          </p>
+          {display.tags.length > 0 && (
             <p className="desc__tags">
-              {video.tags.map((t) => (
+              {display.tags.map((t) => (
                 <span key={t} className="tag">
                   #{t}
                 </span>
               ))}
             </p>
           )}
-          {(video.description.length > 180 || video.tags.length > 0) && (
-            <button className="desc__more" onClick={() => setDescOpen((v) => !v)}>
-              {descOpen ? '…moins' : '…plus'}
+          <div className="desc__actions">
+            {(display.description.length > 180 || display.tags.length > 0) && (
+              <button className="desc__more" onClick={() => setDescOpen((v) => !v)}>
+                {descOpen ? '…moins' : '…plus'}
+              </button>
+            )}
+            <a className="desc__more" href={youtubeUrl} target="_blank" rel="noreferrer noopener">
+              Ouvrir sur YouTube ↗
+            </a>
+            <button
+              className="desc__more"
+              onClick={() => navigator.clipboard?.writeText(appUrl(`watch?v=${display.id}`))}
+            >
+              Copier le lien
             </button>
-          )}
+            <button
+              className="desc__more"
+              onClick={() => useStore.getState().setSetting('sponsorBlock', !sponsorBlock)}
+              title="Sauter automatiquement les sponsors, intros et autopromotions (SponsorBlock)"
+            >
+              SponsorBlock : {sponsorBlock ? 'activé' : 'désactivé'}
+            </button>
+          </div>
         </div>
 
-        <Comments videoId={video.id} />
+        {aiSummary && !loadingMeta && (
+          <VideoSummaryCard video={display} onSeek={seekToChapter} />
+        )}
+
+        <Comments videoId={display.id} />
       </div>
 
       <aside className="watch__aside">
@@ -210,15 +364,16 @@ export function Watch() {
             <hr className="aside__sep" />
           </>
         )}
-        {chapters.length > 1 && (
+
+        {chapters.length > 0 && (
           <>
             <h2 className="aside__title">Chapitres</h2>
             <ol className="chapters">
-              {chapters.map((c, i) => (
-                <li key={i}>
-                  <Link to={`/watch?v=${video.id}&t=${c.sec}s`}>
-                    <span className="chapters__time">{formatDuration(c.sec)}</span>
-                    {c.title}
+              {chapters.map((chapter) => (
+                <li key={`${chapter.sec}-${chapter.title}`}>
+                  <Link to={`/watch?v=${display.id}&t=${chapter.sec}s${listParam}`}>
+                    <span className="chapters__time">{formatDuration(chapter.sec)}</span>
+                    {chapter.title}
                   </Link>
                 </li>
               ))}
@@ -226,13 +381,21 @@ export function Watch() {
             <hr className="aside__sep" />
           </>
         )}
-        <h2 className="aside__title">Suggestions</h2>
-        {related.map((v) => (
-          <VideoCard key={v.id} video={v} variant="compact" />
-        ))}
+
+        {suggestions.length > 0 && (
+          <>
+            <h2 className="aside__title">Suggestions</h2>
+            {suggestions.map((v) => (
+              <VideoCard key={v.id} video={v} variant="compact" />
+            ))}
+          </>
+        )}
         <p className="aside__note">
-          Suggestions issues du catalogue embarqué. Raccourcis du lecteur : k (lecture), j / l (±10 s), c
-          (sous-titres), m (muet), t (théâtre).
+          {details?.related.length
+            ? 'Suggestions fournies en direct par YouTube pour cette vidéo.'
+            : 'Suggestions issues du catalogue embarqué (YouTube indisponible).'}{' '}
+          Le lecteur YouTube gère ses propres contrôles et raccourcis (k, j / l, f, m…) : cliquez dans
+          la vidéo pour les activer.
         </p>
       </aside>
     </div>

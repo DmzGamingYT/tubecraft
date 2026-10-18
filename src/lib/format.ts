@@ -9,7 +9,7 @@ export function compactNumber(n: number): string {
 }
 
 function fmt(v: number): string {
-  const s = v.toFixed(v < 10 ? 1 : 0);
+  const s = v.toFixed(v < 10 ? 1 : 0).replace('.', ',');
   return s.endsWith(',0') ? s.slice(0, -2) : s;
 }
 
@@ -39,25 +39,36 @@ export function formatDuration(seconds: number | null): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
 }
 
-/** Traduit les textes relatifs EN vers le FR (YouTube renvoie déjà du FR via hl=fr) */
+/**
+ * Traduit les textes relatifs EN vers le FR (YouTube renvoie déjà du FR via hl=fr)
+ * et met en forme les dates ISO du catalogue (« 2019-04-04 » → « 4 avr. 2019 »).
+ */
 export function translateRelative(text: string): string {
   if (!text) return text;
-  const t = text.toLowerCase().replace(/[\s\u00a0\u202f]/g, ' ').trim();
-  const rules: Array<[RegExp, string]> = [
-    [/^(\d+) (second|seconds|seconde|secondes) ago$/, 'il y a $1 secondes'],
-    [/^(\d+) (minute|minutes) ago$/, 'il y a $1 minutes'],
-    [/^(\d+) (hour|hours) ago$/, 'il y a $1 heures'],
-    [/^(\d+) (day|days) ago$/, 'il y a $1 jours'],
-    [/^(\d+) (week|weeks) ago$/, 'il y a $1 semaines'],
-    [/^(\d+) (month|months) ago$/, 'il y a $1 mois'],
-  ];
-  for (const [re, rep] of rules) {
-    const m = t.match(re);
-    if (m) return rep.replace('$1', m[1]);
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(text.trim());
+  if (iso) {
+    const date = new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
   }
-  const y = t.match(/^(\d+) (year|years) ago$/);
-  if (y) return `il y a ${y[1]} an${Number(y[1]) > 1 ? 's' : ''}`;
-  return text;
+  const t = text.toLowerCase().replace(/[\s\u00a0\u202f]/g, ' ').trim();
+  const match = t.match(/^(\d+) (second|seconds|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years) ago$/);
+  if (!match) return text;
+
+  const count = Number(match[1]);
+  const unit = match[2].replace(/s$/, '');
+  const labels: Record<string, [string, string]> = {
+    second: ['seconde', 'secondes'],
+    minute: ['minute', 'minutes'],
+    hour: ['heure', 'heures'],
+    day: ['jour', 'jours'],
+    week: ['semaine', 'semaines'],
+    month: ['mois', 'mois'],
+    year: ['an', 'ans'],
+  };
+  const [singular, plural] = labels[unit] ?? [unit, unit];
+  return `il y a ${count} ${count > 1 ? plural : singular}`;
 }
 
 export function timeAgo(timestamp: number): string {

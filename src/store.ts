@@ -1,48 +1,70 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Comment, Playlist } from './types';
+import type { Comment, NotifLevel, Playlist } from './types';
+import {
+  archiveLegacyState,
+  DEFAULT_SUBSCRIPTIONS,
+  emptyProfile,
+  GUEST_PROFILE_ID,
+  profileIdFor,
+  readProfile,
+  saveProfile,
+  snapshotOf,
+} from './lib/profiles';
 
-export type NotifLevel = 'all' | 'personalized' | 'none';
+export type { NotifLevel };
 
 export interface User {
   name: string;
   email: string;
   /** photo Google si la connexion a eu lieu via Google Identity Services */
   photo?: string;
+  /** fournisseur utilisé pour la connexion (google, microsoft, apple, github, email…) */
+  provider?: string;
 }
 
-/** Compte de démonstration proposé dans la fenêtre « Connexion avec Google ». */
-export const DEMO_ACCOUNT: User = {
-  name: 'Alessio Martin',
-  email: 'alessio.martin@gmail.com',
-};
 
-/** Abonnements « de base » offerts à la première connexion, comme sur YouTube. */
-const DEFAULT_SUBS = [
-  'UCz75RVbH8q2jdBJ4SnwuZZQ', // Blender Studio (Animation)
-  'UCsooa4yRKGN_zEE8iknghZA', // TED-Ed (Éducation)
-  'UCLA_DiR1FfKNvjuUpBHmylQ', // NASA (Science / Espace)
-  'UCWv7vMbMWH4-V0ZXdmDpPBA', // Programming with Mosh (Techno)
-  'UCwmZiChSryoWQCZMIQezgTg', // BBC Earth (Nature)
-];
 
-interface Settings {
+export interface Settings {
   autoplayNext: boolean;
   loop: boolean;
   theater: boolean;
   captions: boolean;
   speed: number;
   volume: number;
+  /** recherche assistée par IA (reformulation + mots-clés associés) */
+  aiSearch: boolean;
+  /** résumé + chapitres générés sous chaque vidéo */
+  aiSummary: boolean;
+  /** saut automatique des sponsors/intros via SponsorBlock */
+  sponsorBlock: boolean;
 }
+
+export const DEFAULT_SETTINGS: Settings = {
+  autoplayNext: true,
+  loop: false,
+  theater: false,
+  captions: false,
+  speed: 1,
+  volume: 100,
+  aiSearch: true,
+  aiSummary: true,
+  sponsorBlock: true,
+};
 
 interface AppState {
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  setTheme: (theme: 'dark' | 'light') => void;
 
-  /** compte connecté via « Google » (démonstration locale) */
+  /** compte actuellement connecté */
   user: User | null;
-  signIn: (user: User) => void;
-  signOut: () => void;
+  /** comptes mémorisés localement (sélecteur de comptes façon Google) */
+  accounts: User[];
+  /** renvoie `false` si l'archivage du profil courant a échoué (quota) */
+  signIn: (user: User) => boolean;
+  signOut: () => boolean;
+  forgetAccount: (email: string) => void;
 
   liked: string[];
   disliked: string[];
@@ -53,6 +75,8 @@ interface AppState {
   toggleSubscribe: (id: string) => void;
 
   history: string[];
+  /** date de dernière lecture (ms) par vidéo, pour l'historique groupé par jour */
+  historyDates: Record<string, number>;
   addToHistory: (id: string) => void;
   removeFromHistory: (id: string) => void;
   clearHistory: () => void;
@@ -72,12 +96,18 @@ interface AppState {
   watchLater: string[];
   toggleWatchLater: (videoId: string) => void;
 
+  /** vidéos masquées du fil d'accueil via « Pas intéressé » */
+  dismissed: string[];
+  dismissVideo: (videoId: string) => void;
+  restoreDismissed: () => void;
+
   /** position de lecture en secondes, par vidéo */
   progress: Record<string, number>;
   saveProgress: (videoId: string, seconds: number) => void;
 
   settings: Settings;
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
+  resetSettings: () => void;
 
   notifLevels: Record<string, NotifLevel>;
   setNotifLevel: (channelId: string, level: NotifLevel) => void;
@@ -89,19 +119,51 @@ const MAX_HISTORY = 100;
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       theme: 'dark',
       toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setTheme: (theme) => set({ theme }),
 
       user: null,
-      // La connexion « Google » essaie sur le compte un lot de vidéos de base
-      // et d'abonnements, comme sur YouTube (identité conservée via localStorage).
-      signIn: (user) =>
-        set((s) => ({
+      accounts: [],
+      /**
+       * Bascule de profil : on archive les données du profil courant, puis on
+       * recharge celles du profil cible. Un profil inédit démarre avec les
+       * abonnements de base ; le profil invité conserve ses propres données.
+       */
+      signIn: (user) => {
+        const s = get();
+        // archivage d'abord : si le stockage est plein, on ne bascule pas et
+        // l'état affiché reste la source de vérité (aucune perte silencieuse)
+        if (!saveProfile(profileIdFor(s.user?.email), snapshotOf(s))) return false;
+
+        const existing = readProfile(profileIdFor(user.email));
+        const base = existing ?? (s.user ? emptyProfile() : snapshotOf(s));
+        const data = existing
+          ? base
+          : {
+              ...base,
+              subscribed:
+                base.subscribed.length > 0 ? base.subscribed : [...DEFAULT_SUBSCRIPTIONS],
+            };
+
+        set({
           user,
-          subscribed: s.subscribed.length > 0 ? s.subscribed : [...DEFAULT_SUBS],
-        })),
-      signOut: () => set({ user: null, notifLevels: {} }),
+          accounts: [user, ...s.accounts.filter((a) => a.email !== user.email)].slice(0, 6),
+          ...data,
+        });
+        return true;
+      },
+      signOut: () => {
+        const s = get();
+        if (!saveProfile(profileIdFor(s.user?.email), snapshotOf(s))) return false;
+        const guest = readProfile(GUEST_PROFILE_ID) ?? emptyProfile();
+        set({ user: null, ...guest });
+        saveProfile(GUEST_PROFILE_ID, guest);
+        return true;
+      },
+      forgetAccount: (email) =>
+        set((s) => ({ accounts: s.accounts.filter((a) => a.email !== email) })),
 
       liked: [],
       disliked: [],
@@ -125,12 +187,18 @@ export const useStore = create<AppState>()(
         })),
 
       history: [],
+      historyDates: {},
       addToHistory: (id) =>
         set((s) => ({
           history: [id, ...s.history.filter((x) => x !== id)].slice(0, MAX_HISTORY),
+          historyDates: { ...s.historyDates, [id]: Date.now() },
         })),
-      removeFromHistory: (id) => set((s) => ({ history: s.history.filter((x) => x !== id) })),
-      clearHistory: () => set({ history: [] }),
+      removeFromHistory: (id) =>
+        set((s) => {
+          const { [id]: _removed, ...historyDates } = s.historyDates;
+          return { history: s.history.filter((x) => x !== id), historyDates };
+        }),
+      clearHistory: () => set({ history: [], historyDates: {} }),
 
       comments: {},
       addComment: (videoId, text, parentId) =>
@@ -206,15 +274,25 @@ export const useStore = create<AppState>()(
             : [videoId, ...s.watchLater],
         })),
 
+      dismissed: [],
+      dismissVideo: (videoId) =>
+        set((s) => ({
+          dismissed: s.dismissed.includes(videoId)
+            ? s.dismissed
+            : [videoId, ...s.dismissed].slice(0, 500),
+        })),
+      restoreDismissed: () => set({ dismissed: [] }),
+
       progress: {},
       saveProgress: (videoId, seconds) =>
         set((s) => ({
           progress: { ...s.progress, [videoId]: Math.max(0, Math.floor(seconds)) },
         })),
 
-      settings: { autoplayNext: true, loop: false, theater: false, captions: false, speed: 1, volume: 100 },
+      settings: { ...DEFAULT_SETTINGS },
       setSetting: (key, value) =>
         set((s) => ({ settings: { ...s.settings, [key]: value } })),
+      resetSettings: () => set({ settings: { ...DEFAULT_SETTINGS } }),
 
       notifLevels: {},
       setNotifLevel: (channelId, level) =>
@@ -227,9 +305,45 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tubecraft-store',
-      version: 2,
-      // v1 -> v2 : aucune clé renommée, on conserve les données de l'utilisateur
-      migrate: (persisted) => persisted as AppState,
+      version: 6,
+      /**
+       * v4 -> v5 : les données étaient communes à tous les comptes. On les
+       * rattache au profil actif (ou au profil invité) une seule fois, sans en
+       * supprimer aucune. Les autres comptes mémorisés repartent de zéro.
+       * v5 -> v6 : ajoute `settings.aiSummary` (activé par défaut).
+       */
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Partial<AppState>;
+        if (version < 5) archiveLegacyState(state);
+        return {
+          ...state,
+          settings: {
+            aiSearch: true,
+            aiSummary: true,
+            sponsorBlock: true,
+            ...(state.settings ?? {}),
+          },
+        } as AppState;
+      },
     }
   )
 );
+
+/** Archive l'état courant dans le profil actif. */
+export const snapshotCurrentProfile = (): boolean => {
+  const s = useStore.getState();
+  return saveProfile(profileIdFor(s.user?.email), snapshotOf(s));
+};
+
+/**
+ * `migrate` peut réécrire `tubecraft-store` juste avant que Zustand ne repose
+ * l'état migré. On réarchive donc une fois la réhydratation terminée : la
+ * copie du profil ne reste jamais en arrière, même si le marqueur de version
+ * a été écrit entre-temps.
+ */
+const archiveOnRehydrate = () => {
+  if (!useStore.persist.hasHydrated()) return;
+  snapshotCurrentProfile();
+};
+if (useStore.persist.hasHydrated()) archiveOnRehydrate();
+else useStore.persist.onFinishHydration(archiveOnRehydrate);
