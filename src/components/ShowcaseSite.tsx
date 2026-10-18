@@ -50,7 +50,41 @@ export interface ShowcaseSiteProps {
 }
 
 const THEME_KEY = 'atelier.theme';
-const SECTION_IDS = ['collection', 'manifeste', 'capot', 'telecharger', 'etude'];
+
+/** Sommaire unique : la barre desktop et le menu mobile restent synchronisés. */
+const SECTIONS = [
+  { id: 'collection', num: '01', label: 'Collection' },
+  { id: 'manifeste', num: '02', label: 'Manifeste' },
+  { id: 'capot', num: '03', label: 'Sous le capot' },
+  { id: 'telecharger', num: '04', label: 'Télécharger' },
+  { id: 'etude', num: '05', label: 'À l’étude' },
+] as const;
+const SECTION_IDS = SECTIONS.map((section) => section.id);
+
+/** Soleil / lune du bouton de thème, dessiné au trait pour rester net. */
+function ThemeGlyph({ night }: { night: boolean }) {
+  return night ? (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M20 14.6A8.6 8.6 0 0 1 9.4 4a8.6 8.6 0 1 0 10.6 10.6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M12 2v2.2M12 19.8V22M2 12h2.2M19.8 12H22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M19.1 4.9l-1.6 1.6M6.5 17.5l-1.6 1.6"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 /** Les animations d'apparition ne s'appliquent qu'aux éléments encore sous le pli. */
 function useReveal(root: React.RefObject<HTMLDivElement>) {
@@ -279,6 +313,8 @@ export function ShowcaseSite({
   const [tourOpen, setTourOpen] = useState(false);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const tourReturnRef = useRef<HTMLElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLElement>(null);
   const activeProposal = proposals.find((proposal) => proposal.id === activeIdea) ?? proposals[0];
   const activeSection = useScrollSpy(rootRef, SECTION_IDS);
 
@@ -309,14 +345,52 @@ export function ShowcaseSite({
     returnFocusRef.current?.focus();
   };
 
-  // menu mobile : Échap pour refermer
+  // Menu mobile : plein écran sous la barre, verrouillé au clavier.
   useEffect(() => {
     if (!menuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const frame = window.requestAnimationFrame(() => {
+      mobileMenuRef.current?.querySelector<HTMLElement>('a, button')?.focus();
+    });
+
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusables = mobileMenuRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])'
+      );
+      if (!focusables || focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
+    const onResize = () => {
+      if (window.innerWidth > 1080) setMenuOpen(false);
+    };
+
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
+    };
   }, [menuOpen]);
 
   // galerie plein écran : pas de défilement derrière, Échap pour fermer
@@ -382,6 +456,9 @@ export function ShowcaseSite({
       ref={rootRef}
       style={{ '--sc-progress': 0, '--sc-mx': 0, '--sc-my': 0 } as CSSProperties}
     >
+      <a className="sc-skip" href="#contenu">
+        Aller au contenu
+      </a>
       <span className="sc-progress" aria-hidden />
 
       <header className="sc-nav">
@@ -395,20 +472,15 @@ export function ShowcaseSite({
         </a>
 
         <nav className="sc-nav__links" aria-label="Sommaire">
-          {[
-            ['collection', '01', 'Collection'],
-            ['manifeste', '02', 'Manifeste'],
-            ['capot', '03', 'Sous le capot'],
-            ['telecharger', '04', 'Télécharger'],
-            ['etude', '05', 'À l’étude'],
-          ].map(([id, num, label]) => (
+          {SECTIONS.map(({ id, num, label }) => (
             <a
               key={id}
               href={`#${id}`}
               className={activeSection === id ? 'is-active' : undefined}
-              aria-current={activeSection === id ? 'true' : undefined}
+              aria-current={activeSection === id ? 'location' : undefined}
             >
-              <i>{num}</i> {label}
+              <i>{num}</i>
+              <span>{label}</span>
             </a>
           ))}
         </nav>
@@ -416,28 +488,17 @@ export function ShowcaseSite({
         <div className="sc-nav__actions">
           <button
             type="button"
-            className="sc-nav__tour"
-            onClick={startTour}
-            aria-label="Lancer la visite guidée"
-          >
-            <span className="sc-nav__tourIcon" aria-hidden>
-              ▶
-            </span>
-            <span className="sc-nav__tourLabel">Visite guidée</span>
-          </button>
-
-          <button
-            type="button"
             className="sc-theme"
             onClick={() => setNight((value) => !value)}
             aria-pressed={night}
+            aria-label={night ? 'Passer au thème papier' : 'Passer au thème nuit'}
             title={night ? 'Revenir au thème papier' : 'Passer au thème nuit'}
           >
-            <span className="sc-theme__dot" aria-hidden />
-            {night ? 'Nuit' : 'Papier'}
+            <ThemeGlyph night={night} />
           </button>
 
           <button
+            ref={menuButtonRef}
             type="button"
             className="sc-nav__menu"
             onClick={() => setMenuOpen((value) => !value)}
@@ -450,15 +511,22 @@ export function ShowcaseSite({
           </button>
 
           {appHref ? (
-            <Link className="sc-btn sc-btn--ink sc-btn--small" href={appHref}>
-              Ouvrir TubeCraft <span aria-hidden>↗</span>
+            <Link
+              className="sc-btn sc-btn--ink sc-btn--small sc-nav__cta"
+              href={appHref}
+              aria-label="Ouvrir TubeCraft"
+            >
+              <span className="sc-nav__ctaLong">Ouvrir TubeCraft</span>
+              <span className="sc-nav__ctaShort">Ouvrir</span>
+              <span aria-hidden>↗</span>
             </Link>
           ) : (
             <a
-              className="sc-btn sc-btn--ink sc-btn--small"
+              className="sc-btn sc-btn--ink sc-btn--small sc-nav__cta"
               href={githubHref}
               target="_blank"
               rel="noreferrer noopener"
+              aria-label="Ouvrir le dépôt GitHub"
             >
               GitHub <span aria-hidden>↗</span>
             </a>
@@ -467,38 +535,76 @@ export function ShowcaseSite({
       </header>
 
       {menuOpen ? (
-        <nav className="sc-mobilemenu" id="sc-mobile-menu" aria-label="Sommaire mobile">
-          {[
-            ['collection', '01', 'Collection'],
-            ['manifeste', '02', 'Manifeste'],
-            ['capot', '03', 'Sous le capot'],
-            ['telecharger', '04', 'Télécharger'],
-            ['etude', '05', 'À l’étude'],
-          ].map(([id, num, label]) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className={activeSection === id ? 'is-active' : undefined}
-              onClick={() => setMenuOpen(false)}
+        <nav
+          ref={mobileMenuRef}
+          className="sc-mobilemenu"
+          id="sc-mobile-menu"
+          aria-label="Sommaire"
+        >
+          <div className="sc-mobilemenu__head">
+            <span>Sommaire</span>
+            <span>{String(SECTIONS.length).padStart(2, '0')} sections</span>
+          </div>
+
+          <div className="sc-mobilemenu__list">
+            {SECTIONS.map(({ id, num, label }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className={activeSection === id ? 'is-active' : undefined}
+                aria-current={activeSection === id ? 'location' : undefined}
+                onClick={() => setMenuOpen(false)}
+              >
+                <i>{num}</i>
+                <span>{label}</span>
+                <b aria-hidden>↘</b>
+              </a>
+            ))}
+          </div>
+
+          <div className="sc-mobilemenu__actions">
+            <button
+              type="button"
+              className="sc-mobilemenu__theme"
+              onClick={() => setNight((value) => !value)}
+              aria-pressed={night}
             >
-              <i>{num}</i> {label}
-              <span aria-hidden>↘</span>
+              <ThemeGlyph night={night} />
+              Thème {night ? 'nuit' : 'papier'}
+            </button>
+            <button
+              type="button"
+              className="sc-mobilemenu__tour"
+              onClick={() => {
+                setMenuOpen(false);
+                startTour();
+              }}
+            >
+              <span className="sc-mobilemenu__play" aria-hidden>
+                ▶
+              </span>
+              Visite guidée
+            </button>
+          </div>
+
+          {appHref ? (
+            <Link className="sc-btn sc-btn--ink sc-mobilemenu__cta" href={appHref}>
+              Ouvrir TubeCraft <span aria-hidden>↗</span>
+            </Link>
+          ) : (
+            <a
+              className="sc-btn sc-btn--ink sc-mobilemenu__cta"
+              href={githubHref}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Voir le dépôt GitHub <span aria-hidden>↗</span>
             </a>
-          ))}
-          <button
-            type="button"
-            className="sc-mobilemenu__tour"
-            onClick={() => {
-              setMenuOpen(false);
-              startTour();
-            }}
-          >
-            <span aria-hidden>▶</span> Lancer la visite guidée
-          </button>
+          )}
         </nav>
       ) : null}
 
-      <main>
+      <main id="contenu" tabIndex={-1}>
         <section className="sc-hero" data-tour="hero">
           <div className="sc-rings" aria-hidden>
             <span className="sc-rings__circle sc-rings__circle--1" />
