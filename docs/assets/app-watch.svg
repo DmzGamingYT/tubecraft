@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 760" width="1280" height="760" role="img" aria-label="Aperçu de la page de lecture : lecteur YouTube officiel, résumé IA avec chapitres et suggestions">
+  <defs>
+    <linearGradient id="w1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b1b22"/><stop offset="1" stop-color="#06060a"/>
+    </linearGradient>
+    <linearGradient id="s1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a1220"/><stop offset="1" stop-color="#8d1f38"/>
+    </linearGradient>
+    <linearGradient id="s2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141d3c"/><stop offset="1" stop-color="#2f4a91"/>
+    </linearGradient>
+    <linearGradient id="s3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f2e2c"/><stop offset="1" stop-color="#1f7a6d"/>
+    </linearGradient>
+    <linearGradient id="s4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#251033"/><stop offset="1" stop-color="#6b2f96"/>
+    </linearGradient>
+    <linearGradient id="red2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff1f45"/><stop offset="1" stop-color="#c90023"/>
+    </linearGradient>
+    <linearGradient id="ava2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5a7a"/><stop offset="1" stop-color="#ff0033"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="760" rx="18" fill="#0c0c0f"/>
+  <rect x="0.5" y="0.5" width="1279" height="759" rx="18" fill="none" stroke="#26262b"/>
+
+  <!-- barre haute -->
+  <rect x="0" y="62" width="1280" height="1" fill="#1e1e23"/>
+  <g transform="translate(22,15)">
+    <rect width="32" height="32" rx="9" fill="url(#red2)"/>
+    <path d="M12 9 L23 16 L12 23 Z" fill="#ffffff"/>
+  </g>
+  <rect x="392" y="14" width="430" height="34" rx="17" fill="#15151a" stroke="#26262b"/>
+  <circle cx="418" cy="31" r="7" fill="none" stroke="#8b8578" stroke-width="1.6"/>
+  <path d="M423 36 L428 41" stroke="#8b8578" stroke-width="1.6" stroke-linecap="round"/>
+  <text x="440" y="36" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#7e786c">Rechercher</text>
+  <circle cx="1216" cy="31" r="14" fill="url(#ava2)"/>
+  <text x="1216" y="36" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#0b0b0c" text-anchor="middle">A</text>
+
+  <!-- barre latérale réduite -->
+  <rect x="72" y="62" width="1" height="698" fill="#1c1c21"/>
+  <g fill="#ffffff" fill-opacity="0.06">
+    <rect x="22" y="92" width="28" height="28" rx="9"/>
+    <rect x="22" y="140" width="28" height="28" rx="9"/>
+    <rect x="22" y="188" width="28" height="28" rx="9"/>
+    <rect x="22" y="236" width="28" height="28" rx="9"/>
+    <rect x="22" y="284" width="28" height="28" rx="9"/>
+  </g>
+  <g fill="none" stroke="#a9a397" stroke-width="1.6">
+    <path d="M31 106 h10 v8 h-7 l-3 3 z"/>
+    <path d="M31 148 L39 152 L31 156 Z"/>
+    <circle cx="36" cy="202" r="6"/>
+    <path d="M36 198 v4 l3 2"/>
+    <path d="M32 246 h8 M32 251 h8 M32 256 h5"/>
+    <path d="M36 292 v8 M32 297 l4 4 4-4"/>
+  </g>
+
+  <!-- lecteur -->
+  <rect x="100" y="88" width="700" height="394" rx="14" fill="url(#w1)"/>
+  <rect x="100" y="88" width="700" height="394" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+  <circle cx="450" cy="272" r="40" fill="#0b0b0c" fill-opacity="0.6" stroke="#ffffff" stroke-opacity="0.18"/>
+  <path d="M438 254 L470 272 L438 290 Z" fill="#ffffff"/>
+  <rect x="116" y="440" width="668" height="4" rx="2" fill="#ffffff" fill-opacity="0.16"/>
+  <rect x="116" y="440" width="214" height="4" rx="2" fill="#ff0033"/>
+  <circle cx="330" cy="442" r="6" fill="#ff0033"/>
+  <text x="116" y="468" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" fill="#b9b3a8">04:38 / 15:12</text>
+  <g fill="#cfc9bd">
+    <rect x="700" y="456" width="14" height="14" rx="3" opacity="0.7"/>
+    <rect x="724" y="456" width="14" height="14" rx="3" opacity="0.7"/>
+    <rect x="748" y="456" width="14" height="14" rx="3" opacity="0.7"/>
+  </g>
+
+  <!-- titre + chaîne -->
+  <rect x="100" y="508" width="560" height="18" rx="8" fill="#f2f0ea" fill-opacity="0.86"/>
+  <rect x="100" y="534" width="360" height="14" rx="6" fill="#f2f0ea" fill-opacity="0.34"/>
+  <circle cx="114" cy="580" r="19" fill="url(#ava2)"/>
+  <g font-family="Inter, -apple-system, system-ui, sans-serif">
+    <rect x="146" y="568" width="132" height="12" rx="6" fill="#f2f0ea" fill-opacity="0.8"/>
+    <rect x="146" y="588" width="86" height="10" rx="5" fill="#f2f0ea" fill-opacity="0.3"/>
+    <rect x="404" y="566" width="112" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#26262b"/>
+    <path d="M424 574 v8 l7-4 z" fill="#ff0033"/>
+    <text x="440" y="586" font-size="12" fill="#f2f0ea">12,4 k</text>
+    <rect x="528" y="566" width="118" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#26262b"/>
+    <text x="587" y="586" font-size="12" fill="#f2f0ea" text-anchor="middle">Partager</text>
+    <rect x="658" y="566" width="142" height="30" rx="15" fill="#f2f0ea"/>
+    <text x="729" y="586" font-size="12" font-weight="600" fill="#0b0b0c" text-anchor="middle">Enregistrer</text>
+  </g>
+
+  <!-- carte résumé IA -->
+  <rect x="100" y="620" width="700" height="112" rx="14" fill="#ffffff" fill-opacity="0.035" stroke="#26262b"/>
+  <rect x="120" y="638" width="72" height="22" rx="11" fill="#ff0033" fill-opacity="0.16"/>
+  <text x="132" y="653" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10" letter-spacing="1.6" fill="#ff6f86">RÉSUMÉ IA</text>
+  <g font-family="Inter, -apple-system, system-ui, sans-serif" font-size="12" fill="#cfc9bd">
+    <rect x="120" y="674" width="600" height="10" rx="5" fill="#f2f0ea" fill-opacity="0.28"/>
+    <rect x="120" y="692" width="472" height="10" rx="5" fill="#f2f0ea" fill-opacity="0.28"/>
+  </g>
+  <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11">
+    <text x="120" y="722" fill="#ff6f86">00:00</text><text x="176" y="722" fill="#cfc9bd">Introduction</text>
+    <text x="300" y="722" fill="#ff6f86">03:12</text><text x="356" y="722" fill="#cfc9bd">Premier montage</text>
+    <text x="520" y="722" fill="#ff6f86">09:48</text><text x="576" y="722" fill="#cfc9bd">Export</text>
+  </g>
+
+  <!-- suggestions -->
+  <text x="828" y="104" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="2" fill="#8b8578">SUGGESTIONS YOUTUBE</text>
+  <g>
+    <rect x="828" y="120" width="150" height="86" rx="10" fill="url(#s1)"/>
+    <rect x="828" y="120" width="150" height="86" rx="10" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+    <rect x="994" y="126" width="230" height="12" rx="6" fill="#f2f0ea" fill-opacity="0.8"/>
+    <rect x="994" y="146" width="150" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.3"/>
+    <rect x="994" y="166" width="110" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.22"/>
+
+    <rect x="828" y="226" width="150" height="86" rx="10" fill="url(#s2)"/>
+    <rect x="828" y="226" width="150" height="86" rx="10" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+    <rect x="994" y="232" width="200" height="12" rx="6" fill="#f2f0ea" fill-opacity="0.8"/>
+    <rect x="994" y="252" width="168" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.3"/>
+    <rect x="994" y="272" width="126" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.22"/>
+
+    <rect x="828" y="332" width="150" height="86" rx="10" fill="url(#s3)"/>
+    <rect x="828" y="332" width="150" height="86" rx="10" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+    <rect x="994" y="338" width="218" height="12" rx="6" fill="#f2f0ea" fill-opacity="0.8"/>
+    <rect x="994" y="358" width="140" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.3"/>
+    <rect x="994" y="378" width="160" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.22"/>
+
+    <rect x="828" y="438" width="150" height="86" rx="10" fill="url(#s4)"/>
+    <rect x="828" y="438" width="150" height="86" rx="10" fill="none" stroke="#ffffff" stroke-opacity="0.07"/>
+    <rect x="994" y="444" width="188" height="12" rx="6" fill="#f2f0ea" fill-opacity="0.8"/>
+    <rect x="994" y="464" width="154" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.3"/>
+    <rect x="994" y="484" width="118" height="11" rx="5" fill="#f2f0ea" fill-opacity="0.22"/>
+  </g>
+
+  <rect x="828" y="560" width="428" height="172" rx="14" fill="#ffffff" fill-opacity="0.03" stroke="#26262b"/>
+  <text x="852" y="588" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10" letter-spacing="2" fill="#8b8578">COMMENTAIRES RÉELS</text>
+  <g font-family="Inter, -apple-system, system-ui, sans-serif">
+    <circle cx="862" cy="622" r="11" fill="#ffffff" fill-opacity="0.12"/>
+    <rect x="882" y="612" width="150" height="10" rx="5" fill="#f2f0ea" fill-opacity="0.7"/>
+    <rect x="882" y="630" width="330" height="9" rx="4" fill="#f2f0ea" fill-opacity="0.26"/>
+    <circle cx="862" cy="676" r="11" fill="#ffffff" fill-opacity="0.12"/>
+    <rect x="882" y="666" width="120" height="10" rx="5" fill="#f2f0ea" fill-opacity="0.7"/>
+    <rect x="882" y="684" width="292" height="9" rx="4" fill="#f2f0ea" fill-opacity="0.26"/>
+  </g>
+</svg>

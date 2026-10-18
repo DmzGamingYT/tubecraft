@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-label="Architecture : navigateur, proxy local /yt/api, puis InnerTube et les services communautaires publics">
+  <defs>
+    <linearGradient id="a-red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff1f45"/><stop offset="1" stop-color="#c90023"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="400" rx="18" fill="#0c0c0f"/>
+
+  <!-- nœud navigateur -->
+  <g transform="translate(40,64)">
+    <rect width="330" height="176" rx="16" fill="#111116" stroke="#26262b"/>
+    <text x="24" y="38" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="2.2" fill="#8b8578">NAVIGATEUR</text>
+    <text x="24" y="76" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#f4f2ec">TubeCraft</text>
+    <text x="24" y="102" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="14" fill="#b9b3a8">React · état local, aucun serveur</text>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.4">
+      <rect x="24" y="120" width="168" height="30" rx="15" fill="none" stroke="#ffffff" stroke-opacity="0.16"/>
+      <text x="42" y="140" fill="#cfc9bd">LIKES · PLAYLISTS</text>
+    </g>
+    <text x="24" y="160" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="12.5" fill="#7e786c">localStorage + service worker</text>
+  </g>
+
+  <!-- flèche 1 -->
+  <g stroke="#4a4a52" stroke-width="1.6" fill="none">
+    <path d="M378 152 H454" stroke-dasharray="6 6"/>
+    <path d="M448 145 L458 152 L448 159"/>
+  </g>
+  <text x="416" y="136" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.4" fill="#8b8578" text-anchor="middle">/yt/api</text>
+
+  <!-- nœud proxy -->
+  <g transform="translate(466,64)">
+    <rect width="330" height="176" rx="16" fill="#141014" stroke="#ff0033" stroke-opacity="0.5"/>
+    <text x="24" y="38" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="2.2" fill="#ff6f86">PROXY LOCAL (VITE OU WORKER)</text>
+    <text x="24" y="76" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#f4f2ec">/yt/api/*</text>
+    <g font-family="Inter, -apple-system, system-ui, sans-serif" font-size="14" fill="#b9b3a8">
+      <text x="24" y="102">cache mémoire · timeout · quota</text>
+      <text x="24" y="124">identifiants validés · pas de CORS</text>
+    </g>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.4">
+      <rect x="24" y="140" width="120" height="30" rx="15" fill="#ff0033" fill-opacity="0.14"/>
+      <text x="42" y="160" fill="#ff6f86">AUCUN SECRET</text>
+    </g>
+  </g>
+
+  <!-- flèche 2 -->
+  <g stroke="#4a4a52" stroke-width="1.6" fill="none">
+    <path d="M806 152 H882" stroke-dasharray="6 6"/>
+    <path d="M876 145 L886 152 L876 159"/>
+  </g>
+  <text x="844" y="136" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.4" fill="#8b8578" text-anchor="middle">InnerTube</text>
+
+  <!-- nœud YouTube -->
+  <g transform="translate(894,64)">
+    <rect width="346" height="176" rx="16" fill="#111116" stroke="#26262b"/>
+    <text x="24" y="38" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="2.2" fill="#8b8578">CÔTÉ YOUTUBE</text>
+    <text x="24" y="76" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="22" font-weight="700" fill="#f4f2ec">Données réelles</text>
+    <g font-family="Inter, -apple-system, system-ui, sans-serif" font-size="14" fill="#b9b3a8">
+      <text x="24" y="102">vidéos, chaînes, commentaires,</text>
+      <text x="24" y="124">suggestions, dislikes, segments</text>
+    </g>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="1.4">
+      <rect x="24" y="140" width="176" height="30" rx="15" fill="none" stroke="#ffffff" stroke-opacity="0.16"/>
+      <text x="42" y="160" fill="#cfc9bd">LECTEUR OFFICIEL</text>
+    </g>
+  </g>
+
+  <!-- ligne du bas : services publics sans clé -->
+  <rect x="40" y="270" width="1200" height="94" rx="16" fill="#ffffff" fill-opacity="0.025" stroke="#26262b"/>
+  <text x="64" y="300" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="10.5" letter-spacing="2.2" fill="#8b8578">SERVICES PUBLICS, SANS COMPTE NI CLÉ</text>
+  <g font-family="Inter, -apple-system, system-ui, sans-serif" font-size="14" fill="#cfc9bd">
+    <circle cx="70" cy="330" r="4" fill="#ff0033"/><text x="84" y="335">SponsorBlock — saut des sponsors</text>
+    <circle cx="404" cy="330" r="4" fill="#ff0033"/><text x="418" y="335">Return YouTube Dislike — dislikes réels</text>
+    <circle cx="816" cy="330" r="4" fill="#ff0033"/><text x="830" y="335">Pollinations — recherche et résumé IA</text>
+  </g>
+</svg>

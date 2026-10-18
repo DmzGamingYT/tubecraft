@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-label="La collection Craftline : TubeCraft, SpotifyCraft et PulseCraft">
+  <defs>
+    <linearGradient id="tc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff1f45"/><stop offset="1" stop-color="#c90023"/>
+    </linearGradient>
+    <linearGradient id="sp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3ff07c"/><stop offset="1" stop-color="#12a349"/>
+    </linearGradient>
+    <linearGradient id="pu" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8ff5c"/><stop offset="1" stop-color="#93c21b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="340" rx="18" fill="#0c0c0f"/>
+
+  <!-- TubeCraft -->
+  <g transform="translate(24,24)">
+    <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
+    <g transform="translate(28,28)">
+      <rect width="56" height="56" rx="16" fill="url(#tc)"/>
+      <path d="M21 17 L39 28 L21 39 Z" fill="#ffffff"/>
+    </g>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">TubeCraft</text>
+    <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">YouTube, en open source :</text>
+    <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">recherche, lecteur, Shorts,</text>
+    <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">abonnements, mini-lecteur.</text>
+    <rect x="28" y="196" width="336" height="1" fill="#232328"/>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5" letter-spacing="1.6">
+      <text x="28" y="230" fill="#ff6f86">WEB APP</text>
+      <text x="112" y="230" fill="#7e786c">5 PLATEFORMES</text>
+    </g>
+    <text x="28" y="264" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#8b8578">Ce dépôt · MIT · 0 clé API</text>
+  </g>
+
+  <!-- SpotifyCraft -->
+  <g transform="translate(444,24)">
+    <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
+    <g transform="translate(28,28)">
+      <rect width="56" height="56" rx="16" fill="url(#sp)"/>
+      <g fill="none" stroke="#0b0b0c" stroke-width="3.4" stroke-linecap="round">
+        <path d="M16 22 C25 19 34 20 41 24"/>
+        <path d="M17.5 30 C25 27.5 33 29 38.5 32"/>
+        <path d="M19 37.5 C25 35.5 31 36.5 35.5 39"/>
+      </g>
+    </g>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">SpotifyCraft</text>
+    <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">La musique, sans le nuage :</text>
+    <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">extraits officiels, paroles,</text>
+    <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">égaliseur, vos propres MP3.</text>
+    <rect x="28" y="196" width="336" height="1" fill="#232328"/>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5" letter-spacing="1.6">
+      <text x="28" y="230" fill="#7ce79f">NATIVE</text>
+      <text x="94" y="230" fill="#7e786c">3 SYSTÈMES</text>
+    </g>
+    <text x="28" y="264" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#8b8578">Dépôt séparé · DMG · MSI · AppImage</text>
+  </g>
+
+  <!-- PulseCraft -->
+  <g transform="translate(864,24)">
+    <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
+    <g transform="translate(28,28)">
+      <rect width="56" height="56" rx="16" fill="url(#pu)"/>
+      <path d="M12 30 h7 l4-11 6 22 5-15 3 4 h7" fill="none" stroke="#0b0b0c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">PulseCraft</text>
+    <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">Vos données de santé restent</text>
+    <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">chez vous : objectifs, séances,</text>
+    <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">sommeil, nutrition, coach IA.</text>
+    <rect x="28" y="196" width="336" height="1" fill="#232328"/>
+    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5" letter-spacing="1.6">
+      <text x="28" y="230" fill="#c9e86a">NATIVE + WEB</text>
+      <text x="140" y="230" fill="#7e786c">RUST/WASM</text>
+    </g>
+    <text x="28" y="264" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#8b8578">Dépôt séparé · imports Apple Health</text>
+  </g>
+</svg>
