@@ -1,5 +1,6 @@
 import type { Channel, SearchResult, SponsorSegment, Video, VideoPage } from '../types';
 import { parseViews } from '../lib/format';
+import { mergeChannelVideos } from '../lib/notifications';
 import { rememberChannel, rememberVideo } from '../data/dynamic';
 import { videos, shorts, channels } from '../data/catalog';
 
@@ -340,11 +341,13 @@ export async function fetchChannelPage(
   }>(`channel?id=${encodeURIComponent(channelId)}&tab=${tab}`, { signal, ttl: 5 * 60_000 });
 
   const channel = toChannel(data.channel);
+  // sur un onglet de chaîne, le parseur peut décaler les métadonnées : la
+  // chaîne est connue, on l'impose plutôt que de faire confiance à `r.channelName`.
   const videos = (data.videos ?? []).map((r) =>
     resultToVideo(r, {
-      channelId: r.channelId || channel.id,
-      channelName: r.channelName || channel.name,
-      channelAvatar: r.channelAvatar || channel.avatar,
+      channelId: channel.id,
+      channelName: channel.name,
+      channelAvatar: channel.avatar,
     })
   );
   return { channel, videos, continuation: data.continuation };
@@ -363,11 +366,56 @@ export async function fetchChannelMore(
   const known = channels.find((c) => c.id === channelId);
   const videos = (data.videos ?? []).map((r) =>
     resultToVideo(r, {
-      channelId: r.channelId || channelId,
-      channelName: r.channelName || known?.name || '',
+      channelId,
+      channelName: known?.name || r.channelName || '',
     })
   );
   return { videos, continuation: data.continuation };
+}
+
+/* -------------------------------------------------- nouveautés abonnements */
+
+export interface SubscriptionFeed {
+  videos: Video[];
+  /** au moins une chaîne a répondu via le proxy (sinon repli catalogue) */
+  live: boolean;
+  /** nombre de chaînes interrogées */
+  channels: number;
+}
+
+/**
+ * Dernières vidéos des chaînes abonnées, par petits lots pour ne pas saturer
+ * le proxy. Une chaîne en échec n'empêche pas les autres de répondre.
+ */
+export async function fetchSubscriptionFeed(
+  channelIds: string[],
+  signal?: AbortSignal
+): Promise<SubscriptionFeed> {
+  const ids = [...new Set(channelIds.filter(Boolean))].slice(0, 12);
+  if (ids.length === 0) return { videos: [], live: false, channels: 0 };
+
+  const groups: Video[][] = ids.map(() => []);
+  let live = false;
+  let cursor = 0;
+
+  const worker = async () => {
+    while (cursor < ids.length) {
+      const index = cursor;
+      cursor += 1;
+      try {
+        const page = await fetchChannelPage(ids[index], 'videos', signal);
+        if (page.videos.length > 0) {
+          groups[index] = page.videos.slice(0, 6);
+          live = true;
+        }
+      } catch {
+        // chaîne indisponible : on garde les autres résultats
+      }
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(4, ids.length) }, worker));
+  return { videos: mergeChannelVideos(groups), live, channels: ids.length };
 }
 
 /* ---------------------------------------------------------- commentaires */

@@ -27,6 +27,16 @@ const REQUEST_TIMEOUT = 9_000;
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 const CHANNEL_ID = /^UC[A-Za-z0-9_-]{22}$/;
 
+/** Timeout compatible Node et Workers (repli si `AbortSignal.timeout` manque). */
+function timeoutSignal(ms: number): AbortSignal {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
 /* ------------------------------------------------------------------ cache */
 
 interface CacheEntry {
@@ -96,7 +106,7 @@ async function fetchInnerTubeConfig(): Promise<InnerTubeConfig> {
       'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
       Cookie: 'CONSENT=YES+cb.20210328-17-p0.en+FX+888; SOCS=CAI',
     },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+    signal: timeoutSignal(REQUEST_TIMEOUT),
   });
   if (!res.ok) throw new Error(`Page YouTube : HTTP ${res.status}`);
 
@@ -109,7 +119,10 @@ async function fetchInnerTubeConfig(): Promise<InnerTubeConfig> {
   return cfg;
 }
 
-async function innerTubePost(endpoint: string, payload: Record<string, unknown>): Promise<any> {
+export async function innerTubePost(
+  endpoint: string,
+  payload: Record<string, unknown>
+): Promise<any> {
   const { key, version } = await fetchInnerTubeConfig();
   const res = await fetch(`${YT_BASE}/youtubei/v1/${endpoint}?key=${key}&prettyPrint=false`, {
     method: 'POST',
@@ -123,7 +136,7 @@ async function innerTubePost(endpoint: string, payload: Record<string, unknown>)
       context: { client: { clientName: 'WEB', clientVersion: version, hl: 'fr', gl: 'FR' } },
       ...payload,
     }),
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+    signal: timeoutSignal(REQUEST_TIMEOUT),
   });
   if (!res.ok) throw new Error(`InnerTube ${endpoint} : HTTP ${res.status}`);
   return res.json();
@@ -195,7 +208,7 @@ export function findAll(node: any, key: string, out: any[] = []): any[] {
   return out;
 }
 
-function continuationTokens(node: any, out: string[] = []): string[] {
+export function continuationTokens(node: any, out: string[] = []): string[] {
   if (!node || typeof node !== 'object') return out;
   if (Array.isArray(node)) {
     node.forEach((item) => continuationTokens(item, out));
@@ -671,7 +684,7 @@ export async function innerTubeSuggest(query: string): Promise<string[]> {
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': UA, 'Accept-Language': 'fr-FR,fr;q=0.9' },
-      signal: AbortSignal.timeout(5_000),
+      signal: timeoutSignal(5_000),
     });
     if (!res.ok) return [];
     const text = await res.text();
@@ -721,7 +734,7 @@ export async function sponsorSegments(videoId: string): Promise<SponsorSegment[]
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'TubeCraft/0.2 (+https://github.com)' },
-      signal: AbortSignal.timeout(6_000),
+      signal: timeoutSignal(6_000),
     });
     // 404 = aucune donnée pour cette vidéo, ce n'est pas une erreur
     if (!res.ok) return [];
@@ -756,7 +769,7 @@ export async function dislikeData(videoId: string): Promise<DislikeData | null> 
   try {
     const res = await fetch(`https://returnyoutubedislikeapi.com/votes?videoId=${videoId}`, {
       headers: { 'User-Agent': 'TubeCraft/0.2' },
-      signal: AbortSignal.timeout(5_000),
+      signal: timeoutSignal(5_000),
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -794,7 +807,7 @@ async function pollinationsJson(
       referrer: 'tubecraft',
     }),
     // un résumé complet (800 jetons) peut dépasser 15 s sur le palier gratuit
-    signal: AbortSignal.timeout(25_000),
+    signal: timeoutSignal(25_000),
   });
   if (!res.ok) throw new Error(`Pollinations : HTTP ${res.status}`);
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };

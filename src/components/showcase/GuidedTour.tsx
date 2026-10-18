@@ -16,7 +16,7 @@ export interface TourStep {
   title: string;
   text: string;
   /** scène à déclencher dans une démo */
-  demo?: { app: 'tubecraft' | 'spotifycraft'; scene?: string; hold?: boolean };
+  demo?: { app: 'tubecraft' | 'spotifycraft' | 'pulsecraft'; scene?: string; hold?: boolean };
   /** durée d’avance automatique, en ms */
   duration?: number;
 }

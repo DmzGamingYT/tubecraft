@@ -4,7 +4,7 @@ import { useStore } from '../store';
 import { Avatar } from './Avatar';
 import {
   IconCastle, IconClock, IconDownload, IconGames, IconGear, IconGrowth, IconHistory, IconHome,
-  IconKitchen, IconLike, IconMovie, IconMusicNote, IconNature, IconQueue, IconSchool, IconScience,
+  IconKitchen, IconLike, IconList, IconMovie, IconMusicNote, IconNature, IconQueue, IconSchool, IconScience,
   IconShorts, IconSport, IconSparkle, IconSubs, IconTech, IconTravel,
 } from './icons';
 
@@ -39,6 +39,7 @@ const main = [
 
 const library = [
   { to: '/history', label: 'Historique', icon: <IconHistory /> },
+  { to: '/queue', label: 'Lire ensuite', icon: <IconList /> },
   { to: '/playlists', label: 'Playlists', icon: <IconQueue /> },
   { to: '/watch-later', label: 'Regarder plus tard', icon: <IconClock /> },
   { to: '/liked', label: 'Vidéos likées', icon: <IconLike /> },
@@ -47,6 +48,7 @@ const library = [
 export function Sidebar({ mode, onNavigate }: Props) {
   const location = useLocation();
   const subscribed = useStore((s) => s.subscribed);
+  const queueCount = useStore((s) => s.queue.length);
   const channels = subscribed
     .map((id) => {
       const known = getChannel(id);
@@ -92,7 +94,14 @@ export function Sidebar({ mode, onNavigate }: Props) {
               title={mini ? item.label : undefined}
             >
               <span className="sidebar__icon">{item.icon}</span>
-              {!mini && <span className="sidebar__label">{item.label}</span>}
+              {!mini && (
+                <span className="sidebar__label">
+                  {item.label}
+                  {item.to === '/queue' && queueCount > 0 && (
+                    <span className="sidebar__count">{queueCount}</span>
+                  )}
+                </span>
+              )}
             </Link>
           </li>
         ))}

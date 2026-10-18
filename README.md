@@ -13,6 +13,8 @@ commentaires affichés sont donc de **vraies données YouTube**.
 > publique : elle peut changer sans préavis. Voir [AUDIT.md](AUDIT.md) pour les limites et la
 > feuille de route.
 
+Le code est publié sur GitHub : <https://github.com/DmzGamingYT/tubecraft>.
+
 ## Démarrage
 
 ```bash
@@ -36,18 +38,49 @@ les dépendances si besoin puis lance le serveur et ouvre le navigateur.
 
 | Domaine | Détail |
 | --- | --- |
-| Accueil | grille progressive (24 par 24), chips de catégories, étagère Shorts, « Reprendre la lecture », recommandations personnalisées |
+| Accueil | grille progressive (24 par 24), chips de catégories, étagère Shorts, « Reprendre la lecture », recommandations **explicables** avec signaux négatifs |
 | Lecture | lecteur YouTube officiel, **vraies métadonnées** (titre, vues, description, tags, catégorie), likes et **dislikes réels**, **résumé IA + chapitres cliquables**, reprise de lecture, file d'attente de playlist |
 | Suggestions | **suggestions YouTube en direct** pour la vidéo regardée, avec repli sur le catalogue |
 | Recherche | recherche live, **pagination par continuation**, tri (pertinence / vues), filtre vidéos, filtre de durée, assistance IA gratuite |
 | Chaînes | en-tête réel (avatar, bannière, handle, abonnés, description), onglets Vidéos / Shorts, pagination |
 | Shorts | flux vertical plein écran, un seul lecteur actif à la fois, clavier ↑/↓, partage, historique |
 | Commentaires | **vrais commentaires YouTube paginés** + commentaires locaux (réponses, likes, suppression) |
-| Bibliothèque | abonnements, historique groupé par jour, vidéos likées, playlists, « Regarder plus tard » |
+| Bibliothèque | abonnements (nouveautés live), historique groupé par jour, vidéos likées, playlists, « Regarder plus tard », **file « Lire ensuite » universelle** |
 | Compte | Google OAuth (bouton officiel) ou comptes locaux, sélecteur de comptes, **données isolées par profil**, avatar, recommandations |
 | Paramètres | thème, lecture (autoplay, boucle, théâtre, sous-titres, vitesse, volume), IA, SponsorBlock, profils, export/import JSON et effacement sélectif ou total des données |
-| Confort | thème sombre/clair, raccourcis `Ctrl/⌘+B` et `/`, lien d'évitement, chargement des routes à la demande, responsive |
+| Confort | thème sombre/clair, raccourcis `Ctrl/⌘+B` et `/`, lien d'évitement, chargement des routes à la demande, responsive, **mode avion** avec cache local |
 | SponsorBlock | saut automatique des sponsors, intros, autopromotions et autres segments (désactivable sous chaque vidéo) |
+
+## File « Lire ensuite »
+
+Ajoutez n'importe quelle vidéo à une file personnelle depuis sa vignette ou le menu
+**Enregistrer** ; la page [Lire ensuite](/queue) permet de réordonner, retirer ou vider la file. Elle
+devient automatiquement la suite de lecture du lecteur et du mini-lecteur, sans écraser les
+playlists explicites ni « Regarder plus tard ». Chaque profil a sa propre file, persistée
+localement.
+
+## Recommandations explicables
+
+Le rayon « Recommandés pour vous » calcule son classement dans le navigateur et affiche la raison de
+chaque carte : chaîne abonnée, catégorie déjà regardée, affinité avec une chaîne de l'historique ou
+popularité. « Pas intéressé » masque la vidéo, « Moins de cette chaîne » retire toutes ses
+suggestions, et les vidéos dislikées sont exclues. Le panneau « Pourquoi ces vidéos ? » détaille les
+signaux et permet de tout réactiver.
+
+## Notifications live
+
+La cloche interroge les dernières vidéos des chaînes abonnées via le proxy, par lots de quatre. Le
+relevé est mis en cache 10 minutes (et survit au rechargement), le badge ne compte que les
+nouveautés non lues, et le catalogue embarqué sert de repli si YouTube est injoignable. Le niveau
+« Aucune » d'une chaîne l'exclut du relevé.
+
+## Mode avion
+
+Le service worker met en cache la coquille, les assets, les dernières réponses GET de `/yt/api` et
+les vignettes déjà vues. Hors ligne, un bandeau explique ce qui reste disponible : pages et
+métadonnées en cache, likes, playlists, historique et file restent modifiables localement ; la
+lecture vidéo nécessite une connexion. Le cache se vide depuis **Paramètres → Mode avion**. Aucune
+requête d'écriture ni route de débogage n'est mise en cache.
 
 ## Connexion (Google ou compte local)
 
@@ -156,6 +189,30 @@ stocké). Pour un déploiement statique, ces routes doivent être hébergées s�
 
 ## Déploiement
 
+**TubeCraft est en ligne gratuitement sur Freebuff Sites :**
+
+- application : <https://site-837caca50a67485a994f4549b9ef7404.freebuff.page>
+- aperçu de préproduction : <https://site-ec05ebb2a2f4432ab76b5023e70af9b2.freebuff.page>
+
+Un seul Worker Cloudflare sert à la fois les assets du build Vite et le proxy `/yt/api/*`. Il
+n'y a **ni clé API ni secret** : InnerTube, SponsorBlock, Return YouTube Dislike et Pollinations
+sont publics. Le code du Worker vit dans `worker/index.ts` ; il réutilise les parseurs et les
+appels de `server/ytProxy.ts`, avec un cache mémoire par isolate et une limite de 240 requêtes
+par minute et par IP.
+
+Pour redéployer après une modification :
+
+```bash
+npm run build:site          # build Vite + bundle du Worker dans dist-worker/
+npx wrangler dev            # test local sur http://127.0.0.1:8787 (workerd)
+```
+
+Le manifeste [`sites.manifest.json`](sites.manifest.json) décrit le Worker (`dist-worker/index.js`)
+et les assets (`dist/`) ; c'est lui qui est envoyé à Freebuff Sites. Le projet est aussi décrit
+dans `wrangler.toml` pour les tests locaux.
+
+### Autres hébergeurs
+
 `npm run build` génère un site statique dans `dist/`. Le front seul suffit pour le catalogue
 embarqué, mais **la recherche live, les pages chaîne/vidéo et les commentaires nécessitent le
 proxy**. Deux options :
@@ -165,6 +222,10 @@ proxy**. Deux options :
    Le front n'a pas à changer.
 2. **Site purement statique** : l'application reste utilisable avec le catalogue local, mais
    affiche « hors ligne — catalogue local » pour la recherche.
+
+> Sur Freebuff Sites, le relais IA côté Worker peut être refusé par Pollinations (l'API gratuite
+> bloque certaines IP de datacenter). Le navigateur interroge d'abord Pollinations en direct et
+> retombe sur la recherche classique si l'IA est indisponible : la recherche reste fonctionnelle.
 
 Pour GitHub Pages sur `https://<pseudo>.github.io/<repo>/` :
 
@@ -211,7 +272,7 @@ Sans cette variable, la vitrine renvoie vers le profil GitHub au lieu d'afficher
 Les apps et leurs liens vivent dans `src/data/apps.ts` : la **première entrée est TubeCraft**
 (mise en avant). `source` est l'URL du dépôt GitHub, `self: true` désigne l'application de ce
 dépôt (son URL vient du contexte : route `/` dans l'app, `VITE_APP_URL` sur le site autonome). Le
-dépôt TubeCraft n'étant pas encore public, sa carte renvoie vers le profil GitHub.
+dépôt TubeCraft est public : sa carte pointe vers <https://github.com/DmzGamingYT/tubecraft>.
 
 La section **« À l’étude »** liste les fonctionnalités proposées (palette de commandes, mode
 écoute, etc.). Elle est alimentée par `src/data/proposals.ts` : rien n’y est présenté comme
@@ -245,10 +306,44 @@ Linux, Android et iPhone** :
 - sur la route `/download`, le bouton **Installer** utilise `beforeinstallprompt` quand Chrome ou
   Edge le propose (voir `src/lib/pwa.ts`) ; sur iOS, la page renvoie vers le menu Partager de Safari ;
 - `public/manifest.webmanifest`, `public/sw.js` et les icônes rendent l'app installable ; le service
-  worker ne met en cache que le shell et les assets same-origin, jamais `/yt/api` ni les domaines tiers.
+  worker met en cache le shell, les assets, les réponses GET publiques de `/yt/api` et les vignettes
+  déjà vues (voir « Mode avion »).
 
 La vitrine présente aussi les binaires natifs de SpotifyCraft (DMG, MSI, AppImage) via sa page de
 versions GitHub : aucun faux lien de fichier n'est généré.
+
+## Application de bureau (Tauri 2)
+
+Le dépôt contient aussi un shell **Tauri 2** dans `src-tauri/`. Il ouvre TubeCraft dans une
+vraie fenêtre native (1440 × 900, redimensionnable), garde les données locales de l’app et
+envoie les liens externes vers le navigateur par défaut au lieu de quitter TubeCraft.
+
+Le build de production charge l’application hébergée sur Freebuff Sites : le desktop profite
+donc des mises à jour du site et du proxy InnerTube sans rebuild. En développement, il charge
+le serveur Vite local.
+
+Prérequis : Rust 1.90+, Node 20+, Xcode Command Line Tools sur macOS, WebView2 sur Windows et
+WebKitGTK sur Linux.
+
+| Commande | Rôle |
+| --- | --- |
+| `npm run dev:desktop` | lance Vite puis la fenêtre Tauri avec HMR |
+| `npm run build:desktop` | compile le binaire et les paquets natifs |
+| `npm run icon` | régénère toutes les icônes depuis `src-tauri/app-icon.svg` |
+
+Sur ce Mac Apple Silicon, le build produit `src-tauri/target/release/bundle/macos/TubeCraft.app`
+et `src-tauri/target/release/bundle/dmg/TubeCraft_0.1.0_aarch64.dmg`. Les paquets Windows
+(MSI/NSIS) et Linux (AppImage/DEB) se compilent sur leur système respectif.
+
+L’icône est dessinée en SVG dans [`src-tauri/app-icon.svg`](src-tauri/app-icon.svg) : verre
+rubis translucide, biseau clair, réfractions et triangle de lecture en verre. `npm run icon`
+la décline en ICNS, ICO et PNG pour toutes les tailles.
+
+> Les paquets produits localement sont **ad-hoc / non notariés** : Gatekeeper peut demander
+> un clic droit → « Ouvrir ». Une distribution publique demande un certificat Developer ID,
+> une notarisation Apple et des builds signés par plateforme. Le shell charge l’URL publique ;
+> sans connexion, la fenêtre affiche l’erreur réseau de WebKit (les données locales restent
+> intactes). `TUBECRAFT_START_URL` permet d’ouvrir directement une page pour les tests.
 
 ## Tests et CI
 
@@ -257,8 +352,9 @@ npm test
 ```
 
 Les tests couvrent les parseurs InnerTube (vidéo, lockup, chaîne, commentaires, pagination), le
-formatage français, les chapitres/horodatages, l’export/import des données et les sélecteurs du
-catalogue. Le workflow
+formatage français, les chapitres/horodatages, l’export/import des données, les sélecteurs du
+catalogue, la file « Lire ensuite », les recommandations (explications et signaux négatifs) et la
+fusion des notifications. Le workflow
 [.github/workflows/ci.yml](.github/workflows/ci.yml) exécute `typecheck`, `test` et `build` sur
 chaque push et pull request.
 

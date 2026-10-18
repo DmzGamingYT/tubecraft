@@ -8,7 +8,7 @@
  * l'URL est fournie par la page (route SPA ou site déployé).
  *
  * La vitrine ne présente que des apps réellement utilisables : rien n'y figure
- * avant d'être en ligne. Aujourd'hui : TubeCraft et SpotifyCraft.
+ * avant d'être en ligne. Aujourd'hui : TubeCraft, SpotifyCraft et PulseCraft.
  */
 
 export interface OpenSourceApp {
@@ -53,6 +53,7 @@ export const apps: OpenSourceApp[] = [
     stack: ['React', 'Vite', 'TypeScript', 'InnerTube'],
     license: 'MIT',
     self: true,
+    source: 'https://github.com/DmzGamingYT/tubecraft',
     featured: true,
   },
   {
@@ -68,5 +69,19 @@ export const apps: OpenSourceApp[] = [
     // Serveur de développement local de SpotifyCraft (`npm run dev`, port 5184).
     url: 'http://127.0.0.1:5184/',
     source: 'https://github.com/DmzGamingYT/spotifycraft',
+  },
+  {
+    id: 'pulsecraft',
+    name: 'PulseCraft',
+    mark: 'PC',
+    tagline: 'Vos données de santé restent chez vous.',
+    description:
+      'Un suivi sportif et santé local-first : anneaux d’objectifs, journal d’entraînement, sommeil, corps, nutrition et coach IA. Import Apple Health, Samsung Health, GPX et TCX, calculs en Rust/WASM, app native Tauri — et aucune donnée envoyée sans votre accord.',
+    accent: '#c9ff3d',
+    stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM', 'Tauri 2'],
+    license: 'MIT',
+    // Serveur de développement local de PulseCraft (`npm run dev`, port 5186).
+    url: 'http://127.0.0.1:5186/',
+    source: 'https://github.com/DmzGamingYT/pulsecraft',
   },
 ];

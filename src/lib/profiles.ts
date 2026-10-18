@@ -30,7 +30,10 @@ export interface AccountData {
   comments: Record<string, Comment[]>;
   playlists: Playlist[];
   watchLater: string[];
+  /** file « Lire ensuite », dans l'ordre choisi par l'utilisateur */
+  queue: string[];
   dismissed: string[];
+  mutedChannels: string[];
   progress: Record<string, number>;
   notifLevels: Record<string, NotifLevel>;
   notificationsSeen: string[];
@@ -73,7 +76,9 @@ export function emptyProfile(): AccountData {
     comments: {},
     playlists: [],
     watchLater: [],
+    queue: [],
     dismissed: [],
+    mutedChannels: [],
     progress: {},
     notifLevels: {},
     notificationsSeen: [],
@@ -150,7 +155,9 @@ export function normalizeProfile(value: unknown): AccountData {
     comments: commentsRecord(source.comments),
     playlists: playlistsArray(source.playlists),
     watchLater: stringArray(source.watchLater),
+    queue: stringArray(source.queue),
     dismissed: stringArray(source.dismissed),
+    mutedChannels: stringArray(source.mutedChannels),
     progress: numberRecord(source.progress),
     notifLevels: notifLevelsRecord(source.notifLevels),
     notificationsSeen: stringArray(source.notificationsSeen),

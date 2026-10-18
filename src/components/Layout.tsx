@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useIsMobile } from '../lib/hooks';
+import { useIsMobile, useOnline } from '../lib/hooks';
+import { OfflineBar } from './OfflineBar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
@@ -8,6 +9,7 @@ import { TopBar } from './TopBar';
 export function Layout() {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const online = useOnline();
   const [open, setOpen] = useState(true);
   const mainRef = useRef<HTMLElement>(null);
   const wasMobileRef = useRef(isMobile);
@@ -61,12 +63,13 @@ export function Layout() {
   const mode = isMobile ? (open ? 'drawer' : 'hidden') : open ? 'full' : 'mini';
 
   return (
-    <div className={`shell shell--${mode}`}>
+    <div className={`shell shell--${mode}${online ? '' : ' shell--offline'}`}>
       <span className="route-progress" key={location.key} aria-hidden />
       <a className="skip-link" href="#main">
         Aller au contenu
       </a>
       <TopBar onBurger={() => setOpen((v) => !v)} />
+      <OfflineBar online={online} />
 
       {isMobile && open && (
         <div className="backdrop" onClick={() => setOpen(false)} aria-hidden />

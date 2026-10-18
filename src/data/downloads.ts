@@ -4,9 +4,9 @@
  * Deux apps, deux façons d’installer :
  *
  * - **TubeCraft** n’a pas encore de paquets natifs signés : la voie officielle
- *   est la web app (PWA). Chaque plateforme a donc ses propres étapes,
- *   réellement applicables dans le navigateur, plutôt qu’un faux bouton
- *   .dmg / .exe / .apk qui renverrait vers un fichier inexistant.
+ *   est la web app (PWA). Un shell Tauri 2 est prêt dans le dépôt et se
+ *   compile localement, mais aucun .dmg / .exe / .apk public n’est proposé
+ *   tant qu’il n’est pas signé — donc pas de faux bouton de téléchargement.
  * - **SpotifyCraft** est distribué en binaires natifs (DMG, MSI, AppImage)
  *   construits et signés par le workflow de release de son dépôt. La page
  *   renvoie vers la page des versions plutôt que d’inventer une URL de
@@ -332,7 +332,8 @@ export const downloadApps: DownloadApp[] = [
       { value: '∞', label: 'gratuit', text: 'Open source, sans abonnement ni essai qui expire.' },
     ],
     note:
-      'La web app est la voie d’installation officielle aujourd’hui. Des builds natifs signés — DMG, MSI, AppImage et APK — suivront après la première version stable ; ils seront annoncés sur GitHub.',
+      'La web app reste la voie d’installation officielle. Un shell desktop Tauri 2 (fenêtre native, icône liquid glass, DMG/APP à compiler soi-même) est inclus dans le dépôt ; les paquets signés — DMG, MSI, AppImage et APK — seront annoncés sur GitHub après la première version stable.',
+    sourceHref: 'https://github.com/DmzGamingYT/tubecraft',
   },
   {
     id: 'spotifycraft',

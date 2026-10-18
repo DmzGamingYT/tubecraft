@@ -1,6 +1,8 @@
 node_modules
 dist
 dist-showcase
+dist-worker
+.wrangler
 .DS_Store
 *.log
 .vite

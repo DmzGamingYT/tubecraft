@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <title>TubeCraft — icône liquid glass</title>
+  <defs>
+    <!-- Verre rouge : lumière chaude en haut, cœur rubis, ombre profonde en bas. -->
+    <linearGradient id="glass" x1="214" y1="104" x2="842" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF7683"/>
+      <stop offset="0.3" stop-color="#F81B3C"/>
+      <stop offset="0.64" stop-color="#C60426"/>
+      <stop offset="1" stop-color="#5A0012"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="512" y1="52" x2="512" y2="972" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.92"/>
+      <stop offset="0.22" stop-color="#FFD8DC" stop-opacity="0.42"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="0.83" stop-color="#FFC0C8" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.72"/>
+    </linearGradient>
+    <linearGradient id="bevel" x1="188" y1="148" x2="830" y2="892" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"/>
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.7" stop-color="#4A0010" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#2B0009" stop-opacity="0.52"/>
+    </linearGradient>
+    <linearGradient id="play" x1="414" y1="330" x2="690" y2="704" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.94"/>
+      <stop offset="0.44" stop-color="#FFEFF2" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#FF97A5" stop-opacity="0.36"/>
+    </linearGradient>
+    <linearGradient id="playRim" x1="390" y1="320" x2="706" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="0.55" stop-color="#FFE5E9" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FF9DA9" stop-opacity="0.22"/>
+    </linearGradient>
+    <radialGradient id="topLight" cx="0" cy="0" r="1" gradientTransform="translate(332 236) rotate(48) scale(470 392)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.62"/>
+      <stop offset="0.52" stop-color="#FFE8EB" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="caustic" cx="0" cy="0" r="1" gradientTransform="translate(690 846) rotate(-118) scale(360 250)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC46B" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#FF6A3D" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FF3550" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="playGlow" cx="0" cy="0" r="1" gradientTransform="translate(466 404) rotate(54) scale(250 214)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="0.6" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="26" stdDeviation="26" flood-color="#2B000A" flood-opacity="0.46"/>
+    </filter>
+    <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="62"/>
+    </filter>
+    <filter id="softSmall" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="inner" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="noise" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="3" seed="17" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0" result="g"/>
+      <feComponentTransfer in="g" result="a">
+        <feFuncA type="linear" slope="0.16"/>
+      </feComponentTransfer>
+    </filter>
+
+    <clipPath id="squircle">
+      <rect x="58" y="58" width="908" height="908" rx="228"/>
+    </clipPath>
+    <clipPath id="triangle">
+      <path d="M416 326C388 310 352 330 352 362V662C352 694 388 714 416 698L702 548C730 533 730 491 702 476L416 326Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ombre portée puis masse de verre. -->
+  <g filter="url(#drop)">
+    <rect x="58" y="58" width="908" height="908" rx="228" fill="url(#glass)"/>
+  </g>
+
+  <g clip-path="url(#squircle)">
+    <!-- Profondeur du verre : voile sombre au bord bas. -->
+    <rect x="58" y="58" width="908" height="908" fill="url(#bevel)"/>
+
+    <!-- Grande réfraction lumineuse en haut à gauche. -->
+    <ellipse cx="322" cy="228" rx="470" ry="382" fill="url(#topLight)" filter="url(#soft)"/>
+    <!-- Le verre laisse passer une lumière chaude par le bas. -->
+    <ellipse cx="704" cy="842" rx="364" ry="248" fill="url(#caustic)" filter="url(#soft)"/>
+
+    <!-- Voile diagonal, comme une épaisseur de verre traversée par la lumière. -->
+    <path d="M58 690C250 566 398 612 566 704C734 796 864 826 966 742V966H58V690Z" fill="#FFFFFF" opacity="0.07"/>
+    <path d="M58 760C252 646 430 704 604 786C746 852 868 858 966 806" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="2.5"/>
+    <path d="M58 286C206 196 330 200 470 260" stroke="#FFFFFF" stroke-opacity="0.24" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Grain très fin : le verre n'est jamais parfaitement lisse. -->
+    <rect x="58" y="58" width="908" height="908" filter="url(#noise)" opacity="0.34"/>
+
+    <!-- Bords du verre : liseré clair, biseau sombre, second reflet. -->
+    <rect x="63" y="63" width="898" height="898" rx="224" stroke="url(#rim)" stroke-width="10"/>
+    <rect x="74" y="74" width="876" height="876" rx="213" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="3"/>
+    <path d="M240 74H784" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="4" stroke-linecap="round"/>
+    <path d="M160 854C258 918 368 946 492 950" stroke="#FFD3D8" stroke-opacity="0.3" stroke-width="5" stroke-linecap="round" filter="url(#softSmall)"/>
+
+    <!-- Triangle de lecture, lui aussi en verre : lumière, épaisseur, réfraction. -->
+    <g>
+      <path d="M416 338C388 322 352 342 352 374V678C352 710 388 730 416 714L702 564C730 549 730 507 702 492L416 338Z" fill="#6B0016" opacity="0.34" filter="url(#inner)"/>
+      <path d="M416 326C388 310 352 330 352 362V662C352 694 388 714 416 698L702 548C730 533 730 491 702 476L416 326Z" fill="#FFFFFF" opacity="0.14" filter="url(#softSmall)"/>
+      <path d="M416 326C388 310 352 330 352 362V662C352 694 388 714 416 698L702 548C730 533 730 491 702 476L416 326Z" fill="url(#play)"/>
+      <g clip-path="url(#triangle)">
+        <ellipse cx="486" cy="414" rx="250" ry="216" fill="url(#playGlow)" filter="url(#softSmall)"/>
+        <path d="M330 606L742 414V724H330V606Z" fill="#E11032" opacity="0.16"/>
+        <path d="M352 662V678C352 710 388 730 416 714L694 570L742 548V500L352 662Z" fill="#7A0019" opacity="0.18" filter="url(#inner)"/>
+        <path d="M386 352C402 342 424 350 448 364" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="10" stroke-linecap="round" filter="url(#softSmall)"/>
+      </g>
+      <path d="M416 326C388 310 352 330 352 362V662C352 694 388 714 416 698L702 548C730 533 730 491 702 476L416 326Z" stroke="url(#playRim)" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M370 374V650" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Deux micro-reflets spéculaires. -->
+    <ellipse cx="760" cy="196" rx="58" ry="24" transform="rotate(38 760 196)" fill="#FFFFFF" opacity="0.42" filter="url(#softSmall)"/>
+    <circle cx="828" cy="244" r="7" fill="#FFFFFF" opacity="0.52"/>
+    <circle cx="214" cy="814" r="5" fill="#FFFFFF" opacity="0.28"/>
+  </g>
+</svg>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { OpenSourceApp } from '../../data/apps';
 import type { ShowcaseLinkProps } from '../ShowcaseSite';
-import { DemoFrame, SpotifyCraftDemo, TubeCraftDemo } from './AppDemo';
+import { DemoFrame, PulseCraftDemo, SpotifyCraftDemo, TubeCraftDemo } from './AppDemo';
 import {
   SpotifyEqScene,
   SpotifyImportScene,
@@ -49,6 +49,47 @@ function Caption({ title, note }: { title: string; note: string }) {
 }
 
 function tilesFor(app: OpenSourceApp): Tile[] {
+  if (app.id === 'pulsecraft') {
+    return [
+      {
+        title: 'Aujourd’hui',
+        note: 'Anneaux d’objectifs, forme du jour, hydratation et briefing du coach.',
+        url: 'pulsecraft.app / aujourd’hui',
+        tone: 'dark',
+        wide: true,
+        scene: <PulseCraftDemo cycle={false} />,
+      },
+      {
+        title: 'Activité',
+        note: 'Journal d’entraînement, charge sur 14 jours et répartition des activités.',
+        url: 'pulsecraft.app / activité',
+        tone: 'dark',
+        scene: <PulseCraftDemo initialScene="activity" cycle={false} />,
+      },
+      {
+        title: 'Sommeil',
+        note: 'Durée, stades, dette de sommeil et régularité du coucher.',
+        url: 'pulsecraft.app / sommeil',
+        tone: 'dark',
+        scene: <PulseCraftDemo initialScene="sleep" cycle={false} />,
+      },
+      {
+        title: 'Coach IA',
+        note: 'Conversation et plan de la semaine, sans envoyer de données personnelles.',
+        url: 'pulsecraft.app / coach',
+        tone: 'dark',
+        scene: <PulseCraftDemo initialScene="coach" cycle={false} />,
+      },
+      {
+        title: 'Progrès',
+        note: 'Régularité sur 18 semaines, records et tendances de fond.',
+        url: 'pulsecraft.app / progrès',
+        tone: 'dark',
+        scene: <PulseCraftDemo initialScene="progress" cycle={false} />,
+      },
+    ];
+  }
+
   if (app.id === 'spotifycraft') {
     return [
       {

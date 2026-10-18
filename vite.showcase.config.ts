@@ -14,6 +14,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   root: 'showcase',
   base: './',
+  /**
+   * Cache de dépendances séparé de celui de l'application (5183/5184).
+   * Deux configurations Vite partageant `node_modules/.vite` finissent par
+   * pré-bundler React deux fois (chunks différents), ce qui provoque
+   * « Invalid hook call » et une page blanche. `cacheDir` isole la vitrine.
+   */
+  cacheDir: 'node_modules/.vite-showcase',
   plugins: [react()],
   server: {
     host: '127.0.0.1',

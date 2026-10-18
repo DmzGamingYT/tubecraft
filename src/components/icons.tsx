@@ -169,6 +169,13 @@ export const IconNext = (p: P) => (
   </svg>
 );
 
+/** Liste ordonnée « Lire ensuite » (grille 24). */
+export const IconList = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M4 6h2v2H4V6Zm4 0h12v2H8V6ZM4 11h2v2H4v-2Zm4 0h12v2H8v-2ZM4 16h2v2H4v-2Zm4 0h12v2H8v-2Z" />
+  </svg>
+);
+
 /** File d’attente : lignes + lecture (grille 24). */
 export const IconQueue = (p: P) => (
   <svg {...base24(p)}>

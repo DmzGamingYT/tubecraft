@@ -36,6 +36,7 @@ export function Watch() {
   const playlistId = params.get('list');
   const playlists = useStore((s) => s.playlists);
   const watchLater = useStore((s) => s.watchLater);
+  const personalQueue = useStore((s) => s.queue);
 
   /* ---------------------------------------------------------- métadonnées */
 
@@ -119,31 +120,39 @@ export function Watch() {
 
   useEffect(() => setDescOpen(false), [id]);
 
-  const queue = useMemo(() => {
-    const playlist = playlistId ? playlists.find((p) => p.id === playlistId) : undefined;
-    const isWatchLater = playlistId === 'watch-later';
-    if (playlist) return playlist.videoIds.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
-    if (isWatchLater) return watchLater.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
-    return [];
-  }, [playlistId, playlists, watchLater]);
-
   const playlist =
     playlistId && playlistId !== 'watch-later'
       ? playlists.find((p) => p.id === playlistId)
       : undefined;
   const isWatchLater = playlistId === 'watch-later';
+
+  // File de lecture : la playlist demandée, sinon la file personnelle
+  // « Lire ensuite » (universelle), sinon les suggestions de la vidéo.
+  const queue = useMemo(() => {
+    if (playlist)
+      return playlist.videoIds.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
+    if (isWatchLater)
+      return watchLater.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
+    return personalQueue.map((v) => getVideo(v)).filter((v): v is Video => Boolean(v));
+  }, [playlist, isWatchLater, playlists, watchLater, personalQueue]);
+
+  const usingPersonalQueue = !playlist && !isWatchLater && queue.length > 0;
   const queueIndex = queue.findIndex((item) => item.id === id);
 
-  // File d'attente du mini-lecteur : la playlist en cours, sinon les suggestions.
-  const upNext = useMemo(
-    () => (queue.length > 0 && queueIndex >= 0 ? queue.slice(queueIndex + 1) : related),
-    [queue, queueIndex, related]
-  );
+  const upNext = useMemo(() => {
+    if (usingPersonalQueue) {
+      return queueIndex >= 0 ? queue.slice(queueIndex + 1) : queue;
+    }
+    return queue.length > 0 && queueIndex >= 0 ? queue.slice(queueIndex + 1) : related;
+  }, [usingPersonalQueue, queue, queueIndex, related]);
+
   const queueLabel = playlist
     ? `Playlist « ${playlist.name} »`
     : isWatchLater
       ? 'Regarder plus tard'
-      : 'À suivre';
+      : usingPersonalQueue
+        ? 'Lire ensuite'
+        : 'À suivre';
 
   useEffect(() => {
     player.setUpNext(upNext, queueLabel);
@@ -202,7 +211,12 @@ export function Watch() {
   const suggestions = related.filter((v) => !channelVideoIds.has(v.id));
 
   const nextVideo = related[0];
-  const nextInQueue = queueIndex >= 0 ? queue[queueIndex + 1] : undefined;
+  const nextInQueue =
+    queueIndex >= 0
+      ? queue[queueIndex + 1]
+      : usingPersonalQueue
+        ? queue[0]
+        : undefined;
   const listParam = playlist ? `&list=${playlist.id}` : isWatchLater ? '&list=watch-later' : '';
 
   /** chapitre cliqué : on déplace le lecteur, sinon on recharge au bon timestamp */
@@ -288,6 +302,21 @@ export function Watch() {
                 Voir Regarder plus tard
               </Link>
             )}
+          </div>
+        )}
+
+        {usingPersonalQueue && (
+          <div className="queuebar">
+            <span className="queuebar__label">
+              Lire ensuite : <strong>{queue.length} vidéo{queue.length > 1 ? 's' : ''}</strong>
+              {queueIndex >= 0 ? ` (${queueIndex + 1}/${queue.length})` : ' · la file démarre ici'}
+            </span>
+            <button className="btn btn--ghost" onClick={goNext} disabled={!nextInQueue}>
+              Vidéo suivante
+            </button>
+            <Link className="btn btn--ghost" to="/queue">
+              Gérer la file
+            </Link>
           </div>
         )}
 

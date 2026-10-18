@@ -592,3 +592,376 @@ export function SpotifyCraftDemo() {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------- PulseCraft */
+
+type PulseScene = 'today' | 'activity' | 'sleep' | 'coach' | 'progress';
+
+const PULSE_SCENES: { id: PulseScene; label: string; short: string; url: string }[] = [
+  { id: 'today', label: 'Tableau de bord', short: 'Aujourd’hui', url: 'pulsecraft.app / aujourd’hui' },
+  { id: 'activity', label: 'Journal', short: 'Activité', url: 'pulsecraft.app / activité' },
+  { id: 'coach', label: 'Coach IA', short: 'Coach', url: 'pulsecraft.app / coach' },
+];
+
+const PULSE_RAIL = ['◉', '≡', '☾', '◆', '✦'];
+
+function PulseRail({ active = 0 }: { active?: number }) {
+  return (
+    <aside className="pc__rail" aria-hidden>
+      {PULSE_RAIL.map((glyph, index) => (
+        <span className={index === active ? 'is-on' : ''} key={glyph}>
+          {glyph}
+        </span>
+      ))}
+    </aside>
+  );
+}
+
+function PulseRings() {
+  const rings = [
+    { r: 41, pct: 87, color: '#ff4d6d' },
+    { r: 32, pct: 100, color: '#c9ff3d' },
+    { r: 23, pct: 63, color: '#38d9ff' },
+  ];
+  return (
+    <span className="pc__ringwrap">
+      <svg viewBox="0 0 100 100" aria-hidden>
+        {rings.map((ring) => {
+          const circumference = 2 * Math.PI * ring.r;
+          return (
+            <g key={ring.color} transform="rotate(-90 50 50)">
+              <circle cx="50" cy="50" r={ring.r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="9" />
+              <circle
+                cx="50"
+                cy="50"
+                r={ring.r}
+                fill="none"
+                stroke={ring.color}
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={circumference * (1 - ring.pct / 100)}
+              />
+            </g>
+          );
+        })}
+      </svg>
+      <span className="pc__ringcenter">
+        <b>1/3</b>
+        <i>objectifs</i>
+      </span>
+    </span>
+  );
+}
+
+function PulseDays({ count = 14, max = [0.35, 0.6, 0.45, 0.9, 0.2, 0.75, 0.5, 1, 0.3, 0.65, 0.4, 0.85, 0.55, 0.7] }) {
+  return (
+    <span className="pc__days" aria-hidden>
+      {Array.from({ length: count }).map((_, index) => (
+        <i
+          key={index}
+          style={{ height: `${(max[index % max.length] ?? 0.5) * 100}%` }}
+          className={index === count - 1 ? 'is-now' : ''}
+        />
+      ))}
+    </span>
+  );
+}
+
+function PulseTodayScene() {
+  return (
+    <div className="pc__scene">
+      <div className="pc__hello">
+        <span className="pc__kicker">Dimanche 18 octobre</span>
+        <b>Bon après-midi.</b>
+        <em>Forme à 88/100 — prêt à pousser.</em>
+      </div>
+
+      <div className="pc__grid">
+        <div className="pc__card pc__ringcard">
+          <span className="pc__cardtitle">Objectifs du jour</span>
+          <PulseRings />
+          <span className="pc__legendRow">
+            <i style={{ background: '#ff4d6d' }} /> Bouger <b>520</b> / 600 kcal
+          </span>
+          <span className="pc__legendRow">
+            <i style={{ background: '#c9ff3d' }} /> Entraînement <b>30</b> / 30 min
+          </span>
+          <span className="pc__legendRow">
+            <i style={{ background: '#38d9ff' }} /> Hydratation <b>1 250</b> / 2 000 ml
+          </span>
+        </div>
+
+        <div className="pc__stack">
+          <div className="pc__card pc__tiles">
+            <span>
+              <i>⌁</i>
+              <b>8 420</b>
+              <em>pas</em>
+            </span>
+            <span>
+              <i>☾</i>
+              <b>7 h 32</b>
+              <em>sommeil</em>
+            </span>
+            <span>
+              <i>◆</i>
+              <b>74,6</b>
+              <em>kg</em>
+            </span>
+          </div>
+
+          <div className="pc__card pc__coachcard">
+            <span className="pc__spark">✦</span>
+            <div>
+              <b>Séance soutenue conseillée</b>
+              <em>30 à 45 min, échauffement complet. Encore 750 ml d’eau.</em>
+            </div>
+            <span className="pc__aibadge">IA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PulseActivityScene() {
+  return (
+    <div className="pc__scene">
+      <div className="pc__hello pc__hello--tight">
+        <span className="pc__kicker">Journal</span>
+        <b>Activité</b>
+        <em>5 séances ces 7 derniers jours · 232 min · 20,4 km</em>
+      </div>
+
+      <div className="pc__rowlist">
+        {[
+          { type: 'HIIT', meta: 'aujourd’hui · 07:20', value: '30 min', extra: '330 kcal', tone: '#ff7a45' },
+          { type: 'Course', meta: 'hier · 18:10', value: '8,5 km', extra: '462 kcal', tone: '#ff4d6d' },
+          { type: 'Musculation', meta: 'il y a 2 jours · 07:20', value: '55 min', extra: '264 kcal', tone: '#ffb84d' },
+          { type: 'Vélo', meta: 'il y a 3 jours · 12:05', value: '28,4 km', extra: '520 kcal', tone: '#38d9ff' },
+        ].map((row) => (
+          <div className="pc__row" key={row.type}>
+            <span className="pc__rowdot" style={{ background: `${row.tone}22`, color: row.tone }}>
+              ●
+            </span>
+            <span className="pc__rowtext">
+              <b>{row.type}</b>
+              <em>{row.meta}</em>
+            </span>
+            <b className="pc__rowvalue">{row.value}</b>
+            <em className="pc__rowextra">{row.extra}</em>
+          </div>
+        ))}
+      </div>
+
+      <div className="pc__card pc__chartcard">
+        <span className="pc__cardtitle">Charge des 14 derniers jours</span>
+        <PulseDays />
+      </div>
+    </div>
+  );
+}
+
+function PulseSleepScene() {
+  return (
+    <div className="pc__scene">
+      <div className="pc__hello pc__hello--tight">
+        <span className="pc__kicker">Récupération</span>
+        <b>Sommeil</b>
+        <em>Moyenne de 7 h 38 sur 14 nuits · régularité 92/100</em>
+      </div>
+
+      <div className="pc__bignight">
+        <b>
+          7<span>h</span>32
+        </b>
+        <em>qualité 4/5 · 22:55 → 06:55</em>
+      </div>
+
+      <span className="pc__stages" aria-hidden>
+        <i style={{ width: '24%', background: '#7d8cff' }} />
+        <i style={{ width: '26%', background: '#b48cff' }} />
+        <i style={{ width: '50%', background: 'rgba(56,217,255,.5)' }} />
+      </span>
+      <div className="pc__stagelegend">
+        <span>
+          <i style={{ background: '#7d8cff' }} /> Profond 1 h 36
+        </span>
+        <span>
+          <i style={{ background: '#b48cff' }} /> REM 1 h 44
+        </span>
+      </div>
+
+      <div className="pc__card pc__chartcard">
+        <span className="pc__cardtitle">14 dernières nuits</span>
+        <PulseDays max={[0.82, 0.9, 0.7, 0.95, 0.6, 0.88, 0.75, 0.99, 0.65, 0.86, 0.8, 0.92, 0.78, 0.94]} />
+      </div>
+    </div>
+  );
+}
+
+function PulseCoachScene() {
+  return (
+    <div className="pc__scene">
+      <div className="pc__hello pc__hello--tight">
+        <span className="pc__kicker">Assistant</span>
+        <b>Coach IA</b>
+        <em>Agrégats anonymes uniquement · jamais un avis médical</em>
+      </div>
+
+      <div className="pc__chat">
+        <span className="pc__bubble pc__bubble--user">Que faire aujourd’hui ?</span>
+        <span className="pc__bubble pc__bubble--ai">
+          Forme à 88/100 : une séance soutenue de 30 à 45 minutes est adaptée. La charge de la
+          semaine reste dans la zone favorable (0,84).
+          <em>analyse IA</em>
+        </span>
+      </div>
+
+      <div className="pc__card pc__plancard">
+        <span className="pc__cardtitle">Plan de la semaine</span>
+        <span className="pc__planline">Lundi — Repos actif, 20 min de marche</span>
+        <span className="pc__planline">Mardi — Endurance 40 min, zone 2 (128–150 bpm)</span>
+        <span className="pc__planline">Mercredi — Renforcement 30 min, 3 séries</span>
+        <span className="pc__planline">Jeudi — Repos complet</span>
+        <span className="pc__planline pc__planline--dim">… règle de prudence en fin de plan</span>
+      </div>
+    </div>
+  );
+}
+
+function PulseProgressScene() {
+  const cells = Array.from({ length: 126 }, (_, index) => ((index * 7) % 11) / 11);
+  return (
+    <div className="pc__scene">
+      <div className="pc__hello pc__hello--tight">
+        <span className="pc__kicker">Tendances</span>
+        <b>Progrès</b>
+        <em>4 semaines · 18 séances · 512 min</em>
+      </div>
+
+      <div className="pc__card pc__chartcard">
+        <span className="pc__cardtitle">Régularité — 18 semaines</span>
+        <span className="pc__heat" aria-hidden>
+          {cells.map((value, index) => (
+            <i
+              key={index}
+              style={{ background: value > 0.15 ? `rgba(201,255,61,${(0.2 + value * 0.8).toFixed(2)})` : 'rgba(255,255,255,.06)' }}
+            />
+          ))}
+        </span>
+      </div>
+
+      <div className="pc__records">
+        <span>
+          <em>Séance la plus longue</em>
+          <b>72 min</b>
+        </span>
+        <span>
+          <em>Meilleure allure</em>
+          <b>5:18 /km</b>
+        </span>
+        <span>
+          <em>Série active</em>
+          <b>5 jours</b>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function PulseCraftDemo({
+  initialScene = 'today',
+  cycle = true,
+}: {
+  initialScene?: PulseScene;
+  cycle?: boolean;
+} = {}) {
+  const runtime = useDemoRuntime();
+  const reduced = useReducedMotion();
+  const [scene, setScene] = useState<PulseScene>(initialScene);
+
+  useEffect(() => {
+    const onScene = (event: Event) => {
+      const detail = (event as CustomEvent<{ app?: string; scene?: PulseScene }>).detail;
+      if (detail?.app !== 'pulsecraft') return;
+      if (detail.scene && PULSE_SCENES.some((item) => item.id === detail.scene)) {
+        setScene(detail.scene);
+      }
+    };
+    window.addEventListener('showcase:scene', onScene);
+    return () => window.removeEventListener('showcase:scene', onScene);
+  }, []);
+
+  useEffect(() => {
+    if (!cycle || reduced) return;
+    if (runtime?.paused || runtime?.inView === false) return;
+    const timer = window.setInterval(() => {
+      setScene((current) => {
+        const index = PULSE_SCENES.findIndex((item) => item.id === current);
+        return PULSE_SCENES[(index + 1) % PULSE_SCENES.length].id;
+      });
+    }, 4600);
+    return () => window.clearInterval(timer);
+  }, [cycle, reduced, runtime?.paused, runtime?.inView]);
+
+  useEffect(() => {
+    const current = PULSE_SCENES.find((item) => item.id === scene);
+    runtime?.setStatus(
+      current ? `${String(PULSE_SCENES.indexOf(current) + 1).padStart(2, '0')} / 03 · ${current.label}` : ''
+    );
+    runtime?.setUrl(current?.url ?? 'pulsecraft.app / aujourd’hui');
+  }, [scene, runtime?.setStatus, runtime?.setUrl]);
+
+  return (
+    <div className={`pc pc--${scene}${cycle ? ' pc--cycle' : ''}`} data-scene={scene} aria-hidden>
+      <div className="pc__top">
+        <span className="pc__brand">
+          <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden>
+            <path
+              d="M3 13h4l2-7 3.5 12 2.5-9 1.5 4H21"
+              fill="none"
+              stroke="#c9ff3d"
+              strokeWidth="2.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          PulseCraft
+        </span>
+        <span className="pc__topdate">dimanche 18 octobre</span>
+        <span className="pc__avatar">AL</span>
+      </div>
+
+      <div className="pc__body">
+        <PulseRail active={scene === 'today' ? 0 : scene === 'activity' ? 1 : 4} />
+        <div className="pc__content" key={scene}>
+          {scene === 'today' ? <PulseTodayScene /> : null}
+          {scene === 'activity' ? <PulseActivityScene /> : null}
+          {scene === 'sleep' ? <PulseSleepScene /> : null}
+          {scene === 'coach' ? <PulseCoachScene /> : null}
+          {scene === 'progress' ? <PulseProgressScene /> : null}
+        </div>
+      </div>
+
+      <nav className="pc__tabs">
+        {['Aujourd’hui', 'Activité', 'Coach', 'Progrès'].map((tab, index) => (
+          <span
+            key={tab}
+            className={
+              (scene === 'today' && index === 0) ||
+              (scene === 'activity' && index === 1) ||
+              (scene === 'coach' && index === 2) ||
+              (scene === 'progress' && index === 3)
+                ? 'is-on'
+                : ''
+            }
+          >
+            {tab}
+          </span>
+        ))}
+      </nav>
+    </div>
+  );
+}

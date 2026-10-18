@@ -21,6 +21,9 @@ const ChannelPage = lazy(() =>
 const Playlists = lazy(() =>
   import('./pages/Playlists').then((module) => ({ default: module.Playlists }))
 );
+const QueuePage = lazy(() =>
+  import('./pages/Queue').then((module) => ({ default: module.QueuePage }))
+);
 const PlaylistDetail = lazy(() =>
   import('./pages/PlaylistDetail').then((module) => ({ default: module.PlaylistDetail }))
 );
@@ -85,6 +88,7 @@ export default function App() {
               <Route path="/liked" element={<Feed kind="liked" />} />
               <Route path="/watch-later" element={<Feed kind="watchLater" />} />
               <Route path="/playlists" element={<Playlists />} />
+              <Route path="/queue" element={<QueuePage />} />
               <Route path="/playlist/:id" element={<PlaylistDetail />} />
               <Route path="/channel/:id" element={<ChannelPage />} />
               <Route path="/download" element={<Download />} />

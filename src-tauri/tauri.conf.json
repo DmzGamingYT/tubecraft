@@ -1,0 +1,36 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "TubeCraft",
+  "version": "0.1.0",
+  "identifier": "fr.tubecraft.desktop",
+  "build": {
+    "frontendDist": "https://site-837caca50a67485a994f4549b9ef7404.freebuff.page",
+    "devUrl": "http://127.0.0.1:5183",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Entertainment",
+    "shortDescription": "YouTube, en plus calme et sans compte.",
+    "longDescription": "TubeCraft est un client YouTube open source : recherche, lecture, Shorts, abonnements, playlists et commentaires, avec un thème sombre et des données locales.",
+    "copyright": "TubeCraft — licence MIT",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    }
+  }
+}

@@ -47,6 +47,12 @@
       "description": "Ouvrir le fil vertical"
     },
     {
+      "name": "Lire ensuite",
+      "short_name": "Lire ensuite",
+      "url": "./queue",
+      "description": "Reprendre la file personnelle"
+    },
+    {
       "name": "Ma bibliothèque",
       "short_name": "Bibliothèque",
       "url": "./playlists",

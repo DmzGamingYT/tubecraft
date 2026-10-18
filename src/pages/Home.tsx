@@ -4,7 +4,7 @@ import {
   categories,
   generatedAt,
   getVideo,
-  recommendFor,
+  recommendWithReasons,
   shorts,
   videosByCategory,
 } from '../data';
@@ -23,14 +23,22 @@ export function Home() {
   const dismissed = useStore((s) => s.dismissed);
   const dismissVideo = useStore((s) => s.dismissVideo);
   const restoreDismissed = useStore((s) => s.restoreDismissed);
+  const disliked = useStore((s) => s.disliked);
+  const mutedChannels = useStore((s) => s.mutedChannels);
+  const muteChannel = useStore((s) => s.muteChannel);
+  const restoreMutedChannels = useStore((s) => s.restoreMutedChannels);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const category = params.get('c') ?? 'Toutes';
   const videos = videosByCategory(category).filter((v) => !dismissed.includes(v.id));
 
   useEffect(() => setVisible(PAGE_SIZE), [category]);
 
-  // compte connecté → un rayon « Recommandés pour vous » bâti sur l'historique
-  const recos = user && category === 'Toutes' ? recommendFor(history, subscribed, 8) : [];
+  // compte connecté → un rayon « Recommandés pour vous » bâti sur l'historique,
+  // avec la raison de chaque suggestion et les signaux négatifs exclus.
+  const recos =
+    user && category === 'Toutes'
+      ? recommendWithReasons(history, subscribed, { dismissed, disliked, mutedChannels, limit: 8 })
+      : [];
 
   // « Reprendre la lecture » : vidéos commencées mais pas terminées
   const resume = useMemo(() => {
@@ -102,11 +110,33 @@ export function Home() {
             Recommandés pour vous
           </h2>
           <p className="recos__sub">
-            Suggérés d'après vos vidéos regardées et vos abonnements, comme sur YouTube.
+            Suggérés d'après vos vidéos regardées et vos abonnements. Chaque carte indique pourquoi,
+            et vous pouvez écarter une vidéo ou une chaîne.
           </p>
+          <details className="recos__explain">
+            <summary>Pourquoi ces vidéos ?</summary>
+            <p>
+              Le classement est calculé dans ce navigateur : catégories que vous regardez (×3),
+              chaînes abonnées (×2), affinité avec une chaîne de votre historique (×2), puis
+              popularité. Les vidéos déjà vues, dislikées ou marquées « Pas intéressé » et les
+              chaînes mises de côté sont exclues. Aucune donnée n'est envoyée à un serveur.
+            </p>
+            {mutedChannels.length > 0 && (
+              <button className="linkbtn" onClick={restoreMutedChannels}>
+                Réactiver {mutedChannels.length} chaîne{mutedChannels.length > 1 ? 's' : ''} mise
+                {mutedChannels.length > 1 ? 's' : ''} de côté
+              </button>
+            )}
+          </details>
           <section className="grid">
-            {recos.map((v) => (
-              <VideoCard key={v.id} video={v} onDismiss={() => dismissVideo(v.id)} />
+            {recos.map(({ video, reason }) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                note={reason}
+                onDismiss={() => dismissVideo(video.id)}
+                onMuteChannel={() => muteChannel(video.channelId)}
+              />
             ))}
           </section>
         </section>
@@ -132,13 +162,27 @@ export function Home() {
         </p>
       )}
 
-      {dismissed.length > 0 && (
+      {(dismissed.length > 0 || mutedChannels.length > 0) && (
         <p className="page__footnote">
-          {dismissed.length} vidéo{dismissed.length > 1 ? 's' : ''} masquée
-          {dismissed.length > 1 ? 's' : ''}.{' '}
-          <button className="linkbtn" onClick={restoreDismissed}>
-            Tout restaurer
-          </button>
+          {dismissed.length > 0 && (
+            <>
+              {dismissed.length} vidéo{dismissed.length > 1 ? 's' : ''} masquée
+              {dismissed.length > 1 ? 's' : ''}.{' '}
+              <button className="linkbtn" onClick={restoreDismissed}>
+                Tout restaurer
+              </button>
+            </>
+          )}
+          {dismissed.length > 0 && mutedChannels.length > 0 ? ' · ' : ''}
+          {mutedChannels.length > 0 && (
+            <>
+              {mutedChannels.length} chaîne{mutedChannels.length > 1 ? 's' : ''} mise
+              {mutedChannels.length > 1 ? 's' : ''} de côté.{' '}
+              <button className="linkbtn" onClick={restoreMutedChannels}>
+                Réactiver
+              </button>
+            </>
+          )}
         </p>
       )}
 

@@ -12,6 +12,7 @@ import {
   STORAGE_KEYS,
 } from '../lib/userData';
 import { setPageMeta } from '../lib/meta';
+import { useOnline } from '../lib/hooks';
 import { emptyProfile, profileIdFor, readProfile, saveProfile } from '../lib/profiles';
 import { Avatar } from '../components/Avatar';
 
@@ -69,6 +70,8 @@ export function Settings() {
 
   const clearHistory = useStore((state) => state.clearHistory);
   const restoreDismissed = useStore((state) => state.restoreDismissed);
+  const restoreMutedChannels = useStore((state) => state.restoreMutedChannels);
+  const online = useOnline();
 
   const [status, setStatus] = useState<Status | null>(null);
   const [storageVersion, setStorageVersion] = useState(0);
@@ -162,15 +165,44 @@ export function Settings() {
     setStatus({ kind: 'ok', text: `${label[0].toUpperCase()}${label.slice(1)} effacé.` });
   };
 
-  const clearEverything = () => {
+  const clearOfflineCache = async () => {
+    if (!('caches' in window)) {
+      setStatus({ kind: 'info', text: 'Ce navigateur ne prend pas en charge le cache hors ligne.' });
+      return;
+    }
+    try {
+      const keys = await caches.keys();
+      const ours = keys.filter((key) => key.startsWith('tubecraft-'));
+      await Promise.all(ours.map((key) => caches.delete(key)));
+      setStatus({
+        kind: 'ok',
+        text: `Cache hors ligne vidé (${ours.length} espace${ours.length > 1 ? 's' : ''}).`,
+      });
+    } catch {
+      setStatus({ kind: 'error', text: 'Impossible de vider le cache hors ligne.' });
+    }
+  };
+
+  const clearEverything = async () => {
     if (
       !window.confirm(
-        'Effacer toutes les données TubeCraft de ce navigateur (compte, réglages, historique, playlists, commentaires, progression) ? Cette action est irréversible.'
+        'Effacer toutes les données TubeCraft de ce navigateur (compte, réglages, historique, playlists, commentaires, progression, cache hors ligne) ? Cette action est irréversible.'
       )
     ) {
       return;
     }
     clearAllLocalData();
+    // le mode avion stocke aussi la coquille, les vignettes et des réponses API
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(
+          keys.filter((key) => key.startsWith('tubecraft-')).map((key) => caches.delete(key))
+        );
+      }
+    } catch {
+      /* navigation privée ou quota : on recharge quand même */
+    }
     window.location.reload();
   };
 
@@ -457,6 +489,36 @@ export function Settings() {
           </p>
         </section>
 
+        <section className="settings__card" aria-labelledby="settings-offline">
+          <h2 id="settings-offline" className="settings__title">
+            Mode avion
+          </h2>
+          <p className="settings__desc">
+            TubeCraft garde une copie locale des pages, métadonnées et vignettes déjà visitées,
+            ainsi que des dernières réponses YouTube. Hors ligne, vous pouvez parcourir ces pages,
+            gérer votre file, vos playlists et vos likes ; la lecture vidéo, elle, nécessite une
+            connexion.
+          </p>
+          <div className="settings__row">
+            <span className="settings__row-text">
+              <strong>État du réseau</strong>
+              <span>
+                {online
+                  ? 'En ligne — le cache se met à jour au fil de la navigation.'
+                  : 'Hors ligne — les données déjà visitées restent disponibles.'}
+              </span>
+            </span>
+            <span className={`badge${online ? ' badge--live' : ''}`}>
+              {online ? 'En ligne' : 'Hors ligne'}
+            </span>
+          </div>
+          <div className="settings__footer">
+            <button className="btn btn--ghost" onClick={() => void clearOfflineCache()}>
+              Vider le cache hors ligne
+            </button>
+          </div>
+        </section>
+
         <section className="settings__card" aria-labelledby="settings-data">
           <h2 id="settings-data" className="settings__title">
             Mes données
@@ -521,8 +583,8 @@ export function Settings() {
             <button
               className="btn btn--ghost"
               onClick={() =>
-                confirmClear('les playlists et « Regarder plus tard »', () =>
-                  useStore.setState({ playlists: [], watchLater: [] })
+                confirmClear('les playlists, « Regarder plus tard » et « Lire ensuite »', () =>
+                  useStore.setState({ playlists: [], watchLater: [], queue: [] })
                 )
               }
             >
@@ -544,8 +606,16 @@ export function Settings() {
             >
               Reprise de lecture
             </button>
-            <button className="btn btn--ghost" onClick={() => confirmClear('les vidéos masquées', restoreDismissed)}>
-              Vidéos masquées
+            <button
+              className="btn btn--ghost"
+              onClick={() =>
+                confirmClear('les vidéos masquées et les chaînes mises de côté', () => {
+                  restoreDismissed();
+                  restoreMutedChannels();
+                })
+              }
+            >
+              Recommandations masquées
             </button>
           </div>
 
@@ -557,7 +627,7 @@ export function Settings() {
                 commentaires et les caches de ce navigateur.
               </p>
             </div>
-            <button className="btn btn--danger" onClick={clearEverything}>
+            <button className="btn btn--danger" onClick={() => void clearEverything()}>
               Effacer toutes mes données
             </button>
           </div>

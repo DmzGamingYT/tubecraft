@@ -5735,6 +5735,17 @@
 
 .sc-nav__links a {
   position: relative;
+  white-space: nowrap;
+}
+
+@media (max-width: 1420px) {
+  .sc-nav__links {
+    gap: 14px;
+  }
+
+  .sc-nav__links a {
+    font-size: 9.5px;
+  }
 }
 
 .sc-nav__links a::after {
@@ -8455,4 +8466,612 @@
     animation: none;
     transform: scaleX(1);
   }
+}
+
+/* ==========================================================================
+   PulseCraft — maquette animée de la vitrine
+   Suivi sportif et santé : anneaux, journal, sommeil, coach IA, régularité.
+   Tout est en `em` : la taille suit le conteneur du cadre de démo.
+   ========================================================================== */
+
+.pc {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  color: #f1f4ec;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(201, 255, 61, 0.09), transparent 55%),
+    radial-gradient(80% 70% at 0% 100%, rgba(255, 77, 109, 0.07), transparent 60%),
+    #0b0d0c;
+  overflow: hidden;
+}
+
+.pc__top {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  height: 3.3em;
+  padding: 0 1.3em;
+  border-bottom: 1px solid rgba(241, 244, 236, 0.08);
+  flex: none;
+}
+
+.pc__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  font-size: 0.98em;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+}
+
+.pc__topdate {
+  font-size: 0.66em;
+  color: rgba(241, 244, 236, 0.45);
+  letter-spacing: 0.02em;
+}
+
+.pc__avatar {
+  margin-left: auto;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(241, 244, 236, 0.12);
+  font-size: 0.62em;
+  font-weight: 700;
+}
+
+.pc__body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.pc__rail {
+  flex: none;
+  width: 3.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9em;
+  padding: 1.2em 0;
+  border-right: 1px solid rgba(241, 244, 236, 0.06);
+}
+
+.pc__rail span {
+  font-size: 0.85em;
+  color: rgba(241, 244, 236, 0.3);
+}
+
+.pc__rail span.is-on {
+  color: #c9ff3d;
+}
+
+.pc__content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.15em 1.35em 0.6em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85em;
+  animation: pc-scene-in 0.45s var(--sc-ease, ease);
+}
+
+@keyframes pc-scene-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}
+
+.pc__scene {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  min-height: 0;
+}
+
+.pc__hello {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12em;
+}
+
+.pc__kicker {
+  font-size: 0.6em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__hello b {
+  font-size: 1.5em;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.pc__hello em {
+  font-style: normal;
+  font-size: 0.74em;
+  color: rgba(241, 244, 236, 0.55);
+}
+
+.pc__hello--tight b {
+  font-size: 1.25em;
+}
+
+.pc__grid {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 0.8em;
+  min-height: 0;
+}
+
+.pc__card {
+  background: rgba(241, 244, 236, 0.045);
+  border: 1px solid rgba(241, 244, 236, 0.075);
+  border-radius: 0.95em;
+  padding: 0.85em 0.9em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.pc__cardtitle {
+  font-size: 0.64em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__ringcard {
+  gap: 0.35em;
+}
+
+.pc__ringwrap {
+  position: relative;
+  width: 7.6em;
+  height: 7.6em;
+  margin: 0 auto;
+  display: block;
+}
+
+.pc__ringwrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pc__ringcenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+}
+
+.pc__ringcenter b {
+  font-size: 1.15em;
+  letter-spacing: -0.04em;
+}
+
+.pc__ringcenter i {
+  font-style: normal;
+  font-size: 0.5em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0.42em;
+  font-size: 0.63em;
+  color: rgba(241, 244, 236, 0.6);
+}
+
+.pc__legendRow b {
+  color: #f1f4ec;
+  font-size: 1.1em;
+}
+
+.pc__legendRow i {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pc__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.pc__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5em;
+}
+
+.pc__tiles span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12em;
+  padding: 0.5em 0.55em;
+  border-radius: 0.7em;
+  background: rgba(241, 244, 236, 0.05);
+}
+
+.pc__tiles i {
+  font-style: normal;
+  font-size: 0.7em;
+  color: rgba(201, 255, 61, 0.85);
+}
+
+.pc__tiles b {
+  font-size: 0.9em;
+  letter-spacing: -0.03em;
+}
+
+.pc__tiles em {
+  font-style: normal;
+  font-size: 0.52em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__coachcard {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.6em;
+  flex: 1;
+}
+
+.pc__coachcard div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  min-width: 0;
+}
+
+.pc__coachcard b {
+  font-size: 0.74em;
+}
+
+.pc__coachcard em {
+  font-style: normal;
+  font-size: 0.62em;
+  color: rgba(241, 244, 236, 0.55);
+  line-height: 1.35;
+}
+
+.pc__spark {
+  width: 1.6em;
+  height: 1.6em;
+  flex: none;
+  border-radius: 0.5em;
+  display: grid;
+  place-items: center;
+  background: rgba(201, 255, 61, 0.18);
+  color: #c9ff3d;
+  font-size: 0.8em;
+}
+
+.pc__aibadge {
+  margin-left: auto;
+  font-size: 0.52em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 0.25em 0.5em;
+  border-radius: 0.35em;
+  background: rgba(201, 255, 61, 0.2);
+  color: #e8ffb0;
+}
+
+/* journal d'activité */
+
+.pc__rowlist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.pc__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.65em;
+  border-radius: 0.7em;
+  background: rgba(241, 244, 236, 0.04);
+  border: 1px solid rgba(241, 244, 236, 0.06);
+}
+
+.pc__rowdot {
+  width: 1.7em;
+  height: 1.7em;
+  flex: none;
+  border-radius: 0.5em;
+  display: grid;
+  place-items: center;
+  font-size: 0.62em;
+}
+
+.pc__rowtext {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05em;
+  min-width: 0;
+}
+
+.pc__rowtext b {
+  font-size: 0.74em;
+}
+
+.pc__rowtext em {
+  font-style: normal;
+  font-size: 0.58em;
+  color: rgba(241, 244, 236, 0.45);
+}
+
+.pc__rowvalue {
+  margin-left: auto;
+  font-size: 0.74em;
+}
+
+.pc__rowextra {
+  font-style: normal;
+  font-size: 0.6em;
+  color: rgba(241, 244, 236, 0.5);
+  min-width: 3.6em;
+  text-align: right;
+}
+
+.pc__chartcard {
+  gap: 0.6em;
+}
+
+.pc__days {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.22em;
+  height: 3.4em;
+  padding-bottom: 0.1em;
+  border-bottom: 1px solid rgba(241, 244, 236, 0.1);
+}
+
+.pc__days i {
+  flex: 1;
+  border-radius: 0.2em 0.2em 0 0;
+  background: rgba(201, 255, 61, 0.42);
+  min-height: 0.2em;
+}
+
+.pc__days i.is-now {
+  background: #c9ff3d;
+}
+
+/* sommeil */
+
+.pc__bignight {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  flex-wrap: wrap;
+}
+
+.pc__bignight b {
+  font-size: 2.9em;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+  display: flex;
+  align-items: baseline;
+  gap: 0.12em;
+}
+
+.pc__bignight b span {
+  font-size: 0.34em;
+  color: rgba(241, 244, 236, 0.5);
+}
+
+.pc__bignight em {
+  font-style: normal;
+  font-size: 0.65em;
+  color: rgba(241, 244, 236, 0.5);
+}
+
+.pc__stages {
+  display: flex;
+  gap: 0.15em;
+  height: 0.55em;
+  border-radius: 9em;
+  overflow: hidden;
+}
+
+.pc__stages i {
+  height: 100%;
+}
+
+.pc__stagelegend {
+  display: flex;
+  gap: 1em;
+  font-size: 0.6em;
+  color: rgba(241, 244, 236, 0.5);
+}
+
+.pc__stagelegend span {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.pc__stagelegend i {
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 0.15em;
+}
+
+/* coach */
+
+.pc__chat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.pc__bubble {
+  max-width: 82%;
+  font-size: 0.68em;
+  line-height: 1.45;
+  padding: 0.7em 0.85em;
+  border-radius: 0.9em;
+}
+
+.pc__bubble--user {
+  align-self: flex-end;
+  background: #c9ff3d;
+  color: #10140b;
+  border-bottom-right-radius: 0.25em;
+  font-weight: 550;
+}
+
+.pc__bubble--ai {
+  background: rgba(241, 244, 236, 0.06);
+  border: 1px solid rgba(241, 244, 236, 0.08);
+  border-bottom-left-radius: 0.25em;
+  color: rgba(241, 244, 236, 0.78);
+}
+
+.pc__bubble em {
+  display: block;
+  margin-top: 0.35em;
+  font-style: normal;
+  font-size: 0.8em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(241, 244, 236, 0.35);
+}
+
+.pc__plancard {
+  gap: 0.3em;
+}
+
+.pc__planline {
+  font-size: 0.64em;
+  color: rgba(241, 244, 236, 0.72);
+  padding-left: 0.2em;
+  border-left: 0.15em solid rgba(201, 255, 61, 0.5);
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+}
+
+.pc__planline--dim {
+  border-color: rgba(241, 244, 236, 0.15);
+  color: rgba(241, 244, 236, 0.42);
+}
+
+/* progrès */
+
+.pc__heat {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  gap: 0.18em;
+}
+
+.pc__heat i {
+  aspect-ratio: 1;
+  border-radius: 0.14em;
+}
+
+.pc__records {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55em;
+}
+
+.pc__records span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  padding: 0.6em;
+  border-radius: 0.7em;
+  background: rgba(241, 244, 236, 0.05);
+}
+
+.pc__records em {
+  font-style: normal;
+  font-size: 0.52em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__records b {
+  font-size: 0.85em;
+  letter-spacing: -0.03em;
+}
+
+/* barre d'onglets */
+
+.pc__tabs {
+  flex: none;
+  display: flex;
+  gap: 0.4em;
+  padding: 0.5em 1.3em 0.6em;
+  border-top: 1px solid rgba(241, 244, 236, 0.07);
+  font-size: 0.64em;
+}
+
+.pc__tabs span {
+  flex: 1;
+  text-align: center;
+  padding: 0.45em 0.3em;
+  border-radius: 0.6em;
+  color: rgba(241, 244, 236, 0.42);
+}
+
+.pc__tabs span.is-on {
+  background: rgba(201, 255, 61, 0.16);
+  color: #e8ffb0;
+  font-weight: 600;
+}
+
+.pc--cycle .pc__ringwrap svg circle[stroke-linecap='round'] {
+  animation: pc-ring 5s ease-in-out infinite alternate;
+}
+
+@keyframes pc-ring {
+  from {
+    opacity: 0.86;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pc--cycle .pc__days i {
+  transform-origin: bottom;
+  animation: pc-bar 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes pc-bar {
+  from {
+    transform: scaleY(0.92);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.sc-demo.is-paused .pc *,
+.sc-demo:not(.is-live) .pc * {
+  animation-play-state: paused;
 }

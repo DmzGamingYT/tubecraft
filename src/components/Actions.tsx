@@ -154,6 +154,8 @@ export function SaveMenu({ video }: { video: Video }) {
   const removeFromPlaylist = useStore((s) => s.removeFromPlaylist);
   const watchLater = useStore((s) => s.watchLater.includes(video.id));
   const toggleWatchLater = useStore((s) => s.toggleWatchLater);
+  const queued = useStore((s) => s.queue.includes(video.id));
+  const toggleQueue = useStore((s) => s.toggleQueue);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState('');
   const menuRef = useClickOutside<HTMLDivElement>(() => setOpen(false));
@@ -173,6 +175,11 @@ export function SaveMenu({ video }: { video: Video }) {
           >
             <span className="menu__icon">{watchLater ? '✓' : '🕒'}</span>
             {watchLater ? 'Retirer de Regarder plus tard' : 'Regarder plus tard'}
+          </button>
+
+          <button className="menu__item" onClick={() => toggleQueue(video.id)}>
+            <span className="menu__icon">{queued ? '✓' : '▶'}</span>
+            {queued ? 'Retirer de Lire ensuite' : 'Lire ensuite'}
           </button>
 
           <hr className="menu__sep" />

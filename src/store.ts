@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Comment, NotifLevel, Playlist } from './types';
+import { addToQueue, moveInQueue, removeFromQueue, toggleInQueue } from './lib/queue';
 import {
   archiveLegacyState,
   DEFAULT_SUBSCRIPTIONS,
@@ -96,10 +97,23 @@ interface AppState {
   watchLater: string[];
   toggleWatchLater: (videoId: string) => void;
 
+  /** file personnelle « Lire ensuite », commune à toutes les pages */
+  queue: string[];
+  addToQueue: (videoId: string) => void;
+  removeFromQueue: (videoId: string) => void;
+  toggleQueue: (videoId: string) => void;
+  moveQueue: (videoId: string, delta: number) => void;
+  clearQueue: () => void;
+
   /** vidéos masquées du fil d'accueil via « Pas intéressé » */
   dismissed: string[];
   dismissVideo: (videoId: string) => void;
   restoreDismissed: () => void;
+
+  /** chaînes écartées des recommandations (« Moins de cette chaîne ») */
+  mutedChannels: string[];
+  muteChannel: (channelId: string) => void;
+  restoreMutedChannels: () => void;
 
   /** position de lecture en secondes, par vidéo */
   progress: Record<string, number>;
@@ -274,6 +288,14 @@ export const useStore = create<AppState>()(
             : [videoId, ...s.watchLater],
         })),
 
+      queue: [],
+      addToQueue: (videoId) => set((s) => ({ queue: addToQueue(s.queue, videoId) })),
+      removeFromQueue: (videoId) => set((s) => ({ queue: removeFromQueue(s.queue, videoId) })),
+      toggleQueue: (videoId) => set((s) => ({ queue: toggleInQueue(s.queue, videoId) })),
+      moveQueue: (videoId, delta) =>
+        set((s) => ({ queue: moveInQueue(s.queue, videoId, delta) })),
+      clearQueue: () => set({ queue: [] }),
+
       dismissed: [],
       dismissVideo: (videoId) =>
         set((s) => ({
@@ -282,6 +304,15 @@ export const useStore = create<AppState>()(
             : [videoId, ...s.dismissed].slice(0, 500),
         })),
       restoreDismissed: () => set({ dismissed: [] }),
+
+      mutedChannels: [],
+      muteChannel: (channelId) =>
+        set((s) => ({
+          mutedChannels: s.mutedChannels.includes(channelId)
+            ? s.mutedChannels
+            : [channelId, ...s.mutedChannels].slice(0, 200),
+        })),
+      restoreMutedChannels: () => set({ mutedChannels: [] }),
 
       progress: {},
       saveProgress: (videoId, seconds) =>
@@ -305,18 +336,21 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'tubecraft-store',
-      version: 6,
+      version: 7,
       /**
        * v4 -> v5 : les données étaient communes à tous les comptes. On les
        * rattache au profil actif (ou au profil invité) une seule fois, sans en
        * supprimer aucune. Les autres comptes mémorisés repartent de zéro.
        * v5 -> v6 : ajoute `settings.aiSummary` (activé par défaut).
+       * v6 -> v7 : ajoute la file « Lire ensuite » (vide au départ).
        */
       migrate: (persisted, version) => {
         const state = (persisted ?? {}) as Partial<AppState>;
         if (version < 5) archiveLegacyState(state);
         return {
           ...state,
+          queue: Array.isArray(state.queue) ? state.queue : [],
+          mutedChannels: Array.isArray(state.mutedChannels) ? state.mutedChannels : [],
           settings: {
             aiSearch: true,
             aiSummary: true,

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { OpenSourceApp } from '../data/apps';
 import { proposals, proposalStatusLabel } from '../data/proposals';
-import { DemoFrame, SpotifyCraftDemo, TubeCraftDemo } from './showcase/AppDemo';
+import { DemoFrame, PulseCraftDemo, SpotifyCraftDemo, TubeCraftDemo } from './showcase/AppDemo';
 import { AppGallery } from './showcase/AppGallery';
 import { GuidedTour, type TourStep } from './showcase/GuidedTour';
 import { UnderTheHood } from './showcase/UnderTheHood';
@@ -225,6 +225,13 @@ const TOUR_STEPS: TourStep[] = [
     text: 'Même philosophie : extraits officiels, pochettes réelles, Daily Mix calculés sur l’appareil et import de vos propres fichiers.',
     demo: { app: 'spotifycraft', scene: 'home', hold: true },
     duration: 5000,
+  },
+  {
+    target: '[data-tour="pulsecraft-demo"]',
+    title: 'PulseCraft, la santé qui reste chez vous.',
+    text: 'Anneaux d’objectifs, journal d’entraînement, sommeil, nutrition et coach IA. Les calculs tournent en Rust/WASM, et les imports Apple Health ou Samsung Health restent dans le navigateur.',
+    demo: { app: 'pulsecraft', scene: 'today', hold: true },
+    duration: 5400,
   },
   {
     target: '[data-tour="capot"]',
@@ -553,8 +560,8 @@ export function ShowcaseSite({
           <p className="sc-hero__lede">
             Une famille d’applications open source qui reprennent les outils du quotidien — sans
             compte obligatoire, sans abonnement, sans télémétrie. La première est déjà là :{' '}
-            <strong>TubeCraft</strong> pour la vidéo, avec <strong>SpotifyCraft</strong> juste
-            derrière.
+            <strong>TubeCraft</strong> pour la vidéo, <strong>SpotifyCraft</strong> pour la musique
+            et <strong>PulseCraft</strong> pour la santé.
           </p>
 
           <div className="sc-hero__cta">
@@ -695,7 +702,9 @@ export function ShowcaseSite({
                         ? 'tubecraft-demo'
                         : app.id === 'spotifycraft'
                           ? 'spotifycraft-demo'
-                          : undefined
+                          : app.id === 'pulsecraft'
+                            ? 'pulsecraft-demo'
+                            : undefined
                     }
                   >
                     {app.id === 'tubecraft' ? (
@@ -706,6 +715,15 @@ export function ShowcaseSite({
                         onOpen={() => openGallery(app)}
                       >
                         <TubeCraftDemo />
+                      </DemoFrame>
+                    ) : app.id === 'pulsecraft' ? (
+                      <DemoFrame
+                        url="pulsecraft.app / aujourd’hui"
+                        label="PulseCraft"
+                        tone="dark"
+                        onOpen={() => openGallery(app)}
+                      >
+                        <PulseCraftDemo />
                       </DemoFrame>
                     ) : (
                       <DemoFrame

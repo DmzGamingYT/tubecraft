@@ -1,0 +1,10 @@
+name = "tubecraft"
+main = "dist-worker/index.js"
+compatibility_date = "2026-05-03"
+
+# Test local uniquement. Le déploiement Freebuff Sites utilise son manifeste
+# (worker + assets) et attache le binding ASSETS automatiquement.
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"

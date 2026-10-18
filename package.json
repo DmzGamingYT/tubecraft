@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:desktop": "tauri dev",
     "build": "tsc -b && vite build",
+    "build:desktop": "tauri build",
+    "icon": "tauri icon src-tauri/app-icon.svg",
+    "build:worker": "esbuild worker/index.ts --bundle --format=esm --platform=neutral --target=es2022 --outfile=dist-worker/index.js",
+    "build:site": "npm run build && npm run build:worker",
     "preview": "vite preview",
     "dev:showcase": "vite --config vite.showcase.config.ts",
     "build:showcase": "tsc --noEmit -p tsconfig.showcase.json && vite build --config vite.showcase.config.ts",
@@ -21,6 +26,7 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.3",
     "@types/node": "^26.6.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
