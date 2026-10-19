@@ -329,6 +329,9 @@ les dépendances si besoin, lance le serveur et ouvre le navigateur.
 | `npm run og` | regénère les images de partage (Open Graph) |
 | `npm run shots` | captures de la vitrine, par section et par thème (Playwright) |
 
+> `npm run og` et `npm run shots` ont besoin de Playwright : `npm i -D playwright`
+> puis `npx playwright install chromium`.
+
 <details>
 <summary><strong>Structure du dépôt</strong></summary>
 
