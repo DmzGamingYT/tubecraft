@@ -1252,7 +1252,7 @@ export function ShowcaseSite({
           appHref={appHref}
           githubHref={githubHref}
           Link={Link}
-          appIds={['tubecraft', 'pulsecraft', 'spotifycraft']}
+          appIds={['tubecraft', 'spotifycraft', 'pulsecraft']}
         />
 
         <section className="sc-section sc-section--band sc-section--etude" id="etude" data-tour="etude">

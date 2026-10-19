@@ -1,4 +1,4 @@
-import { useId, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import {
   findDownloadApp,
   type DownloadApp,
@@ -482,35 +482,81 @@ export function DownloadShowcase({
         </ul>
       </header>
 
+      {/* ----------------------------------------------------------------
+          Le catalogue : une ligne par application, avec ses plateformes.
+
+          Les trois apps de la collection sont visibles en même temps —
+          on compare avant de choisir, au lieu de remplir un formulaire
+          d'onglets. Cliquer une plateforme cible l'app et la plateforme.
+          ---------------------------------------------------------------- */}
       {apps.length > 1 ? (
-        <div className="dl__apps" role="group" aria-label="Choisir une application">
-          {apps.map((entry) => (
-            <button
+        <div className="dl__catalog" role="group" aria-label="Choisir une application">
+          {apps.map((entry, index) => (
+            <div
+              className="dl__row"
               key={entry.id}
-              type="button"
-              aria-pressed={entry.id === app.id}
-              data-app={entry.id}
-              className={`dl__appBtn${entry.id === app.id ? ' is-on' : ''}`}
-              onClick={() => selectApp(entry)}
+              data-on={entry.id === app.id}
+              style={{ '--dl-app-accent': entry.accent } as CSSProperties}
             >
-              <span className="dl__appIcon">
-                <img src={entry.icon} alt="" width={46} height={46} loading="lazy" decoding="async" />
+              <span className="dl__rowNum" aria-hidden>
+                {String(index + 1).padStart(2, '0')}
               </span>
-              <span className="dl__appText">
-                <strong>{entry.name}</strong>
-                <em>{entry.summary}</em>
+
+              <button
+                type="button"
+                className="dl__rowApp"
+                aria-pressed={entry.id === app.id}
+                onClick={() => selectApp(entry)}
+              >
+                <span className="dl__appIcon">
+                  <img src={entry.icon} alt="" width={40} height={40} loading="lazy" decoding="async" />
+                </span>
+                <span className="dl__appText">
+                  <strong>{entry.name}</strong>
+                  <em>{entry.summary}</em>
+                </span>
+              </button>
+
+              <div className="dl__rowPlatforms" role="group" aria-label={`Plateformes — ${entry.name}`}>
+                {entry.platforms.map((platform) => {
+                  const on = entry.id === app.id && platform.id === active.id;
+                  return (
+                    <button
+                      key={platform.id}
+                      type="button"
+                      className={`dl__platform${on ? ' is-on' : ''}`}
+                      aria-pressed={on}
+                      onClick={() => {
+                        if (entry.id !== app.id) selectApp(entry);
+                        setActiveId(platform.id);
+                        setInstallNote('');
+                      }}
+                    >
+                      <PlatformGlyph id={platform.id} />
+                      <span>{platform.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <span
+                className={`dl__rowState${
+                  entry.mode === 'native' && entry.releaseState === 'pending' ? ' is-pending' : ''
+                }`}
+              >
+                {entry.mode === 'native' && entry.releaseState === 'pending'
+                  ? 'En préparation'
+                  : entry.mode === 'native'
+                    ? `Publiée v${entry.version ?? '—'}`
+                    : 'Disponible'}
               </span>
-              <span className="dl__appCheck" aria-hidden>
-                <Check />
-              </span>
-            </button>
+            </div>
           ))}
         </div>
-      ) : null}
-
-      <div className="dl__stage">
+      ) : (
+        /* Une seule app : le choix de plateforme reste une barre à part. */
         <div
-          className="dl__tabs"
+          className="dl__platforms"
           role="tablist"
           aria-label="Choisir une plateforme"
           onKeyDown={moveTab}
@@ -524,162 +570,164 @@ export function DownloadShowcase({
               aria-selected={platform.id === activeId}
               aria-controls={`${tabsId}-${platform.id}-panel`}
               tabIndex={platform.id === activeId ? 0 : -1}
-              className={`dl__tab${platform.id === activeId ? ' is-on' : ''}`}
+              className={`dl__platform dl__platform--lg${platform.id === activeId ? ' is-on' : ''}`}
               onClick={() => {
                 setActiveId(platform.id);
                 setInstallNote('');
               }}
             >
-              <span className="dl__tabIcon">
+              <span className="dl__platformIcon">
                 <PlatformGlyph id={platform.id} />
               </span>
-              <span className="dl__tabText">
+              <span className="dl__platformText">
                 <strong>{platform.name}</strong>
                 <em>{platform.family === 'mobile' ? 'Mobile' : 'Ordinateur'}</em>
-              </span>
-              <span className="dl__tabCheck" aria-hidden>
-                <Check />
               </span>
             </button>
           ))}
         </div>
+      )}
 
-        <div
-          className="dl__panel"
-          key={active.id}
-          role="tabpanel"
-          id={`${tabsId}-${active.id}-panel`}
-          aria-labelledby={`${tabsId}-${active.id}`}
-          tabIndex={0}
-        >
-          <div className="dl__panelTop">
-            <span className="dl__panelKind">
-              <PlatformGlyph id={active.id} /> {active.detail}
-            </span>
-            <span
-              className={[
-                'dl__status',
-                app.mode === 'web' && app.self && installed ? 'is-installed' : '',
-                pending ? 'is-pending' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <i />
-              {app.mode === 'native'
-                ? pending
-                  ? 'Binaires en préparation'
-                  : `Build natif · v${app.version ?? '—'}`
-                : app.self && installed
-                  ? 'Installée sur cet appareil'
-                  : 'Disponible · installation navigateur'}
-            </span>
-          </div>
+      {/* Le dossier : le détail de l'app et de la plateforme choisies. */}
+      <div
+        className="dl__panel"
+        key={active.id}
+        role={variant === 'page' ? 'tabpanel' : undefined}
+        id={variant === 'page' ? `${tabsId}-${active.id}-panel` : undefined}
+        aria-labelledby={variant === 'page' ? `${tabsId}-${active.id}` : undefined}
+        tabIndex={0}
+      >
+        <div className="dl__panelTop">
+          <span className="dl__panelApp">
+            <img src={app.icon} alt="" width={22} height={22} loading="lazy" decoding="async" />
+            {app.name}
+          </span>
+          <span className="dl__panelKind">
+            <PlatformGlyph id={active.id} /> {active.detail}
+          </span>
+          <span
+            className={[
+              'dl__status',
+              app.mode === 'web' && app.self && installed ? 'is-installed' : '',
+              pending ? 'is-pending' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <i />
+            {app.mode === 'native'
+              ? pending
+                ? 'Binaires en préparation'
+                : `Build natif · v${app.version ?? '—'}`
+              : app.self && installed
+                ? 'Installée sur cet appareil'
+                : 'Disponible · installation navigateur'}
+          </span>
+        </div>
 
-          <div className="dl__panelBody">
-            <div className="dl__copy">
-              <p className="dl__tagline">{active.tagline}</p>
-              <p className="dl__intro">{active.intro}</p>
+        <div className="dl__panelBody">
+          <div className="dl__copy">
+            <p className="dl__tagline">{active.tagline}</p>
+            <p className="dl__intro">{active.intro}</p>
 
-              <div className="dl__ctaRow">
-                {app.mode === 'native' ? (
-                  <>
-                    {app.releasesHref ? (
-                      <a
-                        className="dl__cta"
-                        href={app.releasesHref}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        {pending ? 'Suivre les versions' : 'Télécharger sur GitHub'} <Arrow />
-                      </a>
-                    ) : null}
-                    {app.sourceHref ? (
-                      <a
-                        className="dl__cta dl__cta--ghost"
-                        href={app.sourceHref}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        Code source <Arrow />
-                      </a>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    {variant === 'page' && active.id !== 'ios' ? (
-                      <button type="button" className="dl__cta" onClick={onInstall}>
-                        {installed ? (
-                          <>
-                            <Check /> {app.name} est installée
-                          </>
-                        ) : (
-                          <>
-                            Installer sur {active.short} <Arrow />
-                          </>
-                        )}
-                      </button>
-                    ) : null}
-
-                    {launchHref ? (
-                      <Link
-                        className={`dl__cta${variant === 'page' && active.id !== 'ios' ? ' dl__cta--ghost' : ''}`}
-                        href={launchHref}
-                      >
-                        {active.id === 'ios' ? 'Ouvrir dans Safari' : `Ouvrir sur ${active.short}`}
-                        <Arrow />
-                      </Link>
-                    ) : (
-                      <a
-                        className={`dl__cta${variant === 'page' && active.id !== 'ios' ? ' dl__cta--ghost' : ''}`}
-                        href={githubHref}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        Voir sur GitHub <Arrow />
-                      </a>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {installNote ? (
-                <p className="dl__installNote" role="status">
-                  {installNote}
-                </p>
-              ) : null}
-
-              {pending ? (
-                <p className="dl__stepsLead">
-                  Dès la première publication, voici comment ça se passera :
-                </p>
-              ) : null}
-
-              <ol className="dl__steps">
-                {active.steps.map((step, index) => (
-                  <li key={step.title}>
-                    <span className="dl__stepNum">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="dl__stepText">
-                      <strong>{step.title}</strong>
-                      <span>{step.text}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-
-              <p className="dl__requirement">
-                <span>Prérequis</span> {active.requirement}
-              </p>
-              <p className="dl__note">{active.note}</p>
-            </div>
-
-            <div className="dl__preview">
+            <div className="dl__ctaRow">
               {app.mode === 'native' ? (
-                <NativeMock app={app} platform={active} />
+                <>
+                  {app.releasesHref ? (
+                    <a
+                      className="dl__cta"
+                      href={app.releasesHref}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {pending ? 'Suivre les versions' : 'Télécharger sur GitHub'} <Arrow />
+                    </a>
+                  ) : null}
+                  {app.sourceHref ? (
+                    <a
+                      className="dl__cta dl__cta--ghost"
+                      href={app.sourceHref}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      Code source <Arrow />
+                    </a>
+                  ) : null}
+                </>
               ) : (
-                <DeviceMock platform={active} />
+                <>
+                  {variant === 'page' && active.id !== 'ios' ? (
+                    <button type="button" className="dl__cta" onClick={onInstall}>
+                      {installed ? (
+                        <>
+                          <Check /> {app.name} est installée
+                        </>
+                      ) : (
+                        <>
+                          Installer sur {active.short} <Arrow />
+                        </>
+                      )}
+                    </button>
+                  ) : null}
+
+                  {launchHref ? (
+                    <Link
+                      className={`dl__cta${variant === 'page' && active.id !== 'ios' ? ' dl__cta--ghost' : ''}`}
+                      href={launchHref}
+                    >
+                      {active.id === 'ios' ? 'Ouvrir dans Safari' : `Ouvrir sur ${active.short}`}
+                      <Arrow />
+                    </Link>
+                  ) : (
+                    <a
+                      className={`dl__cta${variant === 'page' && active.id !== 'ios' ? ' dl__cta--ghost' : ''}`}
+                      href={githubHref}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      Voir sur GitHub <Arrow />
+                    </a>
+                  )}
+                </>
               )}
             </div>
+
+            {installNote ? (
+              <p className="dl__installNote" role="status">
+                {installNote}
+              </p>
+            ) : null}
+
+            {pending ? (
+              <p className="dl__stepsLead">
+                Dès la première publication, voici comment ça se passera :
+              </p>
+            ) : null}
+
+            <ol className="dl__steps">
+              {active.steps.map((step, index) => (
+                <li key={step.title}>
+                  <span className="dl__stepNum">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="dl__stepText">
+                    <strong>{step.title}</strong>
+                    <span>{step.text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+
+            <p className="dl__requirement">
+              <span>Prérequis</span> {active.requirement}
+            </p>
+            <p className="dl__note">{active.note}</p>
+          </div>
+
+          <div className="dl__preview">
+            {app.mode === 'native' ? (
+              <NativeMock app={app} platform={active} />
+            ) : (
+              <DeviceMock platform={active} />
+            )}
           </div>
         </div>
       </div>
