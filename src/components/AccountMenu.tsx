@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useStore, type User } from '../store';
 import { Avatar } from './Avatar';
 import { IconClose, IconGear, IconHistory, IconLike, IconMail, IconShorts, IconTrash } from './icons';
+import { useEscapeKey } from '../lib/hooks';
 import { emptyProfile, profileIdFor, readProfile, saveProfile } from '../lib/profiles';
 import {
   hasGoogleClientId,
@@ -172,6 +173,10 @@ export function AccountMenu() {
     setName('');
     setEmail('');
   };
+
+  // `Échap` referme la fenêtre de connexion, puis le menu du compte
+  useEscapeKey(dialogOpen, closeDialog);
+  useEscapeKey(menuOpen, () => setMenuOpen(false));
 
   return (
     <>

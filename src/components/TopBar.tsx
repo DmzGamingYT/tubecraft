@@ -4,13 +4,22 @@ import { useStore } from '../store';
 import { useClickOutside } from '../lib/hooks';
 import { AccountMenu } from './AccountMenu';
 import { NotificationsBell } from './NotificationsBell';
-import { IconClose, IconDownload, IconMenu, IconMoon, IconSearch, IconSun } from './icons';
+import {
+  IconClose,
+  IconDownload,
+  IconKeyboard,
+  IconMenu,
+  IconMoon,
+  IconSearch,
+  IconSun,
+} from './icons';
 
 interface Props {
   onBurger: () => void;
+  onShortcuts?: () => void;
 }
 
-export function TopBar({ onBurger }: Props) {
+export function TopBar({ onBurger, onShortcuts }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useStore((s) => s.theme);
@@ -213,6 +222,16 @@ export function TopBar({ onBurger }: Props) {
           <IconDownload width={22} height={22} />
         </Link>
         <NotificationsBell />
+        {onShortcuts && (
+          <button
+            className="iconbtn iconbtn--keys"
+            onClick={onShortcuts}
+            aria-label="Afficher les raccourcis clavier"
+            title="Raccourcis clavier (?)"
+          >
+            <IconKeyboard width={22} height={22} />
+          </button>
+        )}
         <button
           className="iconbtn"
           onClick={toggleTheme}

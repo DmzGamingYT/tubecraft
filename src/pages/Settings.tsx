@@ -47,6 +47,7 @@ function ToggleRow({
       </span>
       <input
         type="checkbox"
+        role="switch"
         className="settings__check"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
@@ -266,12 +267,14 @@ export function Settings() {
           </h2>
           <p className="settings__desc">Le thème s’applique immédiatement et reste mémorisé.</p>
 
-          <div className="settings__row">
+          <div className="settings__row settings__row--stack">
             <span className="settings__row-text">
               <strong>Thème</strong>
               <span>Sombre par défaut, comme YouTube.</span>
             </span>
-            <div className="settings__control" role="group" aria-label="Thème">
+            {/* sélecteur segmenté : deux moitiés égales, y compris quand la
+                ligne passe sur deux niveaux sur téléphone */}
+            <div className="settings__control settings__control--seg" role="group" aria-label="Thème">
               <button
                 className={`chip${theme === 'dark' ? ' chip--active' : ''}`}
                 onClick={() => setTheme('dark')}

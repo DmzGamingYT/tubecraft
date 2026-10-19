@@ -11,6 +11,8 @@
  * avant d'être en ligne. Aujourd'hui : TubeCraft, SpotifyCraft et PulseCraft.
  */
 
+import { remoteAppUrl } from '../lib/url';
+
 export interface OpenSourceApp {
   id: string;
   /** nom affiché, en gros sur la carte */
@@ -42,22 +44,31 @@ export interface OpenSourceApp {
 export const githubProfile = 'https://github.com/DmzGamingYT';
 
 /**
- * Adresse de lancement d'une app servie hors de ce dépôt.
+ * Adresse publique de la web app PulseCraft.
+ *
+ * Elle est servie à côté de TubeCraft, dans un sous-dossier (`/pulsecraft/`) du
+ * même hébergement. `VITE_PULSECRAFT_URL` la remplace au build si l’app part
+ * ailleurs. Elle est préférée à un lien mort : l’app est réellement en ligne,
+ * donc la carte et la section « Télécharger » peuvent y renvoyer.
+ */
+export const pulsecraftWebUrl =
+  'https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/pulsecraft/';
+
+/**
+ * Adresse de lancement d’une app servie hors de ce dépôt.
  *
  * Au build, `VITE_PULSECRAFT_URL` / `VITE_SPOTIFYCRAFT_URL` permettent de
- * pointer une vraie instance publique (`./pulsecraft/` quand la vitrine et
- * l'app sont déployées ensemble). En développement, on retombe sur le serveur
- * local pour que « Lancer » marche vraiment ; en production sans variable, la
- * carte ne propose que le code plutôt qu'un lien mort.
+ * pointer une autre instance ; sinon on retombe sur l’URL publique connue
+ * (`pulsecraftWebUrl`) en production, et sur le serveur local en développement
+ * pour que « Lancer » marche vraiment. Une app sans URL connue ne propose que
+ * son code (c’est le cas de SpotifyCraft aujourd’hui).
  */
-function launchUrl(envValue: string | undefined, localPort: number): string | undefined {
-  const configured = envValue?.trim();
-  if (configured) return configured;
-  return import.meta.env.DEV ? `http://127.0.0.1:${localPort}/` : undefined;
-}
-
-const pulsecraftUrl = launchUrl(import.meta.env.VITE_PULSECRAFT_URL, 5186);
-const spotifycraftUrl = launchUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
+const pulsecraftUrl = remoteAppUrl(
+  import.meta.env.VITE_PULSECRAFT_URL,
+  5186,
+  pulsecraftWebUrl
+);
+const spotifycraftUrl = remoteAppUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
 
 export const apps: OpenSourceApp[] = [
   {

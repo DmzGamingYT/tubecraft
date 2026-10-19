@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchSubscriptionFeed } from '../api/youtube';
 import { subscribedVideos } from '../data';
 import { useStore } from '../store';
-import { useClickOutside } from '../lib/hooks';
+import { useClickOutside, useEscapeKey } from '../lib/hooks';
 import { notificationCacheKey } from '../lib/notifications';
 import type { Video } from '../types';
 import { IconBell } from './icons';
@@ -66,6 +66,7 @@ export function NotificationsBell() {
     typeof navigator === 'undefined' ? true : navigator.onLine
   );
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false));
+  useEscapeKey(open, () => setOpen(false));
   const controller = useRef<AbortController | null>(null);
 
   const channels = useMemo(

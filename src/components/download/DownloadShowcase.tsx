@@ -34,6 +34,10 @@ interface Props {
   Link: LinkComponent;
   /** `page` : route de l’app ; `section` : bloc dans la vitrine */
   variant?: 'page' | 'section';
+  /** Titre de la section vitrine (sinon « App, emphasis. »). */
+  sectionTitle?: ReactNode;
+  /** Introduction de la section vitrine (sinon le texte de l’app). */
+  sectionLede?: string;
   /**
    * Apps proposées, dans l’ordre d’affichage. La route interne de TubeCraft
    * n’en montre qu’une ; la vitrine présente la collection entière.
@@ -302,6 +306,8 @@ function DeviceMock({ platform }: { platform: DownloadPlatform }) {
  * binaire lui-même — icône, version, format — dans une fenêtre sobre.
  */
 function NativeMock({ app, platform }: { app: DownloadApp; platform: DownloadPlatform }) {
+  const pending = app.releaseState === 'pending';
+
   return (
     <div className="dln" aria-hidden>
       <div className="dln__win">
@@ -321,9 +327,17 @@ function NativeMock({ app, platform }: { app: DownloadApp; platform: DownloadPla
           </span>
           <strong className="dln__name">{app.name}</strong>
           <span className="dln__meta">
-            Version {app.version} · {platform.file ?? platform.detail}
+            {pending
+              ? `Format prévu · ${platform.file ?? platform.detail}`
+              : `Version ${app.version} · ${platform.file ?? platform.detail}`}
           </span>
-          <span className="dln__trust">{platform.trust}</span>
+          {pending ? (
+            <span className="dln__trust dln__trust--pending">
+              Pas encore publié · à chaque version ensuite
+            </span>
+          ) : (
+            <span className="dln__trust">{platform.trust}</span>
+          )}
         </div>
       </div>
 
@@ -342,6 +356,8 @@ export function DownloadShowcase({
   githubHref,
   Link,
   variant = 'section',
+  sectionTitle,
+  sectionLede,
   appIds = ['tubecraft'],
 }: Props) {
   const apps = appIds.map(findDownloadApp);
@@ -356,8 +372,24 @@ export function DownloadShowcase({
   const { available, installed, promptInstall } = useInstallPrompt();
   const tabsId = useId();
   const active = platforms.find((platform) => platform.id === activeId) ?? platforms[0];
+  /** app native dont rien n’est encore publié : on ne promet aucun fichier */
+  const pending = app.mode === 'native' && app.releaseState === 'pending';
+  /**
+   * URL de lancement : l’app de ce dépôt est servie par la page elle-même, les
+   * autres apportent la leur. Sans adresse connue, on renvoie vers le code.
+   */
+  const launchHref = app.self ? appHref : (app.launchHref ?? null);
+  /**
+   * L’invite d’installation ne concerne que l’app servie par cette page : on ne
+   * peut pas installer PulseCraft depuis la page de TubeCraft.
+   */
   const canPrompt =
-    app.mode === 'web' && variant === 'page' && available && !installed && active.id !== 'ios';
+    Boolean(app.self) &&
+    app.mode === 'web' &&
+    variant === 'page' &&
+    available &&
+    !installed &&
+    active.id !== 'ios';
 
   const selectApp = (next: DownloadApp) => {
     if (next.id === app.id) return;
@@ -431,10 +463,14 @@ export function DownloadShowcase({
             </h1>
           ) : (
             <h2 className="dl__title">
-              {app.name}, <em>{app.emphasis}</em>.
+              {sectionTitle ?? (
+                <>
+                  {app.name}, <em>{app.emphasis}</em>.
+                </>
+              )}
             </h2>
           )}
-          <p className="dl__lede">{app.lede}</p>
+          <p className="dl__lede">{sectionLede ?? app.lede}</p>
         </div>
 
         <ul className="dl__badges" aria-label="Avantages">
@@ -521,12 +557,20 @@ export function DownloadShowcase({
               <PlatformGlyph id={active.id} /> {active.detail}
             </span>
             <span
-              className={`dl__status${app.mode === 'web' && installed ? ' is-installed' : ''}`}
+              className={[
+                'dl__status',
+                app.mode === 'web' && app.self && installed ? 'is-installed' : '',
+                pending ? 'is-pending' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <i />
               {app.mode === 'native'
-                ? `Build natif · v${app.version ?? '—'}`
-                : installed
+                ? pending
+                  ? 'Binaires en préparation'
+                  : `Build natif · v${app.version ?? '—'}`
+                : app.self && installed
                   ? 'Installée sur cet appareil'
                   : 'Disponible · installation navigateur'}
             </span>
@@ -547,7 +591,7 @@ export function DownloadShowcase({
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        Télécharger sur GitHub <Arrow />
+                        {pending ? 'Suivre les versions' : 'Télécharger sur GitHub'} <Arrow />
                       </a>
                     ) : null}
                     {app.sourceHref ? (
@@ -577,10 +621,10 @@ export function DownloadShowcase({
                       </button>
                     ) : null}
 
-                    {appHref ? (
+                    {launchHref ? (
                       <Link
                         className={`dl__cta${variant === 'page' && active.id !== 'ios' ? ' dl__cta--ghost' : ''}`}
-                        href={appHref}
+                        href={launchHref}
                       >
                         {active.id === 'ios' ? 'Ouvrir dans Safari' : `Ouvrir sur ${active.short}`}
                         <Arrow />
@@ -602,6 +646,12 @@ export function DownloadShowcase({
               {installNote ? (
                 <p className="dl__installNote" role="status">
                   {installNote}
+                </p>
+              ) : null}
+
+              {pending ? (
+                <p className="dl__stepsLead">
+                  Dès la première publication, voici comment ça se passera :
                 </p>
               ) : null}
 

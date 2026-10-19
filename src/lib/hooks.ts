@@ -45,6 +45,20 @@ export function useOnline(): boolean {
   return online;
 }
 
+/** Ferme une surface (menu, fenêtre) avec `Échap`, tant qu'elle est ouverte. */
+export function useEscapeKey(active: boolean, onEscape: () => void) {
+  const handler = useRef(onEscape);
+  handler.current = onEscape;
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') handler.current();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active]);
+}
+
 export function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
   const ref = useRef<T>(null);
   useEffect(() => {

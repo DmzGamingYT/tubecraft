@@ -301,6 +301,34 @@ export const IconBell = (p: P) => (
   </svg>
 );
 
+/** Cloche barrée : chaîne en « aucune notification » (grille 24). */
+export const IconBellOff = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2Zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2Zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6Z" />
+    <path
+      d="M3.4 2.2 21.6 20.4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+/** Coche d'un état actif (grille 24). */
+export const IconCheck = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z" />
+  </svg>
+);
+
+/** Ajout (grille 24). */
+export const IconPlus = (p: P) => (
+  <svg {...base24(p)}>
+    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+  </svg>
+);
+
 /** Enveloppe (connexion par e-mail). */
 export const IconMail = (p: P) => (
   <svg {...base24(p)}>
@@ -312,6 +340,20 @@ export const IconMail = (p: P) => (
 export const IconGear = (p: P) => (
   <svg {...base(p)}>
     <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z" />
+  </svg>
+);
+
+/** Clavier (aide des raccourcis, grille 24). */
+export const IconKeyboard = (p: P) => (
+  <svg
+    {...base24(p)}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+  >
+    <rect x="2.6" y="6.4" width="18.8" height="11.2" rx="2.6" />
+    <path d="M6.6 10.2h.01M10 10.2h.01M13.4 10.2h.01M16.8 10.2h.01M8.2 13.8h7.6" />
   </svg>
 );
 

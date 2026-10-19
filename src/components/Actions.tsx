@@ -4,7 +4,18 @@ import type { Video } from '../types';
 import { compactNumber } from '../lib/format';
 import { useClickOutside } from '../lib/hooks';
 import { watchUrl } from '../lib/url';
-import { IconClock, IconDislike, IconLike, IconShare } from './icons';
+import {
+  IconBell,
+  IconBellOff,
+  IconCheck,
+  IconClock,
+  IconDislike,
+  IconLike,
+  IconList,
+  IconPlus,
+  IconShare,
+} from './icons';
+import type { ReactNode } from 'react';
 
 /** J'aime / Je n'aime pas / Partager — état persistant. */
 export function LikeBar({ video }: { video: Video }) {
@@ -71,10 +82,16 @@ export function LikeBar({ video }: { video: Video }) {
   );
 }
 
-const LEVELS: Array<{ value: NotifLevel; label: string; icon: string }> = [
-  { value: 'all', label: 'Toutes les notifications', icon: '🔔' },
-  { value: 'personalized', label: 'Notifications personnalisées', icon: '🔔' },
-  { value: 'none', label: 'Aucune', icon: '🔕' },
+// icônes de l'app (et non emojis) : rendu identique sur macOS, Windows,
+// Android et iOS, contrairement aux pictogrammes système.
+const LEVELS: Array<{ value: NotifLevel; label: string; icon: ReactNode }> = [
+  { value: 'all', label: 'Toutes les notifications', icon: <IconBell width={18} height={18} /> },
+  {
+    value: 'personalized',
+    label: 'Notifications personnalisées',
+    icon: <IconBell width={18} height={18} />,
+  },
+  { value: 'none', label: 'Aucune', icon: <IconBellOff width={18} height={18} /> },
 ];
 
 /** Bouton S'abonner / Abonné + cloche de notifications (3 niveaux, comme YouTube). */
@@ -110,7 +127,11 @@ export function SubscribeButton({ channelId, small = false }: { channelId: strin
           title={LEVELS.find((l) => l.value === level)?.label}
           aria-label={LEVELS.find((l) => l.value === level)?.label}
         >
-          {level === 'none' ? '🔕' : '🔔'}
+          {level === 'none' ? (
+            <IconBellOff width={20} height={20} />
+          ) : (
+            <IconBell width={20} height={20} />
+          )}
         </button>
       )}
 
@@ -173,12 +194,16 @@ export function SaveMenu({ video }: { video: Video }) {
             className="menu__item"
             onClick={() => toggleWatchLater(video.id)}
           >
-            <span className="menu__icon">{watchLater ? '✓' : '🕒'}</span>
+            <span className="menu__icon">
+              {watchLater ? <IconCheck width={18} height={18} /> : <IconClock width={18} height={18} />}
+            </span>
             {watchLater ? 'Retirer de Regarder plus tard' : 'Regarder plus tard'}
           </button>
 
           <button className="menu__item" onClick={() => toggleQueue(video.id)}>
-            <span className="menu__icon">{queued ? '✓' : '▶'}</span>
+            <span className="menu__icon">
+              {queued ? <IconCheck width={18} height={18} /> : <IconList width={18} height={18} />}
+            </span>
             {queued ? 'Retirer de Lire ensuite' : 'Lire ensuite'}
           </button>
 
@@ -199,7 +224,9 @@ export function SaveMenu({ video }: { video: Video }) {
                     : addToPlaylist(playlist.id, video.id)
                 }
               >
-                <span className="menu__icon">{included ? '✓' : '+'}</span>
+                <span className="menu__icon">
+                  {included ? <IconCheck width={18} height={18} /> : <IconPlus width={18} height={18} />}
+                </span>
                 {playlist.name}
                 <span className="menu__count">{playlist.videoIds.length}</span>
               </button>
@@ -231,7 +258,9 @@ export function SaveMenu({ video }: { video: Video }) {
             </form>
           ) : (
             <button className="menu__item" onClick={() => setCreating(true)}>
-              <span className="menu__icon">＋</span>
+              <span className="menu__icon">
+                <IconPlus width={18} height={18} />
+              </span>
               Créer une playlist
             </button>
           )}

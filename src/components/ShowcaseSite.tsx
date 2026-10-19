@@ -70,6 +70,78 @@ const SECTIONS = [
 ] as const;
 const SECTION_IDS = SECTIONS.map((section) => section.id);
 
+/** Quatre principes techniques, présentés comme une grille de fonctionnalités. */
+const CAPABILITIES = [
+  {
+    id: 'reseau',
+    viz: 'network',
+    meta: '01 / Réseau',
+    title: 'InnerTube, en direct.',
+    text: 'Aucune clé Google, aucun quota. Un proxy same-origin avec cache, timeout et limite par IP.',
+  },
+  {
+    id: 'donnees',
+    viz: 'local',
+    meta: '02 / Données',
+    title: 'Local par défaut.',
+    text: 'IndexedDB, localStorage, fichiers importés : les données ne quittent pas l’appareil.',
+  },
+  {
+    id: 'noyau',
+    viz: 'wasm',
+    meta: '03 / Noyau',
+    title: 'Rust → WASM.',
+    text: 'Les calculs de PulseCraft et l’import audio de SpotifyCraft tournent en WebAssembly.',
+  },
+  {
+    id: 'portabilite',
+    viz: 'platforms',
+    meta: '04 / Portabilité',
+    title: 'Un code, trois distributions.',
+    text: 'Web, PWA installable et coque Tauri 2 : la même base, sans fork ni réécriture.',
+  },
+] as const;
+
+function CapabilityVisual({ kind }: { kind: (typeof CAPABILITIES)[number]['viz'] }) {
+  if (kind === 'network') {
+    return (
+      <div className="sc-cap__viz sc-cap__viz--network" aria-hidden>
+        <span>vous</span>
+        <i />
+        <span>/yt</span>
+        <i />
+        <span>YT</span>
+      </div>
+    );
+  }
+  if (kind === 'local') {
+    return (
+      <div className="sc-cap__viz sc-cap__viz--local" aria-hidden>
+        <i />
+        <i />
+        <i />
+        <em>local</em>
+      </div>
+    );
+  }
+  if (kind === 'wasm') {
+    return (
+      <div className="sc-cap__viz sc-cap__viz--wasm" aria-hidden>
+        <span>RUST</span>
+        <b>→</b>
+        <strong>WASM</strong>
+      </div>
+    );
+  }
+  return (
+    <div className="sc-cap__viz sc-cap__viz--platforms" aria-hidden>
+      <span>WEB</span>
+      <span>PWA</span>
+      <span>TAURI</span>
+    </div>
+  );
+}
+
 /** Soleil / lune du bouton de thème, dessiné au trait pour rester net. */
 function ThemeGlyph({ night }: { night: boolean }) {
   return night ? (
@@ -676,12 +748,22 @@ export function ShowcaseSite({
             <span className="sc-rings__axis sc-rings__axis--y" />
           </div>
 
+          {/* constellation de vignettes réelles : le hero montre des images
+              plutôt que des étiquettes, comme une planche contact */}
           <div className="sc-floats" aria-hidden>
-            <span className="sc-float sc-float--1">0 tracker</span>
-            <span className="sc-float sc-float--2">local-first</span>
-            <span className="sc-float sc-float--3">100 % open source</span>
-            <span className="sc-float sc-float--4">sans abonnement</span>
-            <span className="sc-float sc-float--5">InnerTube</span>
+            {preview.slice(0, 4).map((video, index) => (
+              <span className={`sc-shot sc-shot--${index + 1}`} key={video.id}>
+                <span className="sc-shot__frame">
+                  <img
+                    src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {video.duration ? <i>{formatDuration(video.duration)}</i> : null}
+                </span>
+              </span>
+            ))}
           </div>
 
           <p className="sc-kicker sc-kicker--hero">
@@ -755,10 +837,6 @@ export function ShowcaseSite({
             ) : null}
           </div>
 
-          <a href="#collection" className="sc-hero__collection">
-            ou explorer la collection <span aria-hidden>↓</span>
-          </a>
-
           {tourOffered ? null : (
             <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
               <span aria-hidden>↻</span> Revoir la visite guidée
@@ -808,6 +886,40 @@ export function ShowcaseSite({
             </p>
           </div>
 
+          {/* la collection en un clin d’œil : rangée de vignettes, à la manière
+              d’une plage d’apps — chaque vignette mène à la carte de l’app */}
+          <nav
+            className="sc-launcher"
+            aria-label="Raccourcis vers les apps de la collection"
+            data-reveal
+          >
+            {apps.map((app) => (
+              <a
+                key={app.id}
+                className="sc-launcher__app"
+                href={`#app-${app.id}`}
+                style={{ '--app-accent': app.accent } as CSSProperties}
+              >
+                <span className="sc-launcher__icon" aria-hidden>
+                  {app.mark}
+                </span>
+                <span className="sc-launcher__text">
+                  <strong>{app.name}</strong>
+                  <em>{app.tagline}</em>
+                </span>
+              </a>
+            ))}
+            <a className="sc-launcher__app sc-launcher__app--next" href="#app-suite">
+              <span className="sc-launcher__icon" aria-hidden>
+                +
+              </span>
+              <span className="sc-launcher__text">
+                <strong>La suite</strong>
+                <em>En préparation</em>
+              </span>
+            </a>
+          </nav>
+
           <div className="sc-apps">
             {apps.map((app, index) => {
               const isInternal = app.self === true;
@@ -815,6 +927,7 @@ export function ShowcaseSite({
               return (
                 <article
                   key={app.id}
+                  id={`app-${app.id}`}
                   className="sc-app sc-app--visual"
                   data-reveal
                   style={
@@ -829,7 +942,12 @@ export function ShowcaseSite({
                   </span>
 
                   <div className="sc-app__body">
-                    <h3 className="sc-app__name">{app.name}</h3>
+                    <h3 className="sc-app__name">
+                      <span className="sc-app__mark" aria-hidden>
+                        {app.mark}
+                      </span>
+                      <span className="sc-app__nameText">{app.name}</span>
+                    </h3>
                     <p className="sc-app__tagline">{app.tagline}</p>
                     <p className="sc-app__desc">{app.description}</p>
                     <ul className="sc-app__stack" aria-label="Technologies">
@@ -914,12 +1032,17 @@ export function ShowcaseSite({
               );
             })}
 
-            <article className="sc-app sc-app--next sc-app--visual" data-reveal>
+            <article className="sc-app sc-app--next sc-app--visual" id="app-suite" data-reveal>
               <span className="sc-app__index" aria-hidden>
                 +
               </span>
               <div className="sc-app__body">
-                <h3 className="sc-app__name">La suite</h3>
+                <h3 className="sc-app__name">
+                  <span className="sc-app__mark sc-app__mark--ghost" aria-hidden>
+                    +
+                  </span>
+                  <span className="sc-app__nameText">La suite</span>
+                </h3>
                 <p className="sc-app__desc">
                   Une nouvelle app arrive quand elle est réellement utilisable — jamais pour
                   remplir une grille. Les dépôts sont publics dès le premier commit.
@@ -951,7 +1074,9 @@ export function ShowcaseSite({
           </div>
         </section>
 
-        <section className="sc-section sc-section--manifeste" id="manifeste">
+        <div className="sc-act-ink">
+        <section className="sc-section sc-section--manifeste sc-section--ink" id="manifeste">
+          <span className="sc-side-label" aria-hidden>02 — Manifeste</span>
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">02</span>
             <span className="sc-label__text">Le manifeste</span>
@@ -959,62 +1084,97 @@ export function ShowcaseSite({
           </header>
 
           <div className="sc-manifeste">
-            <h2 className="sc-h2 sc-h2--wide" data-reveal>
-              Un logiciel n’est pas un service qu’on loue. C’est un outil qu’on <em>installe</em>,
-              qu’on comprend et qu’on garde.
+            <h2 className="sc-h2 sc-h2--wide sc-h2--ink" data-reveal>
+              On ne loue pas un outil. On le <em>possède</em>.
             </h2>
+            <p className="sc-lede sc-lede--ink" data-reveal>
+              Pas de compte obligatoire, pas d’abonnement, pas de télémétrie. Trois règles,
+              aucune exception — et elles ne bougeront pas.
+            </p>
 
-            <ol className="sc-principles">
+            <ol className="sc-principles sc-principles--ink">
               <li data-reveal style={{ '--d': '0ms' } as CSSProperties}>
-                <span className="sc-principle__num">01</span>
+                <span className="sc-principle__num">A</span>
                 <h3>Le code est le contrat.</h3>
                 <p>
-                  Pas de boîte noire : tout est lisible, forkeable, réparable. Si une fonction vous
-                  manque, vous pouvez l’ajouter — ou payer quelqu’un pour le faire.
+                  Chaque app est un dépôt public : lisible, forkeable, réparable. Si une fonction
+                  vous manque, vous pouvez l’ajouter — ou payer quelqu’un pour le faire.
                 </p>
+                <a
+                  className="sc-principle__link"
+                  href={githubHref}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Voir le code <span aria-hidden>↗</span>
+                </a>
               </li>
               <li data-reveal style={{ '--d': '90ms' } as CSSProperties}>
-                <span className="sc-principle__num">02</span>
+                <span className="sc-principle__num">B</span>
                 <h3>Vos données restent chez vous.</h3>
                 <p>
-                  Comptes, historique, réglages, progression : tout vit dans votre navigateur.
-                  Aucun serveur ne récolte ce que vous regardez ou écrivez.
+                  Historique, réglages, progression : tout vit dans le navigateur. Aucun serveur
+                  Craftline ne récolte ce que vous regardez ou écrivez.
                 </p>
               </li>
               <li data-reveal style={{ '--d': '180ms' } as CSSProperties}>
-                <span className="sc-principle__num">03</span>
+                <span className="sc-principle__num">C</span>
                 <h3>Pas de péage à l’entrée.</h3>
                 <p>
-                  Pas d’essai gratuit qui expire, pas de fonctionnalité derrière un abonnement. Une
-                  app qu’on télécharge, qu’on utilise, et qu’on garde.
+                  Pas d’essai qui expire, pas de fonctionnalité derrière un abonnement. Une app
+                  qu’on installe, qu’on utilise, et qu’on garde.
                 </p>
               </li>
             </ol>
           </div>
         </section>
 
-        <section className="sc-section" id="capot">
+        <section className="sc-section sc-section--ink sc-section--capot" id="capot">
+          <span className="sc-side-label" aria-hidden>03 — Sous le capot</span>
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">03</span>
             <span className="sc-label__text">Sous le capot</span>
-            <span className="sc-label__meta">TubeCraft, concrètement</span>
+            <span className="sc-label__meta">Quatre principes techniques</span>
           </header>
 
-          <div className="sc-intro" data-reveal>
-            <h2 className="sc-h2">
-              YouTube, mais avec le <em>capot ouvert</em>.
+          <div className="sc-intro sc-intro--ink" data-reveal>
+            <h2 className="sc-h2 sc-h2--ink">
+              Pas de boîte noire. Un <em>capot ouvert</em>.
             </h2>
-            <p className="sc-lede">
-              TubeCraft parle directement à InnerTube — le canal que youtube.com utilise déjà — via
-              un proxy local. Aucune clé API, aucun compte Google, aucun serveur à nous.
+            <p className="sc-lede sc-lede--ink">
+              TubeCraft parle directement à InnerTube, PulseCraft calcule en Rust/WASM,
+              SpotifyCraft lit vos fichiers en local. Même principe partout : le moins de serveurs
+              possible.
             </p>
           </div>
 
-          <div className="sc-under-wrap" data-reveal data-tour="capot">
+          <div className="sc-capot__media" data-reveal data-tour="capot">
+            <div className="sc-capot__mediaHead">
+              <span>Architecture réelle · TubeCraft</span>
+              <span>navigateur → proxy → InnerTube</span>
+            </div>
             <UnderTheHood />
           </div>
 
-          <div className="sc-stats">
+          <div className="sc-cap-grid">
+            {CAPABILITIES.map((capability, index) => (
+              <article
+                className="sc-cap"
+                key={capability.id}
+                data-reveal
+                style={{ '--d': `${index * 70}ms` } as CSSProperties}
+              >
+                <CapabilityVisual kind={capability.viz} />
+                <div className="sc-cap__body">
+                  <span className="sc-cap__meta">{capability.meta}</span>
+                  <h3>{capability.title}</h3>
+                  <p>{capability.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="sc-stats sc-stats--ink">
             {[
               {
                 value: '0',
@@ -1050,7 +1210,7 @@ export function ShowcaseSite({
             ))}
           </div>
 
-          <p className="sc-note" data-reveal>
+          <p className="sc-note sc-note--ink" data-reveal>
             Transparence : {featured ? `${featured.name} est publié sous licence ${featured.license}.` : ''}{' '}
             Le lecteur reste celui de YouTube, dans une iframe officielle.
           </p>
@@ -1058,26 +1218,33 @@ export function ShowcaseSite({
 
         <DownloadShowcase
           variant="section"
+          sectionTitle={
+            <>
+              Installer. <em>Partout.</em>
+            </>
+          }
+          sectionLede="Choisissez votre app et votre plateforme. L’installation passe par le navigateur — aucun magasin, aucun compte, aucun binaire à vérifier."
           appHref={appHref}
           githubHref={githubHref}
           Link={Link}
-          appIds={['tubecraft', 'spotifycraft']}
+          appIds={['tubecraft', 'pulsecraft', 'spotifycraft']}
         />
 
-        <section className="sc-section sc-section--etude" id="etude" data-tour="etude">
+        <section className="sc-section sc-section--ink sc-section--etude" id="etude" data-tour="etude">
+          <span className="sc-side-label" aria-hidden>05 — À l’étude</span>
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">05</span>
             <span className="sc-label__text">À l’étude</span>
             <span className="sc-label__meta">{proposals.length} propositions ouvertes</span>
           </header>
 
-          <div className="sc-intro" data-reveal>
-            <h2 className="sc-h2">
-              Ce qui vient <em>ensuite</em>.
+          <div className="sc-intro sc-intro--ink" data-reveal>
+            <h2 className="sc-h2 sc-h2--ink">
+              Ce qui n’est pas encore là. Et qui pourrait <em>l’être</em>.
             </h2>
-            <p className="sc-lede">
-              Ces fonctions ne sont pas encore développées : ce sont des propositions, classées par
-              thème. Les deux premières sont les plus abouties ; les autres attendent un signal.
+            <p className="sc-lede sc-lede--ink">
+              Des propositions publiques, classées par thème et priorisées à la main. Rien n’est
+              vendu, rien n’est promis avant d’être utilisable.
             </p>
           </div>
 
@@ -1141,6 +1308,7 @@ export function ShowcaseSite({
             </a>
           </div>
         </section>
+        </div>
 
         <section className="sc-final" data-reveal>
           <span className="sc-final__ghost" aria-hidden>
