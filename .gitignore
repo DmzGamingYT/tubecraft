@@ -19,3 +19,6 @@ dist-worker
 # …sauf celle de la vitrine : elle ne contient qu'une URL publique, lue par le
 # <link rel="canonical"> et les balises Open Graph.
 !showcase/.env
+
+# captures de développement (artefacts locaux)
+shots/
