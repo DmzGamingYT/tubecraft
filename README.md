@@ -166,7 +166,7 @@ ICNS, ICO et PNG pour toutes les tailles.
 
 TubeCraft est la première app de **Craftline**, une collection d'outils open source qui refusent
 l'abonnement et la télémétrie. La vitrine de la collection est incluse dans ce dépôt, à la route
-[`/apps`](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/apps).
+[`/collection/`](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/collection/).
 
 | App | Statut | Dépôt |
 | --- | --- | --- |
@@ -325,6 +325,9 @@ les dépendances si besoin, lance le serveur et ouvre le navigateur.
 | `npm run dev:showcase` | vitrine seule sur `http://127.0.0.1:5185` |
 | `npm run build:showcase` | build de la vitrine dans `dist-showcase/` |
 | `npm run build:site` | build du front + bundle du Worker dans `dist-worker/` |
+| `npm run format:css` | reformate `src/styles/showcase.css` (vérifie qu'aucune règle ne change) |
+| `npm run og` | regénère les images de partage (Open Graph) |
+| `npm run shots` | captures de la vitrine, par section et par thème (Playwright) |
 
 <details>
 <summary><strong>Structure du dépôt</strong></summary>
@@ -351,32 +354,43 @@ src-tauri/                 shell desktop Tauri 2
 </details>
 
 <details>
-<summary><strong>Vitrine autonome (<code>/apps</code>)</strong></summary>
+<summary><strong>Vitrine autonome (<code>/collection/</code>)</strong></summary>
 
 La collection s'appelle **Craftline** : un C ouvert et un triangle de lecture sur une tuile rouge,
-dessinés dans `CraftlineMark.tsx` et repris par le favicon. La présentation des apps existe à deux
-endroits, à partir du **même composant** (`src/components/ShowcaseSite.tsx`) :
+dessinés dans `CraftlineMark.tsx` et repris par le favicon. La présentation des apps vit dans
+**un seul composant** (`src/components/ShowcaseSite.tsx`), compilé de deux façons :
 
-- `/apps` dans l'application (route React, hors du chrome YouTube) ;
-- un **site statique séparé**, compilé dans `dist-showcase/`.
+- un **site statique** dans `dist-showcase/`, publié sous `/collection/` — c'est l'adresse
+  canonique de la collection ;
+- la route React `/apps` dans l'application, qui n'est plus qu'une **redirection** vers
+  `/collection/`.
+
+Pourquoi une page statique ? Parce qu'elle est lue sans JavaScript : son `<title>`, sa description,
+son image de partage et son `canonical` sont dans le HTML servi, pas injectés après coup. Un lien
+partagé sur Discord ou dans un moteur de recherche montre « Craftline », pas « TubeCraft ».
 
 `dist-showcase/` est **portable** : les chemins d'assets sont relatifs (`base: './'`), donc le
 dossier peut être déposé à la racine d'un domaine ou dans un sous-dossier (GitHub Pages de projet,
-Netlify Drop, Cloudflare Pages…) sans rebuild.
+Netlify Drop, Cloudflare Pages…) sans rebuild. En revanche, un dossier doit toujours se terminer
+par une barre oblique, sinon les assets se résolvent à la racine.
 
 ```bash
 npm run build:showcase
 python3 -m http.server 8080 --directory dist-showcase
 ```
 
-Pour que les boutons « Ouvrir TubeCraft » pointent vers l'application déployée, renseignez
-`VITE_APP_URL` **au moment du build** :
+Deux variables d'environnement sont lues **au moment du build** :
+
+| Variable | Rôle |
+| --- | --- |
+| `VITE_APP_URL` | adresse de l'application, pour que « Ouvrir TubeCraft » ouvre vraiment l'app |
+| `VITE_SITE_URL` | adresse de la vitrine, pour le `<link rel="canonical">` et les balises Open Graph — pré-remplie dans `showcase/.env` |
 
 ```bash
 VITE_APP_URL=https://mon-tubecraft.example npm run build:showcase
 ```
 
-Sans cette variable, la vitrine renvoie vers le profil GitHub au lieu d'afficher un lien mort. Les
+Sans `VITE_APP_URL`, la vitrine renvoie vers le profil GitHub au lieu d'afficher un lien mort. Les
 apps et leurs liens vivent dans `src/data/apps.ts` ; la section **« À l'étude »** est alimentée par
 `src/data/proposals.ts` (statuts `exploring` / `proposed` uniquement).
 

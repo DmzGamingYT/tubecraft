@@ -21,8 +21,16 @@ export interface OpenSourceApp {
   mark: string;
   /** une phrase, l'accroche */
   tagline: string;
-  /** deux ou trois phrases de description */
+  /**
+   * Une phrase, deux tout au plus.
+   *
+   * La fiche catalogue ne doit pas se lire comme un mode d'emploi : le détail
+   * long vit dans la galerie. Au-delà de ~25 mots, la ligne casse et la
+   * fiche cesse d'être une fiche.
+   */
   description: string;
+  /** trois points forts, une ligne chacun, affichés en puces */
+  highlights: string[];
   /** couleur d'accent de la carte */
   accent: string;
   stack: string[];
@@ -42,6 +50,17 @@ export interface OpenSourceApp {
 
 /** Profil GitHub de l'auteur, utilisé comme lien de repli et dans le pied de page. */
 export const githubProfile = 'https://github.com/DmzGamingYT';
+
+/**
+ * Adresse de la vitrine de la collection.
+ *
+ * La vitrine est une page statique à part entière (`/collection/`), servie à
+ * côté de l'application : elle a son propre `<title>`, sa propre image de
+ * partage et son propre poids en JavaScript. L'application garde la route
+ * `/apps` en redirection, pour que les liens déjà partagés marchent encore.
+ */
+export const collectionUrl =
+  (import.meta.env.VITE_COLLECTION_URL ?? '').trim() || '/collection/';
 
 /**
  * Adresse publique de la web app PulseCraft.
@@ -77,7 +96,12 @@ export const apps: OpenSourceApp[] = [
     mark: 'TC',
     tagline: 'YouTube, en open source.',
     description:
-      'Un client YouTube complet : recherche, lecteur, Shorts, abonnements, commentaires, mini-lecteur persistant et reprise de lecture. Il parle directement à YouTube, sans clé API, et garde vos données dans le navigateur.',
+      'Un client YouTube complet — recherche, lecteur, Shorts, abonnements, commentaires — sans clé API, avec vos données dans le navigateur.',
+    highlights: [
+      'Reprise de lecture et mini-lecteur',
+      'Shorts verticaux et abonnements',
+      'Recherche Instantanée, sans quota',
+    ],
     accent: '#ff2d46',
     stack: ['React', 'Vite', 'TypeScript', 'InnerTube'],
     license: 'MIT',
@@ -91,7 +115,12 @@ export const apps: OpenSourceApp[] = [
     mark: 'SP',
     tagline: 'La musique, sans le nuage.',
     description:
-      'Lecteur musical façon Spotify : catalogue iTunes (métadonnées Spotify si vous connectez votre compte), extraits officiels de 30 s, paroles synchronisées, égaliseur 10 bandes, Daily Mix calculés en local — et lecture complète de vos propres MP3, FLAC ou M4A importés dans le navigateur.',
+      'Lecteur façon Spotify : catalogue iTunes, extraits de 30 s, paroles synchronisées, égaliseur — et la lecture de vos propres fichiers importés.',
+    highlights: [
+      'Daily Mix et égaliseur 10 bandes',
+      'Vos MP3, FLAC et M4A importés',
+      'Extraits officiels et paroles',
+    ],
     accent: '#1ed760',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM'],
     license: 'MIT',
@@ -105,7 +134,12 @@ export const apps: OpenSourceApp[] = [
     mark: 'PC',
     tagline: 'Vos données de santé restent chez vous.',
     description:
-      'Un suivi sportif et santé local-first : anneaux d’objectifs, journal d’entraînement, sommeil, corps, nutrition et coach IA. Import Apple Health, Samsung Health, GPX et TCX, calculs en Rust/WASM, app native Tauri — et aucune donnée envoyée sans votre accord.',
+      'Suivi sportif et santé local-first : anneaux d’objectifs, sommeil, corps, nutrition et coach IA — avec import Apple Health et calculs Rust/WASM.',
+    highlights: [
+      'Import Apple Health et Samsung Health',
+      'Anneaux d’objectifs, sommeil, nutrition',
+      'Coach IA, calculs Rust/WASM',
+    ],
     accent: '#c9ff3d',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM', 'Tauri 2'],
     license: 'MIT',

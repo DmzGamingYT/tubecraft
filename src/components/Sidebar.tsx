@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { allVideos, categories, getChannel } from '../data';
+import { collectionUrl } from '../data/apps';
 import { useStore } from '../store';
 import { Avatar } from './Avatar';
 import {
@@ -183,12 +184,17 @@ export function Sidebar({ mode, onNavigate }: Props) {
           </Link>
         </li>
         <li>
-          <Link to="/apps" className="sidebar__item" onClick={onNavigate} title={mini ? 'La collection d’apps' : undefined}>
+          <a
+            href={collectionUrl}
+            className="sidebar__item"
+            onClick={onNavigate}
+            title={mini ? 'La collection d’apps' : undefined}
+          >
             <span className="sidebar__icon">
               <IconSparkle />
             </span>
             {!mini && <span className="sidebar__label">La collection d’apps</span>}
-          </Link>
+          </a>
         </li>
         <li>
           <Link

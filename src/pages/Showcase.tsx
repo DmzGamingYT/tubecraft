@@ -1,51 +1,18 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { videos } from '../data';
-import { apps, githubProfile } from '../data/apps';
-import { formatDuration } from '../lib/format';
-import { setPageMeta } from '../lib/meta';
-import {
-  ShowcaseSite,
-  type ShowcaseLinkProps,
-} from '../components/ShowcaseSite';
-
-/** Liens internes de l'app : navigation client sans rechargement. */
-function RouterLink({ href, className, children }: ShowcaseLinkProps) {
-  return (
-    <Link to={href} className={className}>
-      {children}
-    </Link>
-  );
-}
+import { collectionUrl } from '../data/apps';
 
 /**
- * La vitrine dans l'application (`/apps`).
- * Le même contenu est compilé en site autonome par `npm run build:showcase`.
+ * La vitrine a quitté l'application : elle est servie en page statique.
+ *
+ * L'ancienne route `/apps` reste une redirection. Les liens déjà partagés
+ * (messages, discussions, README) continuent de tomber sur la bonne page, et
+ * il n'y a qu'une seule adresse canonique pour la collection — celle qui a un
+ * vrai `<title>`, une image de partage et un poids en JavaScript réduit.
  */
 export function Showcase() {
   useEffect(() => {
-    setPageMeta(
-      'Craftline — mes apps open source',
-      'Craftline, une collection d’applications open source qui refusent l’abonnement et la télémétrie. La première : TubeCraft, un client YouTube complet.'
-    );
-
-    // La favicon de TubeCraft n’a rien à faire sur la vitrine de la collection.
-    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    const previous = icon?.getAttribute('href');
-    icon?.setAttribute('href', `${import.meta.env.BASE_URL}craftline.svg`);
-    return () => {
-      if (previous) icon?.setAttribute('href', previous);
-    };
+    window.location.replace(collectionUrl);
   }, []);
 
-  return (
-    <ShowcaseSite
-      apps={apps}
-      preview={videos.slice(0, 4)}
-      appHref="/"
-      githubHref={githubProfile}
-      Link={RouterLink}
-      formatDuration={formatDuration}
-    />
-  );
+  return <p className="redirect-note">Redirection vers la collection…</p>;
 }

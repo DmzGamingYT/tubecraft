@@ -300,6 +300,26 @@ export default {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
+    /**
+     * La vitrine de la collection est un site statique à part entière, servi
+     * dans le sous-dossier `/collection/`.
+     *
+     * Ses assets sont relatifs (`base: './'`), donc le dossier doit se terminer
+     * par une barre oblique : sans elle, `collection/assets/…` se résout en
+     * `/assets/…` et la page arrive sans styles.
+     */
+    if (url.pathname === '/collection' || url.pathname === '/collection/') {
+      if (url.pathname === '/collection') {
+        return Response.redirect(new URL('/collection/', url), 301);
+      }
+      return env.ASSETS.fetch(
+        new Request(new URL('/collection/index.html', url), {
+          method: 'GET',
+          headers: request.headers,
+        })
+      );
+    }
+
     const response = await env.ASSETS.fetch(request);
     if (
       response.status === 404 &&

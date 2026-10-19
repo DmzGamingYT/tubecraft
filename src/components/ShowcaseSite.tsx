@@ -188,30 +188,37 @@ function useReveal(root: React.RefObject<HTMLDivElement>) {
       return;
     }
 
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      // `top < limite` couvre aussi les blocs déjà dépassés (ancre, rechargement
-      // au milieu de la page) : sans cela, un saut de navigation les laisserait
-      // invisibles en remontant.
-      const limit = window.innerHeight * 0.92;
-      targets.forEach((el) => {
-        if (!el.dataset.in && el.getBoundingClientRect().top < limit) reveal(el);
-      });
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(update);
-    };
+    if (typeof IntersectionObserver === 'undefined') {
+      targets.forEach(reveal);
+      return;
+    }
 
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
+    /**
+     * Un observateur remplace la mesure au défilement.
+     *
+     * Le navigateur signale l'entrée dans le cadre sans recalculer la mise en
+     * page : sur une page de neuf mille pixels, la version précédente
+     * demandait la position de cinquante blocs à chaque image.
+     *
+     * La marge basse de 8 % reproduit l'ancien déclenchement (révélation
+     * quand le bloc atteint 92 % de la hauteur de fenêtre), et un bloc déjà
+     * dépassé — ancre, rechargement au milieu de la page — est révélé d'office,
+     * sinon il resterait invisible en remontant.
+     */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const el = entry.target as HTMLElement;
+          if (!entry.isIntersecting && entry.boundingClientRect.top > 0) continue;
+          reveal(el);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.01 }
+    );
+
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, [root]);
 }
 
@@ -748,8 +755,141 @@ export function ShowcaseSite({
             <span className="sc-rings__axis sc-rings__axis--y" />
           </div>
 
-          {/* constellation de vignettes réelles : le hero montre des images
-              plutôt que des étiquettes, comme une planche contact */}
+          {/* Le hero est une page de catalogue : le titre à gauche, l'index des
+              apps à droite. On sait en un coup d'œil qu'il y a trois produits. */}
+          <div className="sc-hero__grid">
+            <div className="sc-hero__lead">
+              <p className="sc-kicker sc-kicker--hero">
+                <span className="sc-kicker__dot" aria-hidden />
+                Collection open source — 2026
+              </p>
+
+              <h1 className="sc-hero__title">
+                <span className="sc-hero__line">
+                  <span>Des outils</span>
+                </span>
+                <span className="sc-hero__line">
+                  <span>
+                    qu’on{' '}
+                    <span className="sc-hero__em">
+                      <em>possède</em>
+                      <svg
+                        className="sc-hero__scribble"
+                        viewBox="0 0 260 18"
+                        preserveAspectRatio="none"
+                        aria-hidden
+                      >
+                        <path
+                          d="M3 13 C 52 4, 108 16, 158 8 S 226 4, 257 11"
+                          pathLength="1"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </span>
+                <span className="sc-hero__line">
+                  <span>vraiment.</span>
+                </span>
+              </h1>
+
+              <p className="sc-hero__lede">
+                Une famille d’applications open source qui reprennent les outils du quotidien —
+                sans compte obligatoire, sans abonnement, sans télémétrie. Trois apps, un même
+                code, un même principe : le logiciel est public, et les données restent chez vous.
+              </p>
+
+              <div className="sc-hero__cta">
+                {appHref ? (
+                  <Link className="sc-btn sc-btn--ink" href={appHref}>
+                    Lancer TubeCraft <span aria-hidden>→</span>
+                  </Link>
+                ) : (
+                  <a
+                    className="sc-btn sc-btn--ink"
+                    href={githubHref}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    Voir sur GitHub <span aria-hidden>↗</span>
+                  </a>
+                )}
+                {tourOffered ? (
+                  <button
+                    type="button"
+                    data-tour-start
+                    className="sc-btn sc-btn--line sc-btn--tour"
+                    onClick={startTour}
+                  >
+                    <span className="sc-btn__play" aria-hidden>
+                      ▶
+                    </span>
+                    Visite guidée
+                  </button>
+                ) : null}
+              </div>
+
+              {tourOffered ? null : (
+                <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
+                  <span aria-hidden>↻</span> Revoir la visite guidée
+                </button>
+              )}
+
+              <p className="sc-hero__meta">
+                Open source sur GitHub · Web · Sans compte · Aucun abonnement
+              </p>
+            </div>
+
+            {/* Le catalogue en un coup d'œil : chaque ligne mène à sa fiche. */}
+            <nav className="sc-launcher" aria-label="Catalogue des applications">
+              <span className="sc-launcher__head">
+                <span>Catalogue</span>
+                <span>{String(apps.length).padStart(2, '0')} applications</span>
+              </span>
+
+              {apps.map((app, index) => (
+                <a
+                  key={app.id}
+                  className="sc-launcher__app"
+                  href={`#app-${app.id}`}
+                  style={{ '--app-accent': app.accent } as CSSProperties}
+                >
+                  <span className="sc-launcher__num" aria-hidden>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="sc-launcher__icon" aria-hidden>
+                    {app.mark}
+                  </span>
+                  <span className="sc-launcher__text">
+                    <strong>{app.name}</strong>
+                    <em>{app.tagline}</em>
+                  </span>
+                  <span className="sc-launcher__go" aria-hidden>
+                    ↘
+                  </span>
+                </a>
+              ))}
+
+              <a className="sc-launcher__app sc-launcher__app--next" href="#app-suite">
+                <span className="sc-launcher__num" aria-hidden>
+                  +
+                </span>
+                <span className="sc-launcher__icon" aria-hidden>
+                  +
+                </span>
+                <span className="sc-launcher__text">
+                  <strong>La suite</strong>
+                  <em>En préparation</em>
+                </span>
+                <span className="sc-launcher__go" aria-hidden>
+                  ↘
+                </span>
+              </a>
+            </nav>
+          </div>
+
+          {/* Planche contact : les vraies vignettes du catalogue, qui débordent
+              du bas du hero. La collection commence déjà sous la ligne de flottaison. */}
           <div className="sc-floats" aria-hidden>
             {preview.slice(0, 4).map((video, index) => (
               <span className={`sc-shot sc-shot--${index + 1}`} key={video.id}>
@@ -765,91 +905,6 @@ export function ShowcaseSite({
               </span>
             ))}
           </div>
-
-          <p className="sc-kicker sc-kicker--hero">
-            <span className="sc-kicker__dot" aria-hidden />
-            Collection open source — 2026
-          </p>
-
-          <h1 className="sc-hero__title">
-            <span className="sc-hero__line">
-              <span>Des outils</span>
-            </span>
-            <span className="sc-hero__line">
-              <span>
-                qu’on{' '}
-                <span className="sc-hero__em">
-                  <em>possède</em>
-                  <svg
-                    className="sc-hero__scribble"
-                    viewBox="0 0 260 18"
-                    preserveAspectRatio="none"
-                    aria-hidden
-                  >
-                    <path
-                      d="M3 13 C 52 4, 108 16, 158 8 S 226 4, 257 11"
-                      pathLength="1"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-                </span>
-              </span>
-            </span>
-            <span className="sc-hero__line">
-              <span>vraiment.</span>
-            </span>
-          </h1>
-
-          <p className="sc-hero__lede">
-            Une famille d’applications open source qui reprennent les outils du quotidien — sans
-            compte obligatoire, sans abonnement, sans télémétrie. La première est déjà là :{' '}
-            <strong>TubeCraft</strong> pour la vidéo, <strong>SpotifyCraft</strong> pour la musique
-            et <strong>PulseCraft</strong> pour la santé.
-          </p>
-
-          <div className="sc-hero__cta">
-            {appHref ? (
-              <Link className="sc-btn sc-btn--ink" href={appHref}>
-                Lancer TubeCraft <span aria-hidden>→</span>
-              </Link>
-            ) : (
-              <a
-                className="sc-btn sc-btn--ink"
-                href={githubHref}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Voir sur GitHub <span aria-hidden>↗</span>
-              </a>
-            )}
-            {tourOffered ? (
-              <button
-                type="button"
-                data-tour-start
-                className="sc-btn sc-btn--line sc-btn--tour"
-                onClick={startTour}
-              >
-                <span className="sc-btn__play" aria-hidden>
-                  ▶
-                </span>
-                Visite guidée
-              </button>
-            ) : null}
-          </div>
-
-          {tourOffered ? null : (
-            <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
-              <span aria-hidden>↻</span> Revoir la visite guidée
-            </button>
-          )}
-
-          <p className="sc-hero__meta">
-            Open source sur GitHub · Web · Sans compte · Aucun abonnement
-          </p>
-
-          <a href="#collection" className="sc-scrollhint" aria-label="Faire défiler vers la collection">
-            <span aria-hidden>↓</span> Défiler
-          </a>
         </section>
 
         <div className="sc-ticker" aria-hidden>
@@ -886,40 +941,8 @@ export function ShowcaseSite({
             </p>
           </div>
 
-          {/* la collection en un clin d’œil : rangée de vignettes, à la manière
-              d’une plage d’apps — chaque vignette mène à la carte de l’app */}
-          <nav
-            className="sc-launcher"
-            aria-label="Raccourcis vers les apps de la collection"
-            data-reveal
-          >
-            {apps.map((app) => (
-              <a
-                key={app.id}
-                className="sc-launcher__app"
-                href={`#app-${app.id}`}
-                style={{ '--app-accent': app.accent } as CSSProperties}
-              >
-                <span className="sc-launcher__icon" aria-hidden>
-                  {app.mark}
-                </span>
-                <span className="sc-launcher__text">
-                  <strong>{app.name}</strong>
-                  <em>{app.tagline}</em>
-                </span>
-              </a>
-            ))}
-            <a className="sc-launcher__app sc-launcher__app--next" href="#app-suite">
-              <span className="sc-launcher__icon" aria-hidden>
-                +
-              </span>
-              <span className="sc-launcher__text">
-                <strong>La suite</strong>
-                <em>En préparation</em>
-              </span>
-            </a>
-          </nav>
-
+          {/* La collection : une fiche pleine largeur par app, qui alterne le
+              texte et la démonstration. Le catalogue se lit comme une brochure. */}
           <div className="sc-apps">
             {apps.map((app, index) => {
               const isInternal = app.self === true;
@@ -928,7 +951,7 @@ export function ShowcaseSite({
                 <article
                   key={app.id}
                   id={`app-${app.id}`}
-                  className="sc-app sc-app--visual"
+                  className={`sc-app sc-app--visual${index % 2 === 1 ? ' sc-app--flip' : ''}`}
                   data-reveal
                   style={
                     {
@@ -950,6 +973,11 @@ export function ShowcaseSite({
                     </h3>
                     <p className="sc-app__tagline">{app.tagline}</p>
                     <p className="sc-app__desc">{app.description}</p>
+                    <ul className="sc-app__points" aria-label="Points forts">
+                      {app.highlights.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
                     <ul className="sc-app__stack" aria-label="Technologies">
                       {app.stack.map((item) => (
                         <li key={item}>{item}</li>
@@ -1032,7 +1060,7 @@ export function ShowcaseSite({
               );
             })}
 
-            <article className="sc-app sc-app--next sc-app--visual" id="app-suite" data-reveal>
+            <article className="sc-app sc-app--next sc-app--visual sc-app--flip" id="app-suite" data-reveal>
               <span className="sc-app__index" aria-hidden>
                 +
               </span>
@@ -1074,9 +1102,7 @@ export function ShowcaseSite({
           </div>
         </section>
 
-        <div className="sc-act-ink">
-        <section className="sc-section sc-section--manifeste sc-section--ink" id="manifeste">
-          <span className="sc-side-label" aria-hidden>02 — Manifeste</span>
+        <section className="sc-section sc-section--band sc-section--manifeste" id="manifeste">
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">02</span>
             <span className="sc-label__text">Le manifeste</span>
@@ -1084,15 +1110,15 @@ export function ShowcaseSite({
           </header>
 
           <div className="sc-manifeste">
-            <h2 className="sc-h2 sc-h2--wide sc-h2--ink" data-reveal>
+            <h2 className="sc-h2 sc-h2--wide" data-reveal>
               On ne loue pas un outil. On le <em>possède</em>.
             </h2>
-            <p className="sc-lede sc-lede--ink" data-reveal>
+            <p className="sc-lede" data-reveal>
               Pas de compte obligatoire, pas d’abonnement, pas de télémétrie. Trois règles,
               aucune exception — et elles ne bougeront pas.
             </p>
 
-            <ol className="sc-principles sc-principles--ink">
+            <ol className="sc-principles">
               <li data-reveal style={{ '--d': '0ms' } as CSSProperties}>
                 <span className="sc-principle__num">A</span>
                 <h3>Le code est le contrat.</h3>
@@ -1129,19 +1155,18 @@ export function ShowcaseSite({
           </div>
         </section>
 
-        <section className="sc-section sc-section--ink sc-section--capot" id="capot">
-          <span className="sc-side-label" aria-hidden>03 — Sous le capot</span>
+        <section className="sc-section sc-section--capot" id="capot">
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">03</span>
             <span className="sc-label__text">Sous le capot</span>
             <span className="sc-label__meta">Quatre principes techniques</span>
           </header>
 
-          <div className="sc-intro sc-intro--ink" data-reveal>
-            <h2 className="sc-h2 sc-h2--ink">
+          <div className="sc-intro" data-reveal>
+            <h2 className="sc-h2">
               Pas de boîte noire. Un <em>capot ouvert</em>.
             </h2>
-            <p className="sc-lede sc-lede--ink">
+            <p className="sc-lede">
               TubeCraft parle directement à InnerTube, PulseCraft calcule en Rust/WASM,
               SpotifyCraft lit vos fichiers en local. Même principe partout : le moins de serveurs
               possible.
@@ -1174,7 +1199,7 @@ export function ShowcaseSite({
             ))}
           </div>
 
-          <div className="sc-stats sc-stats--ink">
+          <div className="sc-stats">
             {[
               {
                 value: '0',
@@ -1210,7 +1235,7 @@ export function ShowcaseSite({
             ))}
           </div>
 
-          <p className="sc-note sc-note--ink" data-reveal>
+          <p className="sc-note" data-reveal>
             Transparence : {featured ? `${featured.name} est publié sous licence ${featured.license}.` : ''}{' '}
             Le lecteur reste celui de YouTube, dans une iframe officielle.
           </p>
@@ -1230,19 +1255,18 @@ export function ShowcaseSite({
           appIds={['tubecraft', 'pulsecraft', 'spotifycraft']}
         />
 
-        <section className="sc-section sc-section--ink sc-section--etude" id="etude" data-tour="etude">
-          <span className="sc-side-label" aria-hidden>05 — À l’étude</span>
+        <section className="sc-section sc-section--band sc-section--etude" id="etude" data-tour="etude">
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">05</span>
             <span className="sc-label__text">À l’étude</span>
             <span className="sc-label__meta">{proposals.length} propositions ouvertes</span>
           </header>
 
-          <div className="sc-intro sc-intro--ink" data-reveal>
-            <h2 className="sc-h2 sc-h2--ink">
+          <div className="sc-intro" data-reveal>
+            <h2 className="sc-h2">
               Ce qui n’est pas encore là. Et qui pourrait <em>l’être</em>.
             </h2>
-            <p className="sc-lede sc-lede--ink">
+            <p className="sc-lede">
               Des propositions publiques, classées par thème et priorisées à la main. Rien n’est
               vendu, rien n’est promis avant d’être utilisable.
             </p>
@@ -1308,11 +1332,10 @@ export function ShowcaseSite({
             </a>
           </div>
         </section>
-        </div>
 
         <section className="sc-final" data-reveal>
           <span className="sc-final__ghost" aria-hidden>
-            ATELIER
+            CRAFTLINE
           </span>
           <p className="sc-kicker">
             <span className="sc-kicker__dot" aria-hidden />
