@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useStore, type User } from '../store';
 import { Avatar } from './Avatar';
 import { IconClose, IconGear, IconHistory, IconLike, IconMail, IconShorts, IconTrash } from './icons';
+import { useEscapeKey } from '../lib/hooks';
 import { emptyProfile, profileIdFor, readProfile, saveProfile } from '../lib/profiles';
 import {
   hasGoogleClientId,
@@ -173,6 +174,10 @@ export function AccountMenu() {
     setEmail('');
   };
 
+  // `Échap` referme la fenêtre de connexion, puis le menu du compte
+  useEscapeKey(dialogOpen, closeDialog);
+  useEscapeKey(menuOpen, () => setMenuOpen(false));
+
   return (
     <>
       {user ? (
@@ -267,7 +272,7 @@ export function AccountMenu() {
 
             {view === 'providers' ? (
               <>
-                <h2 className="auth__title">Se connecter à TubeCraft</h2>
+                <h2 className="auth__title">Se connecter à Séquence</h2>
                 <p className="auth__sub">
                   Accédez à vos abonnements, à vos playlists et à votre historique.
                 </p>

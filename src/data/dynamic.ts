@@ -17,6 +17,48 @@ const MAX_CHANNELS = 120;
 let videoCache: Map<string, Video> | null = null;
 let channelCache: Map<string, Channel> | null = null;
 
+/**
+ * Écritures en attente.
+ *
+ * Sérialiser la carte complète coûte cher : à 500 vidéos, `persistMap` écrit
+ * ~220 Ko de JSON. Un import de résultats de recherche appelle `rememberVideo`
+ * puis `rememberChannel` une vingtaine de fois d'affilée : sans regroupement,
+ * c'est vingt sérialisations complètes sur le thread principal (mesuré : ~43 ms
+ * pour 20 vidéos). On marque donc la carte comme « à réécrire » et la
+ * sauvegarde réelle a lieu une seule fois, juste après la passe en cours.
+ */
+const dirtyKeys = new Set<string>();
+let flushQueued = false;
+let unloadBound = false;
+
+function persistNow(key: string): void {
+  if (key === VIDEO_KEY) persistMap(VIDEO_KEY, loadVideos(), MAX_VIDEOS);
+  else if (key === CHANNEL_KEY) persistMap(CHANNEL_KEY, loadChannels(), MAX_CHANNELS);
+}
+
+/** Écrit tout ce qui est en attente (micro-tâche, `pagehide`, tests). */
+export function flushDynamicWrites(): void {
+  flushQueued = false;
+  if (dirtyKeys.size === 0) return;
+  const keys = [...dirtyKeys];
+  dirtyKeys.clear();
+  for (const key of keys) persistNow(key);
+}
+
+/** Programme une réécriture de `key`, fusionnée avec les suivantes. */
+function schedulePersist(key: string): void {
+  if (typeof window === 'undefined') return;
+  dirtyKeys.add(key);
+  if (!unloadBound) {
+    // un onglet fermé juste après une écriture ne doit rien perdre
+    unloadBound = true;
+    window.addEventListener('pagehide', flushDynamicWrites);
+  }
+  if (flushQueued) return;
+  flushQueued = true;
+  queueMicrotask(flushDynamicWrites);
+}
+
 function readMap<T>(key: string): Map<string, T> {
   if (typeof window === 'undefined') return new Map();
   try {
@@ -89,7 +131,7 @@ export function rememberVideo(video: Video): void {
   const merged = mergeVideo(map.get(video.id), video);
   map.delete(video.id);
   map.set(video.id, merged);
-  persistMap(VIDEO_KEY, map, MAX_VIDEOS);
+  schedulePersist(VIDEO_KEY);
 }
 
 export function rememberVideos(videos: Video[]): void {
@@ -101,8 +143,8 @@ export function rememberChannel(channel: Channel): void {
   const map = loadChannels();
   map.delete(channel.id);
   map.set(channel.id, { ...map.get(channel.id), ...channel });
-  persistMap(CHANNEL_KEY, map, MAX_CHANNELS);
   channelCache = map;
+  schedulePersist(CHANNEL_KEY);
 }
 
 export function getDynamicVideo(id: string): Video | undefined {
@@ -118,7 +160,6 @@ export function getDynamicChannel(id: string): Channel | undefined {
 }
 
 export function forgetDynamicVideo(id: string): void {
-  const map = loadVideos();
-  map.delete(id);
-  persistMap(VIDEO_KEY, map, MAX_VIDEOS);
+  loadVideos().delete(id);
+  schedulePersist(VIDEO_KEY);
 }

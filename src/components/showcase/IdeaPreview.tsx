@@ -252,7 +252,7 @@ function YearlyRecap() {
   return (
     <div className="ip ip--recap" aria-hidden>
       <div className="ip-recap__head">
-        <span className="ip-kicker">Votre année TubeCraft</span>
+        <span className="ip-kicker">Votre année Séquence</span>
         <strong>128 h</strong>
         <em>de vidéos regardées en local</em>
       </div>

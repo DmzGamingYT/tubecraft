@@ -47,6 +47,7 @@ function ToggleRow({
       </span>
       <input
         type="checkbox"
+        role="switch"
         className="settings__check"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
@@ -85,7 +86,7 @@ export function Settings() {
   );
 
   useEffect(() => {
-    setPageMeta('Paramètres — TubeCraft');
+    setPageMeta('Paramètres — Séquence');
   }, []);
 
   const refresh = () => setStorageVersion((version) => version + 1);
@@ -186,7 +187,7 @@ export function Settings() {
   const clearEverything = async () => {
     if (
       !window.confirm(
-        'Effacer toutes les données TubeCraft de ce navigateur (compte, réglages, historique, playlists, commentaires, progression, cache hors ligne) ? Cette action est irréversible.'
+        'Effacer toutes les données Séquence de ce navigateur (compte, réglages, historique, playlists, commentaires, progression, cache hors ligne) ? Cette action est irréversible.'
       )
     ) {
       return;
@@ -266,12 +267,14 @@ export function Settings() {
           </h2>
           <p className="settings__desc">Le thème s’applique immédiatement et reste mémorisé.</p>
 
-          <div className="settings__row">
+          <div className="settings__row settings__row--stack">
             <span className="settings__row-text">
               <strong>Thème</strong>
               <span>Sombre par défaut, comme YouTube.</span>
             </span>
-            <div className="settings__control" role="group" aria-label="Thème">
+            {/* sélecteur segmenté : deux moitiés égales, y compris quand la
+                ligne passe sur deux niveaux sur téléphone */}
+            <div className="settings__control settings__control--seg" role="group" aria-label="Thème">
               <button
                 className={`chip${theme === 'dark' ? ' chip--active' : ''}`}
                 onClick={() => setTheme('dark')}
@@ -494,7 +497,7 @@ export function Settings() {
             Mode avion
           </h2>
           <p className="settings__desc">
-            TubeCraft garde une copie locale des pages, métadonnées et vignettes déjà visitées,
+            Séquence garde une copie locale des pages, métadonnées et vignettes déjà visitées,
             ainsi que des dernières réponses YouTube. Hors ligne, vous pouvez parcourir ces pages,
             gérer votre file, vos playlists et vos likes ; la lecture vidéo, elle, nécessite une
             connexion.
@@ -545,7 +548,7 @@ export function Settings() {
               accept="application/json,.json"
               onChange={handleImport}
               hidden
-              aria-label="Fichier de sauvegarde TubeCraft"
+              aria-label="Fichier de sauvegarde Séquence"
             />
           </div>
           <p className="settings__hint">

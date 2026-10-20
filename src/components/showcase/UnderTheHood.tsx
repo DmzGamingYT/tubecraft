@@ -45,7 +45,7 @@ export function UnderTheHood() {
       <div className="sc-flow" aria-hidden>
         <div className="sc-flow__node">
           <span className="sc-flow__kind">Navigateur</span>
-          <strong>TubeCraft</strong>
+          <strong>Séquence</strong>
           <small>React · état local</small>
           <span className="sc-flow__chip">0 clé API</span>
         </div>

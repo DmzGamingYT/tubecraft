@@ -1,5 +1,5 @@
 /*
- * Service worker de TubeCraft — coquille + mode avion.
+ * Service worker de Séquence — coquille + mode avion.
  *
  * - navigations : réseau d’abord, cache de secours (l’app reste ouvrable hors
  *   ligne une fois visitée) ;

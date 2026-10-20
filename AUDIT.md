@@ -1,12 +1,12 @@
-# Audit TubeCraft — état des lieux et feuille de route
+# Audit Séquence — état des lieux et feuille de route
 
 _Revue complète du projet, 17 octobre 2026. Ce document liste ce qui a été corrigé dans cette
-passe, les risques restants et les fonctionnalités qui feraient passer TubeCraft au niveau
+passe, les risques restants et les fonctionnalités qui feraient passer Séquence au niveau
 supérieur._
 
 ## 1. Synthèse
 
-TubeCraft est déjà bien plus qu'une maquette : le catalogue est réel, la recherche interroge
+Séquence est déjà bien plus qu'une maquette : le catalogue est réel, la recherche interroge
 YouTube en direct, le lecteur officiel fonctionne, les commentaires sont authentiques et
 l'expérience (thème, Shorts, playlists, historique) tient debout. Le code est lisible, typé et
 correctement découpé.

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/banner.svg" alt="TubeCraft — client YouTube open source, sans clé API" width="100%">
+<img src="docs/assets/banner.svg" alt="Séquence — client YouTube open source, sans clé API" width="100%">
 
 [![CI](https://github.com/DmzGamingYT/tubecraft/actions/workflows/ci.yml/badge.svg)](https://github.com/DmzGamingYT/tubecraft/actions/workflows/ci.yml)
 ![licence MIT](https://img.shields.io/badge/licence-MIT-8b8578?style=flat-square&labelColor=0b0b0c)
@@ -13,7 +13,7 @@
 Recherche, lecteur, Shorts, abonnements, commentaires, playlists et mini-lecteur persistant —
 avec de **vraies données YouTube** et vos données qui restent dans le navigateur.
 
-[**▶ Ouvrir TubeCraft**](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page) ·
+[**▶ Ouvrir Séquence**](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page) ·
 [**⬇ Installer**](#installer) ·
 [**🧩 La collection**](#la-collection-craftline) ·
 [**📋 Audit & feuille de route**](AUDIT.md)
@@ -30,7 +30,7 @@ avec de **vraies données YouTube** et vos données qui restent dans le navigate
 <table>
 <tr>
 <td width="50%">
-<img src="docs/assets/app-home.svg" alt="Accueil de TubeCraft : chips de catégories, grille de vidéos, barre latérale">
+<img src="docs/assets/app-home.svg" alt="Accueil de Séquence : chips de catégories, grille de vidéos, barre latérale">
 <p align="center"><em>Accueil — grille progressive, chips de catégories, étagère Shorts, « Reprendre la lecture ».</em></p>
 </td>
 <td width="50%">
@@ -110,13 +110,13 @@ requête d'écriture ni route de débogage n'est mise en cache.
 
 **Le plus simple : installer la web app depuis le navigateur.** Une seule app, cinq plateformes,
 pas d'installeur à décompresser — le navigateur crée une icône, une fenêtre et un raccourci, puis
-TubeCraft se met à jour toute seule.
+Séquence se met à jour toute seule.
 
 | Plateforme | Comment |
 | --- | --- |
 | 🍎 **macOS** | [ouvrir l'app](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page) → Chrome / Edge : icône d'installation dans la barre d'adresse · Safari 17+ : *Fichier → Ajouter au Dock* |
 | 🪟 **Windows** | Chrome ou Edge → icône d'installation dans la barre d'adresse |
-| 🐧 **Linux** | Chrome, Edge ou Chromium → « Installer TubeCraft » |
+| 🐧 **Linux** | Chrome, Edge ou Chromium → « Installer Séquence » |
 | 🤖 **Android** | Chrome → menu ⋮ → « Ajouter à l'écran d'accueil » |
 | 🍏 **iPhone / iPad** | Safari → Partager → « Sur l'écran d'accueil » |
 
@@ -143,8 +143,8 @@ WebKitGTK sur Linux.
 | `npm run icon` | régénère toutes les icônes depuis `src-tauri/app-icon.svg` |
 
 Sur un Mac Apple Silicon, le build produit
-`src-tauri/target/release/bundle/macos/TubeCraft.app` et
-`.../dmg/TubeCraft_0.1.0_aarch64.dmg`. Les paquets Windows (MSI/NSIS) et Linux (AppImage/DEB) se
+`src-tauri/target/release/bundle/macos/Séquence.app` et
+`.../dmg/Séquence_0.1.0_aarch64.dmg`. Les paquets Windows (MSI/NSIS) et Linux (AppImage/DEB) se
 compilent sur leur système respectif.
 
 L'icône est dessinée en SVG dans [`src-tauri/app-icon.svg`](src-tauri/app-icon.svg) : verre rubis
@@ -162,21 +162,22 @@ ICNS, ICO et PNG pour toutes les tailles.
 
 ## La collection Craftline
 
-<img src="docs/assets/apps-collection.svg" alt="TubeCraft, SpotifyCraft et PulseCraft" width="100%">
+<img src="docs/assets/apps-collection.svg" alt="Séquence, Portée et Battement" width="100%">
 
-TubeCraft est la première app de **Craftline**, une collection d'outils open source qui refusent
+Séquence est la première app de **Craftline**, une collection d'outils open source qui refusent
 l'abonnement et la télémétrie. La vitrine de la collection est incluse dans ce dépôt, à la route
-[`/apps`](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/apps).
+[`/collection/`](https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/collection/).
 
 | App | Statut | Dépôt |
 | --- | --- | --- |
-| **TubeCraft** — YouTube | disponible (web + desktop) | ce dépôt |
-| **SpotifyCraft** — musique | disponible (web + natif) | [DmzGamingYT/spotifycraft](https://github.com/DmzGamingYT/spotifycraft) |
-| **PulseCraft** — santé | disponible (natif + web) | [DmzGamingYT/pulsecraft](https://github.com/DmzGamingYT/pulsecraft) |
+| **Séquence** — YouTube | disponible (web + desktop) | ce dépôt |
+| **Portée** — musique | disponible (web + natif) | [DmzGamingYT/spotifycraft](https://github.com/DmzGamingYT/spotifycraft) |
+| **Battement** — santé | disponible (natif + web) | [DmzGamingYT/pulsecraft](https://github.com/DmzGamingYT/pulsecraft) |
 
 La vitrine présente chaque app avec une **démo d'interface animée**, une **visite guidée** pas à pas,
-une galerie plein écran, un thème papier / nuit et une section « À l'étude » qui liste les
-propositions sans jamais les présenter comme terminées.
+une galerie plein écran et un thème papier / nuit. Trois sections donnent le ton : « La preuve »
+rassemble une fiche d'identité vérifiable par app, « La fabrique » montre le socle technique commun
+et « L'atelier » explique comment contribuer sans compte.
 
 ---
 
@@ -184,7 +185,7 @@ propositions sans jamais les présenter comme terminées.
 
 <img src="docs/assets/architecture.svg" alt="Architecture : navigateur, proxy local /yt/api, InnerTube et services publics" width="100%">
 
-TubeCraft ne demande **aucune clé API Google** : elle parle à **InnerTube** (le canal que
+Séquence ne demande **aucune clé API Google** : elle parle à **InnerTube** (le canal que
 youtube.com utilise lui-même) via un proxy local, et lit les vidéos avec le **lecteur officiel**
 YouTube (iframe). Les métadonnées, résultats de recherche, suggestions et commentaires affichés sont
 donc de vraies données YouTube.
@@ -294,7 +295,7 @@ Aucun compte factice n'est pré-rempli :
    `VITE_GOOGLE_CLIENT_ID=...apps.googleusercontent.com`.
 4. Relancez `npm run dev`.
 
-> ⚠️ La connexion Google ne sert qu'à récupérer nom, e-mail et photo. TubeCraft ne demande
+> ⚠️ La connexion Google ne sert qu'à récupérer nom, e-mail et photo. Séquence ne demande
 > **aucun scope YouTube** et ne peut pas agir sur votre compte Google. Les « comptes locaux » ne sont
 > pas une authentification : ne les considérez pas comme une protection.
 
@@ -311,7 +312,7 @@ npm install
 npm run dev        # http://127.0.0.1:5183
 ```
 
-Sur macOS, vous pouvez aussi **double-cliquer sur `Démarrer TubeCraft.command`** : le script installe
+Sur macOS, vous pouvez aussi **double-cliquer sur `Démarrer Séquence.command`** : le script installe
 les dépendances si besoin, lance le serveur et ouvre le navigateur.
 
 | Commande | Rôle |
@@ -325,6 +326,12 @@ les dépendances si besoin, lance le serveur et ouvre le navigateur.
 | `npm run dev:showcase` | vitrine seule sur `http://127.0.0.1:5185` |
 | `npm run build:showcase` | build de la vitrine dans `dist-showcase/` |
 | `npm run build:site` | build du front + bundle du Worker dans `dist-worker/` |
+| `npm run format:css` | reformate `src/styles/showcase.css` (vérifie qu'aucune règle ne change) |
+| `npm run og` | regénère les images de partage (Open Graph) |
+| `npm run shots` | captures de la vitrine, par section et par thème (Playwright) |
+
+> `npm run og` et `npm run shots` ont besoin de Playwright : `npm i -D playwright`
+> puis `npx playwright install chromium`.
 
 <details>
 <summary><strong>Structure du dépôt</strong></summary>
@@ -342,7 +349,7 @@ src/lib/url.ts             URLs absolues compatibles base Vite (GitHub Pages)
 src/data/                  catalogue généré, index, registre des vidéos/chaînes découvertes
 src/store.ts               état persistant (thème, likes, abonnements, historique, commentaires)
 src/components/            barre haute, barre latérale, cartes, commentaires, lecteur…
-src/components/showcase/   vitrine (démos animées, visite guidée, galerie, « Sous le capot »)
+src/components/showcase/   vitrine (démos animées, visite guidée, galerie, aperçus d'idées)
 src/pages/                 routes chargées à la demande
 showcase/                  entrée du site vitrine autonome
 src-tauri/                 shell desktop Tauri 2
@@ -351,32 +358,43 @@ src-tauri/                 shell desktop Tauri 2
 </details>
 
 <details>
-<summary><strong>Vitrine autonome (<code>/apps</code>)</strong></summary>
+<summary><strong>Vitrine autonome (<code>/collection/</code>)</strong></summary>
 
 La collection s'appelle **Craftline** : un C ouvert et un triangle de lecture sur une tuile rouge,
-dessinés dans `CraftlineMark.tsx` et repris par le favicon. La présentation des apps existe à deux
-endroits, à partir du **même composant** (`src/components/ShowcaseSite.tsx`) :
+dessinés dans `CraftlineMark.tsx` et repris par le favicon. La présentation des apps vit dans
+**un seul composant** (`src/components/ShowcaseSite.tsx`), compilé de deux façons :
 
-- `/apps` dans l'application (route React, hors du chrome YouTube) ;
-- un **site statique séparé**, compilé dans `dist-showcase/`.
+- un **site statique** dans `dist-showcase/`, publié sous `/collection/` — c'est l'adresse
+  canonique de la collection ;
+- la route React `/apps` dans l'application, qui n'est plus qu'une **redirection** vers
+  `/collection/`.
+
+Pourquoi une page statique ? Parce qu'elle est lue sans JavaScript : son `<title>`, sa description,
+son image de partage et son `canonical` sont dans le HTML servi, pas injectés après coup. Un lien
+partagé sur Discord ou dans un moteur de recherche montre « Craftline », pas « Séquence ».
 
 `dist-showcase/` est **portable** : les chemins d'assets sont relatifs (`base: './'`), donc le
 dossier peut être déposé à la racine d'un domaine ou dans un sous-dossier (GitHub Pages de projet,
-Netlify Drop, Cloudflare Pages…) sans rebuild.
+Netlify Drop, Cloudflare Pages…) sans rebuild. En revanche, un dossier doit toujours se terminer
+par une barre oblique, sinon les assets se résolvent à la racine.
 
 ```bash
 npm run build:showcase
 python3 -m http.server 8080 --directory dist-showcase
 ```
 
-Pour que les boutons « Ouvrir TubeCraft » pointent vers l'application déployée, renseignez
-`VITE_APP_URL` **au moment du build** :
+Deux variables d'environnement sont lues **au moment du build** :
+
+| Variable | Rôle |
+| --- | --- |
+| `VITE_APP_URL` | adresse de l'application, pour que « Ouvrir Séquence » ouvre vraiment l'app |
+| `VITE_SITE_URL` | adresse de la vitrine, pour le `<link rel="canonical">` et les balises Open Graph — pré-remplie dans `showcase/.env` |
 
 ```bash
 VITE_APP_URL=https://mon-tubecraft.example npm run build:showcase
 ```
 
-Sans cette variable, la vitrine renvoie vers le profil GitHub au lieu d'afficher un lien mort. Les
+Sans `VITE_APP_URL`, la vitrine renvoie vers le profil GitHub au lieu d'afficher un lien mort. Les
 apps et leurs liens vivent dans `src/data/apps.ts` ; la section **« À l'étude »** est alimentée par
 `src/data/proposals.ts` (statuts `exploring` / `proposed` uniquement).
 
@@ -386,7 +404,7 @@ apps et leurs liens vivent dans `src/data/apps.ts` ; la section **« À l'étude
 
 ## Déploiement
 
-**TubeCraft est en ligne gratuitement sur Freebuff Sites :**
+**Séquence est en ligne gratuitement sur Freebuff Sites :**
 
 - application : <https://site-837caca50a67485a994f4549b9ef7404.freebuff.page>
 - aperçu de préproduction : <https://site-ec05ebb2a2f4432ab76b5023e70af9b2.freebuff.page>
@@ -453,7 +471,7 @@ fusion des notifications et la mémoire de la visite guidée. Le workflow
 ## Limites connues
 
 - Les vidéos dont la chaîne a **désactivé l'intégration** ne peuvent pas être lues dans un iframe.
-  TubeCraft utilise uniquement le lecteur officiel, jamais d'URL de flux extraite.
+  Séquence utilise uniquement le lecteur officiel, jamais d'URL de flux extraite.
 - La lecture automatique peut être bloquée par le navigateur : cliquez sur ▶ dans le lecteur.
 - InnerTube est une API non contractuelle : si YouTube change de format, `npm run catalog`, la
   recherche et le parsing peuvent nécessiter une mise à jour.
@@ -466,5 +484,5 @@ fusion des notifications et la mémoire de la visite guidée. Le workflow
 
 ## Licence
 
-TubeCraft est publié sous licence [MIT](LICENSE) — libre à chacun d'utiliser, modifier et
+Séquence est publié sous licence [MIT](LICENSE) — libre à chacun d'utiliser, modifier et
 redistribuer.

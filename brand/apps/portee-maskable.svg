@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Portée">
+  <title>Portée (maskable)</title>
+  <defs>
+    <linearGradient id="pt-tile-m" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#2ce07d"/>
+      <stop offset="0.52" stop-color="#15b95a"/>
+      <stop offset="1" stop-color="#0b7f3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#pt-tile-m)"/>
+  <g transform="translate(512 512) scale(0.78) translate(-512 -512)">
+    <g stroke="#0c0c0d" stroke-opacity="0.3" stroke-width="26" stroke-linecap="round">
+      <path d="M262 372h500"/>
+      <path d="M262 462h500"/>
+      <path d="M262 552h500"/>
+      <path d="M262 642h500"/>
+    </g>
+    <g fill="#0c0c0d">
+      <ellipse cx="462" cy="566" rx="58" ry="43" transform="rotate(-20 462 566)"/>
+      <rect x="507" y="330" width="28" height="246" rx="14"/>
+      <path d="M535 330c68 20 96 68 86 129-22-42-52-64-86-72Z"/>
+    </g>
+  </g>
+</svg>

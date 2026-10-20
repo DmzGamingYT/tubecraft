@@ -3,26 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f2f0ea" />
-    <title>Craftline — apps open source</title>
+    <title>Craftline — des outils qu'on possède vraiment</title>
     <meta
       name="description"
-      content="Craftline, une collection d’applications open source : TubeCraft, SpotifyCraft et PulseCraft. Sans compte obligatoire, sans abonnement, sans télémétrie — et les prochaines fonctions sont proposées en public."
+      content="Séquence, Portée, Battement et Feuillet : quatre applications open source, sans compte obligatoire, sans abonnement, sans télémétrie. Le code est public et les données restent dans votre navigateur."
     />
+    <link rel="canonical" href="%VITE_SITE_URL%" />
+
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Craftline — apps open source" />
+    <meta property="og:site_name" content="Craftline" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content="Craftline — des outils qu'on possède vraiment" />
     <meta
       property="og:description"
-      content="Des outils qu’on possède vraiment : le code est public et les données restent dans votre navigateur."
+      content="Quatre applications open source — vidéo, musique, santé, notes. Sans compte obligatoire, sans abonnement, sans télémétrie."
     />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
+    <meta property="og:image" content="%VITE_SITE_URL%og-craftline.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Craftline — Des outils qu'on possède vraiment" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Craftline — des outils qu'on possède vraiment" />
+    <meta
+      name="twitter:description"
+      content="Quatre applications open source — vidéo, musique, santé, notes. Sans compte, sans abonnement, sans télémétrie."
+    />
+    <meta name="twitter:image" content="%VITE_SITE_URL%og-craftline.png" />
+
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./og-craftline.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Craftline",
+        "description": "Une collection d'applications open source : vidéo, musique et santé. Sans compte obligatoire, sans abonnement, sans télémétrie.",
+        "url": "%VITE_SITE_URL%",
+        "inLanguage": "fr-FR",
+        "license": "https://opensource.org/licenses/MIT",
+        "about": [
+          {
+            "@type": "SoftwareApplication",
+            "name": "Séquence",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "Web, iOS, Android, macOS, Windows, Linux",
+            "url": "https://github.com/DmzGamingYT/tubecraft",
+            "codeRepository": "https://github.com/DmzGamingYT/tubecraft",
+            "license": "https://opensource.org/licenses/MIT",
+            "description": "Client YouTube complet : recherche, lecteur, Shorts, abonnements et commentaires. Aucune clé API, données locales.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Portée",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "Web, iOS, Android, macOS, Windows, Linux",
+            "url": "https://github.com/DmzGamingYT/spotifycraft",
+            "codeRepository": "https://github.com/DmzGamingYT/spotifycraft",
+            "license": "https://opensource.org/licenses/MIT",
+            "description": "Lecteur musical : catalogue iTunes, extraits de 30 s, paroles synchronisées, égaliseur. Import de fichiers locaux.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Battement",
+            "applicationCategory": "HealthApplication",
+            "operatingSystem": "Web, iOS, Android, macOS, Windows, Linux",
+            "url": "https://github.com/DmzGamingYT/pulsecraft",
+            "codeRepository": "https://github.com/DmzGamingYT/pulsecraft",
+            "license": "https://opensource.org/licenses/MIT",
+            "description": "Suivi sportif et santé local-first : anneaux d'objectifs, sommeil, nutrition, import Apple Health, coach IA. Aucune donnée envoyée sans accord.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Feuillet",
+            "applicationCategory": "ProductivityApplication",
+            "operatingSystem": "Web, iOS, Android, macOS, Windows, Linux",
+            "url": "https://github.com/DmzGamingYT/feuilletcraft",
+            "codeRepository": "https://github.com/DmzGamingYT/feuilletcraft",
+            "license": "https://opensource.org/licenses/MIT",
+            "description": "Carnet local-first : pages de blocs, cases à cocher, citations et petites bases de données. Sans compte ni serveur.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

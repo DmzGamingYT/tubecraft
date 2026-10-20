@@ -25,7 +25,7 @@ const profilesValue = JSON.stringify({ version: 1, profiles: { guest: { liked: [
 const videosValue = JSON.stringify({ abcdefghijk: { id: 'abcdefghijk' } });
 
 describe('exportUserData', () => {
-  it('n’exporte que les clés TubeCraft connues', () => {
+  it('n’exporte que les clés Séquence connues', () => {
     const storage = fakeStorage({
       [STORAGE_KEYS.store]: storeValue,
       [STORAGE_KEYS.profiles]: profilesValue,

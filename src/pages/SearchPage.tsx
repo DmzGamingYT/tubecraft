@@ -44,7 +44,7 @@ export function SearchPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setPageMeta(query ? `${query} — recherche TubeCraft` : 'Recherche — TubeCraft');
+    setPageMeta(query ? `${query} — recherche Séquence` : 'Recherche — Séquence');
   }, [query]);
 
   useEffect(() => {

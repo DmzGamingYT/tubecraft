@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('TubeCraft — erreur de rendu', error, info.componentStack);
+    console.error('Séquence — erreur de rendu', error, info.componentStack);
   }
 
   render() {

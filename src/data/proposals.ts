@@ -1,5 +1,5 @@
 /**
- * Propositions de fonctionnalités pour TubeCraft, affichées dans la section
+ * Propositions de fonctionnalités pour Séquence, affichées dans la section
  * « À l’étude » de la vitrine.
  *
  * Rien ici n’est encore développé : ce sont des idées ouvertes, classées par
@@ -29,7 +29,7 @@ export const proposals: FeatureProposal[] = [
     id: 'command-palette',
     title: 'Palette de commandes ⌘K',
     summary:
-      'Lancer une vidéo, changer de thème, ouvrir une chaîne ou un réglage sans quitter le clavier. Une seule entrée, et tout TubeCraft devient accessible.',
+      'Lancer une vidéo, changer de thème, ouvrir une chaîne ou un réglage sans quitter le clavier. Une seule entrée, et tout Séquence devient accessible.',
     tag: 'Confort',
     status: 'exploring',
   },
@@ -61,7 +61,7 @@ export const proposals: FeatureProposal[] = [
     id: 'import-subscriptions',
     title: 'Importer ses abonnements YouTube',
     summary:
-      'Coller un export d’abonnements et retrouver ses chaînes dans TubeCraft en un clic, plutôt que de les réajouter une par une.',
+      'Coller un export d’abonnements et retrouver ses chaînes dans Séquence en un clic, plutôt que de les réajouter une par une.',
     tag: 'Migration',
     status: 'proposed',
   },

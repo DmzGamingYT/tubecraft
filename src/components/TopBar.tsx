@@ -4,13 +4,22 @@ import { useStore } from '../store';
 import { useClickOutside } from '../lib/hooks';
 import { AccountMenu } from './AccountMenu';
 import { NotificationsBell } from './NotificationsBell';
-import { IconClose, IconDownload, IconMenu, IconMoon, IconSearch, IconSun } from './icons';
+import {
+  IconClose,
+  IconDownload,
+  IconKeyboard,
+  IconMenu,
+  IconMoon,
+  IconSearch,
+  IconSun,
+} from './icons';
 
 interface Props {
   onBurger: () => void;
+  onShortcuts?: () => void;
 }
 
-export function TopBar({ onBurger }: Props) {
+export function TopBar({ onBurger, onShortcuts }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useStore((s) => s.theme);
@@ -117,14 +126,14 @@ export function TopBar({ onBurger }: Props) {
         <button className="iconbtn" onClick={onBurger} aria-label="Menu de navigation">
           <IconMenu />
         </button>
-        <Link to="/" className="logo" aria-label="TubeCraft — accueil">
+        <Link to="/" className="logo" aria-label="Séquence — accueil">
           <span className="logo__mark">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
           <span className="logo__text">
-            TubeCraft<span className="logo__sup">FR</span>
+            Séquence<span className="logo__sup">FR</span>
           </span>
         </Link>
       </div>
@@ -207,12 +216,22 @@ export function TopBar({ onBurger }: Props) {
         <Link
           to="/download"
           className="iconbtn"
-          aria-label="Installer TubeCraft sur cet appareil"
-          title="Installer TubeCraft"
+          aria-label="Installer Séquence sur cet appareil"
+          title="Installer Séquence"
         >
           <IconDownload width={22} height={22} />
         </Link>
         <NotificationsBell />
+        {onShortcuts && (
+          <button
+            className="iconbtn iconbtn--keys"
+            onClick={onShortcuts}
+            aria-label="Afficher les raccourcis clavier"
+            title="Raccourcis clavier (?)"
+          >
+            <IconKeyboard width={22} height={22} />
+          </button>
+        )}
         <button
           className="iconbtn"
           onClick={toggleTheme}

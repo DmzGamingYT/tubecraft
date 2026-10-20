@@ -113,7 +113,7 @@ export function Watch() {
   useEffect(() => {
     if (!video) return;
     setPageMeta(
-      `${video.title} — TubeCraft`,
+      `${video.title} — Séquence`,
       video.description ? video.description.slice(0, 160) : undefined
     );
   }, [video]);

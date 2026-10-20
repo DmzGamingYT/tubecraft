@@ -15,6 +15,9 @@
     "dev:showcase": "vite --config vite.showcase.config.ts",
     "build:showcase": "tsc --noEmit -p tsconfig.showcase.json && vite build --config vite.showcase.config.ts",
     "preview:showcase": "vite preview --config vite.showcase.config.ts",
+    "format:css": "node scripts/format-css.mjs src/styles/showcase.css",
+    "og": "node scripts/make-og.mjs",
+    "shots": "node scripts/shots.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.showcase.json",
     "catalog": "node scripts/build-catalog.mjs",
     "test": "vitest run"

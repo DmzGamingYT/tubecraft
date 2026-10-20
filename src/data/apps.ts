@@ -2,30 +2,46 @@
  * Les apps présentées sur la vitrine (`/apps` dans l'app, `showcase/` en site
  * autonome).
  *
- * La première entrée est mise en avant : c'est TubeCraft, l'app de ce dépôt.
+ * La première entrée est mise en avant : c'est Séquence, l'app de ce dépôt.
  * Pour ajouter une app, dupliquez une entrée et renseignez `source` avec
  * l'URL du dépôt public. `self: true` = l'application de ce dépôt, dont
  * l'URL est fournie par la page (route SPA ou site déployé).
  *
  * La vitrine ne présente que des apps réellement utilisables : rien n'y figure
- * avant d'être en ligne. Aujourd'hui : TubeCraft, SpotifyCraft et PulseCraft.
+ * avant d'être en ligne. Aujourd'hui : Séquence, Portée et Battement.
  */
+
+import { remoteAppUrl } from '../lib/url';
+import featilletIcon from '../assets/apps/feuillet.svg';
+import pulsecraftIcon from '../assets/apps/pulsecraft.svg';
+import spotifycraftIcon from '../assets/apps/spotifycraft.svg';
+import tubecraftIcon from '../assets/apps/tubecraft.svg';
 
 export interface OpenSourceApp {
   id: string;
   /** nom affiché, en gros sur la carte */
   name: string;
-  /** monogramme de la pastille colorée */
+  /** monogramme de repli, quand l’icône n’est pas affichée */
   mark: string;
+  /** icône carrée de l’app, dans la famille graphique Craftline */
+  icon: string;
   /** une phrase, l'accroche */
   tagline: string;
-  /** deux ou trois phrases de description */
+  /**
+   * Une phrase, deux tout au plus.
+   *
+   * La fiche catalogue ne doit pas se lire comme un mode d'emploi : le détail
+   * long vit dans la galerie. Au-delà de ~25 mots, la ligne casse et la
+   * fiche cesse d'être une fiche.
+   */
   description: string;
+  /** trois points forts, une ligne chacun, affichés en puces */
+  highlights: string[];
   /** couleur d'accent de la carte */
   accent: string;
   stack: string[];
   license: string;
-  /** l'app de ce dépôt (TubeCraft) : URL fournie par le contexte */
+  /** l'app de ce dépôt (Séquence) : URL fournie par le contexte */
   self?: boolean;
   /**
    * URL de lancement d'une app qui n'est pas celle de ce dépôt (autre origine,
@@ -42,31 +58,65 @@ export interface OpenSourceApp {
 export const githubProfile = 'https://github.com/DmzGamingYT';
 
 /**
- * Adresse de lancement d'une app servie hors de ce dépôt.
+ * Adresse de la vitrine de la collection.
+ *
+ * La vitrine est une page statique à part entière (`/collection/`), servie à
+ * côté de l'application : elle a son propre `<title>`, sa propre image de
+ * partage et son propre poids en JavaScript. L'application garde la route
+ * `/apps` en redirection, pour que les liens déjà partagés marchent encore.
+ */
+export const collectionUrl =
+  (import.meta.env.VITE_COLLECTION_URL ?? '').trim() || '/collection/';
+
+/**
+ * Adresse publique de la web app Battement.
+ *
+ * Elle est servie à côté de Séquence, dans un sous-dossier (`/pulsecraft/`) du
+ * même hébergement. `VITE_PULSECRAFT_URL` la remplace au build si l’app part
+ * ailleurs. Elle est préférée à un lien mort : l’app est réellement en ligne,
+ * donc la carte et la section « Télécharger » peuvent y renvoyer.
+ */
+export const pulsecraftWebUrl =
+  'https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/pulsecraft/';
+
+/**
+ * Adresse publique du carnet Feuillet, servi dans `/feuillet/` du même
+ * hébergement. `VITE_FEUILLET_URL` la remplace au build.
+ */
+export const feuilletWebUrl =
+  'https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/feuillet/';
+
+/**
+ * Adresse de lancement d’une app servie hors de ce dépôt.
  *
  * Au build, `VITE_PULSECRAFT_URL` / `VITE_SPOTIFYCRAFT_URL` permettent de
- * pointer une vraie instance publique (`./pulsecraft/` quand la vitrine et
- * l'app sont déployées ensemble). En développement, on retombe sur le serveur
- * local pour que « Lancer » marche vraiment ; en production sans variable, la
- * carte ne propose que le code plutôt qu'un lien mort.
+ * pointer une autre instance ; sinon on retombe sur l’URL publique connue
+ * (`pulsecraftWebUrl`) en production, et sur le serveur local en développement
+ * pour que « Lancer » marche vraiment. Une app sans URL connue ne propose que
+ * son code (c’est le cas de Portée aujourd’hui).
  */
-function launchUrl(envValue: string | undefined, localPort: number): string | undefined {
-  const configured = envValue?.trim();
-  if (configured) return configured;
-  return import.meta.env.DEV ? `http://127.0.0.1:${localPort}/` : undefined;
-}
-
-const pulsecraftUrl = launchUrl(import.meta.env.VITE_PULSECRAFT_URL, 5186);
-const spotifycraftUrl = launchUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
+const pulsecraftUrl = remoteAppUrl(
+  import.meta.env.VITE_PULSECRAFT_URL,
+  5186,
+  pulsecraftWebUrl
+);
+const spotifycraftUrl = remoteAppUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
+const feuilletUrl = remoteAppUrl(import.meta.env.VITE_FEUILLET_URL, 5187, feuilletWebUrl);
 
 export const apps: OpenSourceApp[] = [
   {
     id: 'tubecraft',
-    name: 'TubeCraft',
-    mark: 'TC',
+    name: 'Séquence',
+    mark: 'SE',
+    icon: tubecraftIcon,
     tagline: 'YouTube, en open source.',
     description:
-      'Un client YouTube complet : recherche, lecteur, Shorts, abonnements, commentaires, mini-lecteur persistant et reprise de lecture. Il parle directement à YouTube, sans clé API, et garde vos données dans le navigateur.',
+      'Un client YouTube complet — recherche, lecteur, Shorts, abonnements, commentaires — sans clé API, avec vos données dans le navigateur.',
+    highlights: [
+      'Reprise de lecture et mini-lecteur',
+      'Shorts verticaux et abonnements',
+      'Recherche Instantanée, sans quota',
+    ],
     accent: '#ff2d46',
     stack: ['React', 'Vite', 'TypeScript', 'InnerTube'],
     license: 'MIT',
@@ -76,11 +126,17 @@ export const apps: OpenSourceApp[] = [
   },
   {
     id: 'spotifycraft',
-    name: 'SpotifyCraft',
-    mark: 'SP',
+    name: 'Portée',
+    mark: 'PO',
+    icon: spotifycraftIcon,
     tagline: 'La musique, sans le nuage.',
     description:
-      'Lecteur musical façon Spotify : catalogue iTunes (métadonnées Spotify si vous connectez votre compte), extraits officiels de 30 s, paroles synchronisées, égaliseur 10 bandes, Daily Mix calculés en local — et lecture complète de vos propres MP3, FLAC ou M4A importés dans le navigateur.',
+      'Lecteur musical : catalogue iTunes, extraits de 30 s, paroles synchronisées, égaliseur — et la lecture de vos propres fichiers importés.',
+    highlights: [
+      'Daily Mix et égaliseur 10 bandes',
+      'Vos MP3, FLAC et M4A importés',
+      'Extraits officiels et paroles',
+    ],
     accent: '#1ed760',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM'],
     license: 'MIT',
@@ -90,16 +146,42 @@ export const apps: OpenSourceApp[] = [
   },
   {
     id: 'pulsecraft',
-    name: 'PulseCraft',
-    mark: 'PC',
+    name: 'Battement',
+    mark: 'BA',
+    icon: pulsecraftIcon,
     tagline: 'Vos données de santé restent chez vous.',
     description:
-      'Un suivi sportif et santé local-first : anneaux d’objectifs, journal d’entraînement, sommeil, corps, nutrition et coach IA. Import Apple Health, Samsung Health, GPX et TCX, calculs en Rust/WASM, app native Tauri — et aucune donnée envoyée sans votre accord.',
+      'Suivi sportif et santé local-first : anneaux d’objectifs, sommeil, corps, nutrition et coach IA — avec import Apple Health et calculs Rust/WASM.',
+    highlights: [
+      'Import Apple Health et Samsung Health',
+      'Anneaux d’objectifs, sommeil, nutrition',
+      'Coach IA, calculs Rust/WASM',
+    ],
     accent: '#c9ff3d',
     stack: ['React', 'Vite', 'TypeScript', 'Rust → WASM', 'Tauri 2'],
     license: 'MIT',
     // Instance publique via `VITE_PULSECRAFT_URL`, sinon serveur local (5186).
     ...(pulsecraftUrl ? { url: pulsecraftUrl } : {}),
     source: 'https://github.com/DmzGamingYT/pulsecraft',
+  },
+  {
+    id: 'feuilletcraft',
+    name: 'Feuillet',
+    mark: 'FE',
+    icon: featilletIcon,
+    tagline: 'Un carnet qui vous appartient.',
+    description:
+      'Notes local-first : pages de blocs, cases à cocher, citations et petites bases de données — sans compte, sans serveur, sans synchronisation obligatoire.',
+    highlights: [
+      'Pages imbriquées et recherche plein texte',
+      'Bases simples : colonnes typées, tri, lignes',
+      'Gestes « / » et markdown, thème clair ou sombre',
+    ],
+    accent: '#4f5bff',
+    stack: ['React', 'Vite', 'TypeScript', 'IndexedDB'],
+    license: 'MIT',
+    // Instance publique via `VITE_FEUILLET_URL`, sinon serveur local (5187).
+    ...(feuilletUrl ? { url: feuilletUrl } : {}),
+    source: 'https://github.com/DmzGamingYT/feuilletcraft',
   },
 ];

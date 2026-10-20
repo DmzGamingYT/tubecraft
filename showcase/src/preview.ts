@@ -3,7 +3,7 @@ import type { ShowcasePreviewItem } from '../../src/components/ShowcaseSite';
 /**
  * Aperçu de la fenêtre de démonstration du hero.
  *
- * Ce sont de vraies vidéos du catalogue TubeCraft (les Blender Open Movies,
+ * Ce sont de vraies vidéos du catalogue Séquence (les Blender Open Movies,
  * publiées en licence libre). Elles sont figées ici pour que le site autonome
  * n'embarque pas tout le catalogue de l'application.
  */

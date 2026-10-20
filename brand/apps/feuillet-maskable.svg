@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Feuillet">
+  <title>Feuillet (maskable)</title>
+  <defs>
+    <linearGradient id="ff-tile-m" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#7b86ff"/>
+      <stop offset="0.52" stop-color="#4f5bff"/>
+      <stop offset="1" stop-color="#3339d6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ff-tile-m)"/>
+  <g transform="translate(512 512) scale(0.78) translate(-512 -512)">
+    <path
+      d="M344 246h248l92 92v440H344Z"
+      fill="#0c0c0d"
+      stroke="#0c0c0d"
+      stroke-width="30"
+      stroke-linejoin="round"
+    />
+    <path d="M592 246v92h92" fill="#7b86ff" opacity="0.55"/>
+    <g stroke="#e7e9ff" stroke-width="30" stroke-linecap="round">
+      <path d="M420 450h176"/>
+      <path d="M420 522h176"/>
+      <path d="M420 594h108"/>
+    </g>
+  </g>
+</svg>

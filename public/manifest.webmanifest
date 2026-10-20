@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "TubeCraft",
-  "short_name": "TubeCraft",
+  "name": "Séquence",
+  "short_name": "Séquence",
   "description": "Un client YouTube open source : recherche, lecteur, Shorts, abonnements et commentaires. Sans clé API, données locales.",
   "lang": "fr",
   "dir": "ltr",

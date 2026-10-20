@@ -1,5 +1,5 @@
 /**
- * Export / import / mesure des données locales de TubeCraft.
+ * Export / import / mesure des données locales de Séquence.
  *
  * On ne touche qu'à une liste blanche de clés : un fichier importé ne peut pas
  * écrire n'importe quoi dans le `localStorage` de l'utilisateur.
@@ -97,7 +97,7 @@ export function parseUserData(text: string): ParseResult {
   }
 
   if (Object.keys(data).length === 0) {
-    return { ok: false, error: 'Aucune donnée TubeCraft reconnue dans ce fichier.' };
+    return { ok: false, error: 'Aucune donnée Séquence reconnue dans ce fichier.' };
   }
   return { ok: true, data };
 }
@@ -109,7 +109,7 @@ export function importUserData(storage: StorageWriter, data: Record<string, stri
   }
 }
 
-/** Taille approximative (octets UTF-8) des données TubeCraft. */
+/** Taille approximative (octets UTF-8) des données Séquence. */
 export function localDataSize(storage: StorageReader): number {
   let bytes = 0;
   for (const key of MANAGED_KEYS) {
@@ -125,7 +125,7 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2).replace('.', ',')} Mo`;
 }
 
-/** Supprime toutes les clés TubeCraft (y compris les caches de session). */
+/** Supprime toutes les clés Séquence (y compris les caches de session). */
 export function clearAllLocalData(): void {
   const removable: string[] = [];
   for (let index = 0; index < window.localStorage.length; index += 1) {

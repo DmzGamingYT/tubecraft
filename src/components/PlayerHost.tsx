@@ -470,7 +470,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
       if (!win) throw new Error('Fenêtre Picture-in-Picture indisponible');
       const opened = win;
       copyStyles(opened.document);
-      opened.document.title = sessionRef.current?.video.title ?? 'TubeCraft';
+      opened.document.title = sessionRef.current?.video.title ?? 'Séquence';
       // Échap ferme la fenêtre ; `pagehide` ramène alors le lecteur dans la page.
       opened.document.addEventListener('keydown', (event: KeyboardEvent) => {
         if (event.key === 'Escape') opened.close();
@@ -637,9 +637,13 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
       ref={dockRef}
       className={dockClass}
       style={
-        !pip && docked && rect
-          ? { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
-          : undefined
+        {
+          ...(!pip && docked && rect
+            ? { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+            : {}),
+          // sur téléphone, la barre compacte affiche sa progression en bas
+          '--mini-fill': fillPercent(position, duration),
+        } as CSSProperties
       }
       role={docked || pip ? undefined : 'complementary'}
       aria-label={docked || pip ? undefined : 'Mini-lecteur'}
@@ -713,7 +717,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
 
         <button
           type="button"
-          className="miniplayer__action"
+          className="miniplayer__action miniplayer__action--play"
           onClick={togglePlay}
           aria-label={playing ? 'Mettre en pause' : 'Lire'}
           title={playing ? 'Pause' : 'Lecture'}
@@ -723,7 +727,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
 
         <button
           type="button"
-          className="miniplayer__action"
+          className="miniplayer__action miniplayer__action--next"
           onClick={advance}
           disabled={upNext.length === 0}
           aria-label="Vidéo suivante"
@@ -735,7 +739,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
         {!pip && (
           <button
             type="button"
-            className={`miniplayer__action${queueOpen ? ' is-on' : ''}`}
+            className={`miniplayer__action miniplayer__action--queue${queueOpen ? ' is-on' : ''}`}
             onClick={toggleQueue}
             disabled={upNext.length === 0}
             aria-label="File d’attente"
@@ -750,7 +754,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
         {!pip && pipSupported && (
           <button
             type="button"
-            className="miniplayer__action"
+            className="miniplayer__action miniplayer__action--pip"
             onClick={enterPip}
             aria-label="Picture-in-Picture"
             title="Picture-in-Picture"
@@ -773,7 +777,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
           <>
             <button
               type="button"
-              className="miniplayer__action"
+              className="miniplayer__action miniplayer__action--expand"
               onClick={() => navigate(watchHref)}
               aria-label="Agrandir le lecteur"
               title="Revenir à la vidéo"
@@ -782,7 +786,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
             </button>
             <button
               type="button"
-              className="miniplayer__action"
+              className="miniplayer__action miniplayer__action--close"
               onClick={close}
               aria-label="Fermer le mini-lecteur"
               title="Fermer"

@@ -36,13 +36,20 @@ export function VideoCard({
   const queued = useStore((s) => s.queue.includes(video.id));
   const toggleQueue = useStore((s) => s.toggleQueue);
   const showQueue = variant !== 'compact';
+  // largeur réellement occupée par la vignette, selon la variante et l'écran
+  const thumbSizes =
+    variant === 'row'
+      ? '(max-width: 900px) 100vw, 360px'
+      : variant === 'compact'
+        ? '168px'
+        : '(max-width: 560px) 100vw, (max-width: 1024px) 45vw, 300px';
 
   return (
     <article className={`card card--${variant}`}>
       <div className="card__thumbwrap">
         <Link className="card__thumb" to={watchUrl} aria-label={video.title}>
           <div className="thumb">
-            <Thumb videoId={video.id} isShort={video.isShort} alt={video.title} />
+            <Thumb videoId={video.id} isShort={video.isShort} alt={video.title} sizes={thumbSizes} />
             {video.duration != null && video.duration > 0 && (
               <span className="thumb__duration">{formatDuration(video.duration)}</span>
             )}

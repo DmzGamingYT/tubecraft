@@ -1,7 +1,7 @@
 @import './styles/showcase.css';
 
 /* ==========================================================================
-   TubeCraft — thème sombre/clair inspiré de YouTube
+   Séquence — thème sombre/clair inspiré de YouTube
    ========================================================================== */
 
 :root {
@@ -22,6 +22,9 @@
   --header: 56px;
   --sidebar-w: 240px;
   --mini-w: 72px;
+  /* hauteur de la barre de navigation basse (téléphone) ; mise à jour par
+     Layout quand elle est affichée, pour que les éléments fixes s'écartent */
+  --bottomnav-h: 0px;
   color-scheme: dark;
 }
 
@@ -53,7 +56,9 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* Inter Tight est la seule police chargée par index.html */
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial,
+    sans-serif;
   font-size: 14px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
@@ -206,6 +211,17 @@ code {
 
 .iconbtn--search-mobile {
   display: none;
+}
+
+/* l'aide des raccourcis n'a pas de sens sur un écran tactile */
+.iconbtn--keys {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .iconbtn--keys {
+    display: grid;
+  }
 }
 
 /* --------------------------------------------------------------- hors ligne */
@@ -716,8 +732,18 @@ code {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 24px 16px;
+  /* 230 px de largeur minimale : 4 colonnes sur un portable 1280 px avec la
+     barre latérale, 3 sur une tablette, 1 sur téléphone. Les cartes gardent une
+     taille proche de YouTube au lieu de devenir énormes. */
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 26px 16px;
+}
+
+/* très grand écran : on plafonne la densité plutôt que d'empiler 6 colonnes */
+@media (min-width: 1800px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
 }
 
 .card {
@@ -1201,7 +1227,9 @@ code {
 
 .dock--mini {
   right: 20px;
-  bottom: 20px;
+  /* --bottomnav-h vaut 56 px sur téléphone : le mini-lecteur se pose au-dessus
+     de la barre de navigation au lieu de la recouvrir */
+  bottom: calc(20px + var(--bottomnav-h, 0px));
   width: 360px;
   max-width: calc(100vw - 24px);
   border: 1px solid var(--border);
@@ -1654,7 +1682,68 @@ code {
 @media (max-width: 640px) {
   .dock--mini {
     right: 12px;
-    bottom: 12px;
+    bottom: calc(12px + var(--bottomnav-h, 0px));
+  }
+
+  /* Téléphone : mini-lecteur en barre compacte.
+     Le bloc 16:9 + contrôles occupait ~270 px de haut, soit un tiers de
+     l'écran, et masquait la page. On garde une vignette de 84 px, le titre et
+     l'essentiel ; la progression devient un liseré en bas. */
+  .dock--mini {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* la barre n'est plus une boîte : ses enfants deviennent les cases */
+  .dock--mini .miniplayer__bar {
+    display: contents;
+  }
+
+  .dock--mini .player {
+    order: -1;
+    width: 84px;
+    border-radius: 8px;
+  }
+
+  .dock--mini .miniplayer__title {
+    padding: 4px 2px;
+  }
+
+  .dock--mini .miniplayer__action {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* contrôles redondants sur téléphone : le titre ouvre la vidéo, la file
+     d'attente et le volume restent sur la page de lecture */
+  .dock--mini .miniplayer__action--queue,
+  .dock--mini .miniplayer__action--pip,
+  .dock--mini .miniplayer__action--expand,
+  .dock--mini .miniplayer__footer,
+  .dock--mini .queuepanel {
+    display: none;
+  }
+
+  /* liseré de progression de la barre compacte */
+  .dock--mini::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: var(--mini-fill, 0%);
+    height: 3px;
+    background: var(--red);
+    border-radius: 0 3px 3px 0;
+    pointer-events: none;
   }
 }
 
@@ -2554,8 +2643,12 @@ code {
 }
 
 .menu__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
   width: 18px;
   text-align: center;
+  color: var(--text-2);
 }
 
 .menu__count {
@@ -2594,10 +2687,14 @@ code {
 }
 
 .bell {
+  display: grid;
+  place-items: center;
+  flex: none;
   font-size: 16px;
   line-height: 1;
   padding: 6px;
   border-radius: 50%;
+  color: var(--text-2);
 }
 
 .bell:hover {
@@ -2807,6 +2904,58 @@ code {
   font-size: 13px;
 }
 
+/* Téléphone : l'en-tête de page passait sur trois lignes (titre, champ puis
+   bouton) avec un alignement bancal. Le titre garde sa ligne, les outils
+   partagent la suivante, le champ se rétracte au lieu de déborder. */
+@media (max-width: 640px) {
+  .page__head {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .page__head .headtools {
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .page__head .headtools__input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page__head .headtools .btn {
+    flex: none;
+    padding: 0 12px;
+  }
+
+  /* le paragraphe explicatif des recommandations répète le panneau
+     « Pourquoi ces vidéos ? » : inutile d'occuper l'écran */
+  .recos__sub {
+    display: none;
+  }
+
+  /* file d'attente sous la vidéo : le libellé sur sa ligne, puis deux
+     boutons de même largeur (au lieu d'un bouton orphelin par ligne) */
+  .queuebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .queuebar__label {
+    grid-column: 1 / -1;
+    margin-right: 0;
+  }
+
+  .queuebar .btn {
+    width: 100%;
+    padding: 0 10px;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2814,6 +2963,19 @@ code {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* La vitrine est une page à part : l'ancienne route n'affiche qu'un renvoi. */
+.redirect-note {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: IBM Plex Mono, ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-2);
 }
 
 /* --------------------------------------------------------------------- mobile */
@@ -2839,15 +3001,40 @@ code {
   .searchform--open {
     display: flex;
   }
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
   .watch__bar-right {
     margin-left: 0;
   }
+  .shelf__row {
+    /* le doigt doit pouvoir atteindre la première vignette sans déborder */
+    scroll-padding-left: 4px;
+  }
+  .chips__track {
+    scroll-padding-left: 4px;
+  }
+  .chips::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 28px;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, var(--bg));
+  }
   .skeleton--thumb {
     width: 100%;
+  }
+  /* la barre de navigation basse recouvre le bas de page : on lui réserve la place */
+  .content {
+    padding-bottom: calc(48px + var(--bottomnav-h, 0px));
+  }
+}
+
+/* téléphone : une seule colonne, pleine largeur, comme sur YouTube mobile */
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
 }
 
@@ -3556,12 +3743,89 @@ code {
   flex-wrap: wrap;
 }
 
+/* sélecteur segmenté (thème) : deux moitiés égales dans un même rail */
+.settings__control--seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  min-width: 172px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.settings__control--seg .chip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: transparent;
+  text-align: center;
+}
+
+.settings__control--seg .chip:hover {
+  background: var(--hover);
+}
+
+.settings__control--seg .chip--active,
+.settings__control--seg .chip--active:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+@media (max-width: 640px) {
+  .settings__row--stack {
+    flex-wrap: wrap;
+  }
+
+  .settings__row--stack .settings__control {
+    flex: 1 0 100%;
+  }
+}
+
+/* interrupteur : la case native garde le clavier et les lecteurs d'écran,
+   mais prend l'apparence d'un rail (au lieu de la case rouge du système). */
 .settings__check {
-  width: 20px;
-  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 42px;
+  height: 24px;
   flex: none;
-  accent-color: var(--red);
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elev);
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.settings__check::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.settings__check:checked {
+  background: var(--red);
+  border-color: transparent;
+}
+
+.settings__check:checked::after {
+  transform: translateX(18px);
+  background: #fff;
+}
+
+.settings__check:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .settings__select {
@@ -3722,8 +3986,6 @@ code {
    ========================================================================== */
 
 body {
-  font-family: 'Inter Tight', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Helvetica, Arial, sans-serif;
   font-feature-settings: 'ss01' 1, 'cv11' 1;
   text-rendering: optimizeLegibility;
 }
@@ -3836,5 +4098,268 @@ a.iconbtn {
 @media (max-width: 640px) {
   .download-page__crumb {
     margin-bottom: 14px;
+  }
+}
+
+/* ==========================================================================
+   v4 — navigation basse (téléphone) et aide des raccourcis clavier
+   ========================================================================== */
+
+/* ------------------------------------------------ barre de navigation basse */
+
+.bottomnav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .bottomnav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 46;
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    align-items: stretch;
+    height: var(--bottomnav-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .bottomnav__item {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 3px;
+    padding: 6px 2px;
+    color: var(--text-2);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+
+  .bottomnav__item svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .bottomnav__item--active {
+    color: var(--text);
+  }
+
+  .bottomnav__item--active svg {
+    color: var(--red);
+  }
+
+}
+
+/* ------------------------------------------------- aide des raccourcis clavier */
+
+.shortcuts {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  animation: shortcuts-fade 0.16s ease both;
+}
+
+.shortcuts__panel {
+  width: min(560px, 100%);
+  max-height: min(80vh, 640px);
+  overflow-y: auto;
+  padding: 20px 22px 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: shortcuts-rise 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.shortcuts__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.shortcuts__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.shortcuts__close {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-2);
+}
+
+.shortcuts__close:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.shortcuts__note {
+  margin: 0 0 16px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.shortcuts__group {
+  margin: 0 0 18px;
+}
+
+.shortcuts__group h3 {
+  margin: 0 0 8px;
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shortcuts__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortcuts__list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.shortcuts__list li:nth-child(odd) {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.shortcuts__label {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.shortcuts__keys {
+  display: inline-flex;
+  flex: none;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.shortcuts kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--bg-elev);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+@keyframes shortcuts-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes shortcuts-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shortcuts,
+  .shortcuts__panel {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------- recherche : confort sur téléphone */
+
+@media (max-width: 767px) {
+  .searchhead {
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+
+  .searchhead__title {
+    width: 100%;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  /* les pastilles passent sous le titre, alignées à gauche */
+  .searchhead__actions {
+    margin-left: 0;
+  }
+
+  /* les trois familles de filtres défilent sur une seule ligne au lieu de
+     manger tout l'écran en quatre rangées */
+  .searchfilters,
+  .searchchannels {
+    flex-wrap: nowrap;
+    margin: 0 -16px 16px;
+    padding: 2px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .searchfilters::-webkit-scrollbar,
+  .searchchannels::-webkit-scrollbar {
+    display: none;
+  }
+
+  .searchfilters__group {
+    flex: none;
+    flex-wrap: nowrap;
+  }
+
+  .channelrow {
+    flex: none;
+    min-width: 0;
+  }
+
+  .aicard__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .aicard__chips::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* téléphone étroit : on retire les actions secondaires de la barre haute,
+   toutes présentes dans le tiroir de navigation */
+@media (max-width: 480px) {
+  .topbar a.iconbtn[href$='/download'] {
+    display: none;
   }
 }

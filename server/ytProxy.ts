@@ -733,7 +733,7 @@ export async function sponsorSegments(videoId: string): Promise<SponsorSegment[]
   )}`;
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'TubeCraft/0.2 (+https://github.com)' },
+      headers: { 'User-Agent': 'Sequence/0.2 (+https://github.com)' },
       signal: timeoutSignal(6_000),
     });
     // 404 = aucune donnée pour cette vidéo, ce n'est pas une erreur
@@ -768,7 +768,7 @@ export interface DislikeData {
 export async function dislikeData(videoId: string): Promise<DislikeData | null> {
   try {
     const res = await fetch(`https://returnyoutubedislikeapi.com/votes?videoId=${videoId}`, {
-      headers: { 'User-Agent': 'TubeCraft/0.2' },
+      headers: { 'User-Agent': 'Sequence/0.2' },
       signal: timeoutSignal(5_000),
     });
     if (!res.ok) return null;

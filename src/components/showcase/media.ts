@@ -1,7 +1,7 @@
 /**
  * Médias des démos : vraies vignettes YouTube et jaquettes iTunes.
  *
- * Les jaquettes sont celles servies à SpotifyCraft par l'API iTunes, en 300 px
+ * Les jaquettes sont celles servies à Portée par l'API iTunes, en 300 px
  * pour rester légères. Elles restent distantes : hors ligne, le fond dégradé
  * de secours prend le relais.
  */
@@ -16,13 +16,13 @@ export const YT_THUMBS = {
 const art = (path: string) =>
   `https://is1-ssl.mzstatic.com/image/thumb/${path}/300x300bb.jpg`;
 
-export interface SpotifyMix {
+export interface MusicMix {
   name: string;
   meta: string;
   covers: [string, string, string, string];
 }
 
-export const SP_MIXES: SpotifyMix[] = [
+export const MIXES: MusicMix[] = [
   {
     name: 'Mix de démarrage',
     meta: 'Pour découvrir · Daft Punk · 24 titres',
@@ -55,7 +55,7 @@ export const SP_MIXES: SpotifyMix[] = [
   },
 ];
 
-export const SP_TRACKS = [
+export const TRACKS = [
   {
     title: 'PARISIENNE',
     artist: 'GIMS & La Mano 1.9',

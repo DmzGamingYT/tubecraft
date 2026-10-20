@@ -1,6 +1,6 @@
 /**
  * Titre + métadonnées de partage par page. Une SPA n'a qu'un seul `index.html` :
- * sans cela, tous les liens partagés affichent « TubeCraft ».
+ * sans cela, tous les liens partagés affichent « Séquence ».
  */
 function setMeta(selector: string, attribute: 'name' | 'property', key: string, content: string) {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
