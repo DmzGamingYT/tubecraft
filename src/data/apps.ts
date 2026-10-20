@@ -12,6 +12,7 @@
  */
 
 import { remoteAppUrl } from '../lib/url';
+import featilletIcon from '../assets/apps/feuillet.svg';
 import pulsecraftIcon from '../assets/apps/pulsecraft.svg';
 import spotifycraftIcon from '../assets/apps/spotifycraft.svg';
 import tubecraftIcon from '../assets/apps/tubecraft.svg';
@@ -79,6 +80,13 @@ export const pulsecraftWebUrl =
   'https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/pulsecraft/';
 
 /**
+ * Adresse publique du carnet Feuillet, servi dans `/feuillet/` du même
+ * hébergement. `VITE_FEUILLET_URL` la remplace au build.
+ */
+export const feuilletWebUrl =
+  'https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/feuillet/';
+
+/**
  * Adresse de lancement d’une app servie hors de ce dépôt.
  *
  * Au build, `VITE_PULSECRAFT_URL` / `VITE_SPOTIFYCRAFT_URL` permettent de
@@ -93,6 +101,7 @@ const pulsecraftUrl = remoteAppUrl(
   pulsecraftWebUrl
 );
 const spotifycraftUrl = remoteAppUrl(import.meta.env.VITE_SPOTIFYCRAFT_URL, 5184);
+const feuilletUrl = remoteAppUrl(import.meta.env.VITE_FEUILLET_URL, 5187, feuilletWebUrl);
 
 export const apps: OpenSourceApp[] = [
   {
@@ -154,5 +163,25 @@ export const apps: OpenSourceApp[] = [
     // Instance publique via `VITE_PULSECRAFT_URL`, sinon serveur local (5186).
     ...(pulsecraftUrl ? { url: pulsecraftUrl } : {}),
     source: 'https://github.com/DmzGamingYT/pulsecraft',
+  },
+  {
+    id: 'feuilletcraft',
+    name: 'Feuillet',
+    mark: 'FE',
+    icon: featilletIcon,
+    tagline: 'Un carnet qui vous appartient.',
+    description:
+      'Notes local-first : pages de blocs, cases à cocher, citations et petites bases de données — sans compte, sans serveur, sans synchronisation obligatoire.',
+    highlights: [
+      'Pages imbriquées et recherche plein texte',
+      'Bases simples : colonnes typées, tri, lignes',
+      'Gestes « / » et markdown, thème clair ou sombre',
+    ],
+    accent: '#4f5bff',
+    stack: ['React', 'Vite', 'TypeScript', 'IndexedDB'],
+    license: 'MIT',
+    // Instance publique via `VITE_FEUILLET_URL`, sinon serveur local (5187).
+    ...(feuilletUrl ? { url: feuilletUrl } : {}),
+    source: 'https://github.com/DmzGamingYT/feuilletcraft',
   },
 ];

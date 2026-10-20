@@ -14152,3 +14152,247 @@ a.iconbtn {
     flex-wrap:wrap
   }
 }
+
+/* ------------------------------------------------------------------ Feuillet
+   Le carnet tel qu'il s'ouvre : barre latérale, page de blocs, petite base.
+   Tout est en px fixes : la maquette est mise à l'échelle par la fenêtre de
+   démonstration, pas par le viewport. */
+
+.nf {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  height: 100%;
+  background: #faf9f6;
+  color: #17161a;
+  font-family: var(--sc-sans);
+  font-size: 10px;
+  overflow: hidden;
+}
+
+.nf__side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 11px 8px;
+  background: #f1efe8;
+  border-right: 1px solid #e3dfd4;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nf__brand {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.nf__mark {
+  color: #4f5bff;
+}
+
+.nf__search {
+  padding: 4px 6px;
+  border: 1px solid #e3dfd4;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 9px;
+  color: #9b968d;
+}
+
+.nf__new {
+  padding: 4px 6px;
+  border: 1px dashed #ddd8cc;
+  border-radius: 5px;
+  font-size: 9px;
+  color: #6b6760;
+}
+
+.nf__label {
+  margin-top: 5px;
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a09b92;
+}
+
+.nf__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 5px;
+  border-radius: 5px;
+  font-size: 9.5px;
+  color: #46434c;
+}
+
+.nf__item.is-on {
+  background: rgba(79, 91, 255, 0.13);
+  color: #17161a;
+  font-weight: 560;
+}
+
+.nf__itemIcon {
+  width: 10px;
+  text-align: center;
+  color: #8b8780;
+}
+
+.nf__itemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nf__main {
+  padding: 14px 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.nf__crumb {
+  font-size: 8.5px;
+  color: #9b968d;
+}
+
+.nf__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-family: var(--sc-serif);
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+
+.nf__titleIcon {
+  font-size: 15px;
+}
+
+.nf__meta {
+  margin: 3px 0 13px 22px;
+  font-size: 8px;
+  color: #9b968d;
+}
+
+.nf__h1 {
+  margin-bottom: 4px;
+  font-family: var(--sc-serif);
+  font-size: 15px;
+}
+
+.nf__p {
+  margin: 0 0 10px;
+  max-width: 46ch;
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: #46434c;
+}
+
+.nf__h2 {
+  margin-bottom: 4px;
+  font-family: var(--sc-serif);
+  font-size: 12.5px;
+}
+
+.nf__list {
+  margin: 0 0 8px;
+  padding-left: 14px;
+  font-size: 9.5px;
+  line-height: 1.75;
+  color: #46434c;
+}
+
+.nf__list li::marker {
+  color: #b6b1a6;
+}
+
+.nf__todo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 9.5px;
+  color: #46434c;
+}
+
+.nf__todo i {
+  width: 9px;
+  height: 9px;
+  border: 1.2px solid #b6b1a6;
+  border-radius: 3px;
+}
+
+.nf__quote {
+  margin-bottom: 12px;
+  padding-left: 9px;
+  border-left: 2px solid rgba(79, 91, 255, 0.4);
+  font-family: var(--sc-serif);
+  font-size: 10.5px;
+  font-style: italic;
+  color: #5a5660;
+}
+
+.nf__db {
+  border: 1px solid #e3dfd4;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.nf__dbHead {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-bottom: 1px solid #eeeae0;
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.nf__dbHead em {
+  margin-left: auto;
+  font-size: 8.5px;
+  font-style: normal;
+  font-weight: 400;
+  color: #9b968d;
+}
+
+.nf__dbGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.8fr;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #f2efe7;
+  font-size: 9px;
+  color: #46434c;
+}
+
+.nf__dbGrid:last-child {
+  border-bottom: 0;
+}
+
+.nf__dbGrid--head {
+  background: #f7f5ef;
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b8780;
+}
+
+.nf__tag {
+  width: fit-content;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: rgba(79, 91, 255, 0.13);
+  color: #3b45c9;
+  font-size: 8px;
+}
+
+.nf__tag--now {
+  background: rgba(226, 163, 74, 0.2);
+  color: #95610f;
+}

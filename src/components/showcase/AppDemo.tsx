@@ -593,6 +593,82 @@ export function MusicDemo() {
   );
 }
 
+/* ------------------------------------------------------------------- Feuillet */
+
+const NOTES_PAGES = [
+  { icon: '✳', name: 'Bienvenue dans Feuillet' },
+  { icon: '✎', name: 'Idées' },
+  { icon: '▤', name: 'Lectures' },
+  { icon: '◆', name: 'Projets' },
+];
+
+/** Le carnet tel qu'il s'ouvre la première fois : une page lisible, une base. */
+export function NotesDemo() {
+  return (
+    <div className="nf" aria-hidden>
+      <aside className="nf__side">
+        <div className="nf__brand">
+          <span className="nf__mark">▤</span> Feuillet
+        </div>
+        <div className="nf__search">Chercher une page</div>
+        <div className="nf__new">+ Nouvelle page</div>
+        <div className="nf__label">Pages</div>
+        {NOTES_PAGES.map((page, index) => (
+          <div className={`nf__item${index === 0 ? ' is-on' : ''}`} key={page.name}>
+            <span className="nf__itemIcon">{page.icon}</span>
+            <span className="nf__itemName">{page.name}</span>
+          </div>
+        ))}
+      </aside>
+
+      <div className="nf__main">
+        <div className="nf__crumb">Feuillet / Bienvenue</div>
+        <div className="nf__title">
+          <span className="nf__titleIcon">✳</span> Bienvenue dans Feuillet
+        </div>
+        <div className="nf__meta">Modifiée à l’instant</div>
+
+        <div className="nf__h1">Un carnet, pas un tableau de bord</div>
+        <p className="nf__p">
+          Feuillet garde des pages faites de blocs et, quand il en faut, de petites bases de
+          données. Tout reste dans ce navigateur.
+        </p>
+        <div className="nf__h2">Les gestes à connaître</div>
+        <ul className="nf__list">
+          <li>Tapez « / » pour choisir un type de bloc</li>
+          <li>« # », « - » ou « [] » en début de ligne changent le bloc</li>
+        </ul>
+        <div className="nf__todo">
+          <i />
+          <span>Cocher une première tâche</span>
+        </div>
+        <div className="nf__quote">Une note n’a pas besoin d’être rangée pour être utile.</div>
+
+        <div className="nf__db">
+          <div className="nf__dbHead">
+            <span>▤</span> Roadmap <em>3 lignes</em>
+          </div>
+          <div className="nf__dbGrid nf__dbGrid--head">
+            <span>Nom</span>
+            <span>Statut</span>
+            <span>Échéance</span>
+          </div>
+          <div className="nf__dbGrid">
+            <span>Écrire la page d’accueil</span>
+            <span className="nf__tag">Fait</span>
+            <span>12 mai</span>
+          </div>
+          <div className="nf__dbGrid">
+            <span>Brancher l’import Markdown</span>
+            <span className="nf__tag nf__tag--now">En cours</span>
+            <span>18 mai</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------- Battement */
 
 type PulseScene = 'today' | 'activity' | 'sleep' | 'coach' | 'progress';

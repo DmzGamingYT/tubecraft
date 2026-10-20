@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { OpenSourceApp } from '../data/apps';
-import { DemoFrame, HealthDemo, MusicDemo, VideoDemo } from './showcase/AppDemo';
+import { DemoFrame, HealthDemo, MusicDemo, NotesDemo, VideoDemo } from './showcase/AppDemo';
 import { AppGallery } from './showcase/AppGallery';
 import { GuidedTour, type TourStep } from './showcase/GuidedTour';
 import { hasSeenTour, rememberTour } from './showcase/tourMemory';
@@ -95,7 +95,7 @@ const WORKSHOP_STEPS = [
   {
     num: '01',
     title: 'Écrire',
-    text: 'React 18, TypeScript et Vite pour les trois apps. Un même socle de conventions, un dépôt autonome par app.',
+    text: 'React 18, TypeScript et Vite pour les apps. Un même socle de conventions, un dépôt autonome par app.',
     chip: 'Socle commun',
   },
   {
@@ -370,7 +370,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour="fabrique"]',
     title: 'Un seul atelier.',
-    text: 'React, TypeScript et Vite pour le socle ; Rust/WASM quand le calcul compte ; web, PWA et Tauri 2 pour la distribution. Les trois apps sortent de la même chaîne.',
+    text: 'React, TypeScript et Vite pour le socle ; Rust/WASM quand le calcul compte ; web, PWA et Tauri 2 pour la distribution. Les apps sortent de la même chaîne.',
     duration: 5200,
   },
   {
@@ -803,8 +803,7 @@ export function ShowcaseSite({
               </h1>
 
               <p className="sc-hero__lede">
-                Une famille d’applications open source qui reprennent les outils du quotidien —
-                sans compte obligatoire, sans abonnement, sans télémétrie. Trois apps, un même
+                Une famille d’applications open source qui reprennent les outils du quotidien —                  sans compte obligatoire, sans abonnement, sans télémétrie. Quatre apps, un même
                 socle et un même principe : le logiciel est public, et les données restent chez vous.
               </p>
 
@@ -993,6 +992,15 @@ export function ShowcaseSite({
                         onOpen={() => openGallery(app)}
                       >
                         <VideoDemo />
+                      </DemoFrame>
+                    ) : app.id === 'feuilletcraft' ? (
+                      <DemoFrame
+                        url="feuillet.app / bienvenue"
+                        label="Feuillet"
+                        tone="light"
+                        onOpen={() => openGallery(app)}
+                      >
+                        <NotesDemo />
                       </DemoFrame>
                     ) : app.id === 'pulsecraft' ? (
                       <DemoFrame

@@ -15,4 +15,9 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://site-837caca50a67485a994f4549b9ef7404.freebuff.page/feuillet/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
