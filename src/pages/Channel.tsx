@@ -71,7 +71,7 @@ export function ChannelPage() {
   const banner = info?.banner;
 
   useEffect(() => {
-    if (name) setPageMeta(`${name} — TubeCraft`);
+    if (name) setPageMeta(`${name} — Séquence`);
   }, [name]);
 
   if (!name) {

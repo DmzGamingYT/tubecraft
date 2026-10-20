@@ -8,13 +8,10 @@ import {
   type ReactNode,
 } from 'react';
 import type { OpenSourceApp } from '../data/apps';
-import { proposals, proposalStatusLabel } from '../data/proposals';
-import { DemoFrame, PulseCraftDemo, SpotifyCraftDemo, TubeCraftDemo } from './showcase/AppDemo';
+import { DemoFrame, HealthDemo, MusicDemo, VideoDemo } from './showcase/AppDemo';
 import { AppGallery } from './showcase/AppGallery';
 import { GuidedTour, type TourStep } from './showcase/GuidedTour';
 import { hasSeenTour, rememberTour } from './showcase/tourMemory';
-import { UnderTheHood } from './showcase/UnderTheHood';
-import { IdeaPreview } from './showcase/IdeaPreview';
 import { DownloadShowcase } from './download/DownloadShowcase';
 import { CraftlineMark } from './CraftlineMark';
 
@@ -48,7 +45,7 @@ export interface ShowcaseLinkProps {
 export interface ShowcaseSiteProps {
   apps: OpenSourceApp[];
   preview: ShowcasePreviewItem[];
-  /** URL de l'app TubeCraft. `null` hors SPA tant que l'app n'est pas déployée. */
+  /** URL de l'app Séquence. `null` hors SPA tant que l'app n'est pas déployée. */
   appHref: string | null;
   /** profil GitHub de l'auteur */
   githubHref: string;
@@ -63,84 +60,98 @@ const THEME_KEY = 'atelier.theme';
 /** Sommaire unique : la barre desktop et le menu mobile restent synchronisés. */
 const SECTIONS = [
   { id: 'collection', num: '01', label: 'Collection' },
-  { id: 'manifeste', num: '02', label: 'Manifeste' },
-  { id: 'capot', num: '03', label: 'Sous le capot' },
+  { id: 'preuve', num: '02', label: 'La preuve' },
+  { id: 'fabrique', num: '03', label: 'La fabrique' },
   { id: 'telecharger', num: '04', label: 'Télécharger' },
-  { id: 'etude', num: '05', label: 'À l’étude' },
+  { id: 'atelier', num: '05', label: 'L’atelier' },
 ] as const;
 const SECTION_IDS = SECTIONS.map((section) => section.id);
 
-/** Quatre principes techniques, présentés comme une grille de fonctionnalités. */
-const CAPABILITIES = [
+/**
+ * Fiche d’identité de chaque app : les mêmes cinq lignes pour toutes, mais des
+ * réponses différentes. C’est ce qui rend la section vérifiable plutôt que
+ * déclarative — le réseau et le stockage ne sont pas les mêmes partout.
+ */
+const APP_PROOF: Record<string, { data: string; network: string; account: string }> = {
+  tubecraft: {
+    data: 'Navigateur · IndexedDB + localStorage',
+    network: 'InnerTube, via un proxy same-origin',
+    account: 'Aucun',
+  },
+  spotifycraft: {
+    data: 'Navigateur + fichiers audio importés',
+    network: 'Catalogue iTunes · Spotify si vous connectez un compte',
+    account: 'Facultatif (OAuth PKCE)',
+  },
+  pulsecraft: {
+    data: 'Navigateur + exports Santé importés',
+    network: 'Aucun service Craftline · coach IA sur accord',
+    account: 'Aucun',
+  },
+};
+
+/** Les quatre étapes communes à toutes les apps de la collection. */
+const WORKSHOP_STEPS = [
   {
-    id: 'reseau',
-    viz: 'network',
-    meta: '01 / Réseau',
-    title: 'InnerTube, en direct.',
-    text: 'Aucune clé Google, aucun quota. Un proxy same-origin avec cache, timeout et limite par IP.',
+    num: '01',
+    title: 'Écrire',
+    text: 'React 18, TypeScript et Vite pour les trois apps. Un même socle de conventions, un dépôt autonome par app.',
+    chip: 'Socle commun',
   },
   {
-    id: 'donnees',
-    viz: 'local',
-    meta: '02 / Données',
-    title: 'Local par défaut.',
-    text: 'IndexedDB, localStorage, fichiers importés : les données ne quittent pas l’appareil.',
+    num: '02',
+    title: 'Calculer',
+    text: 'Ce qui coûte cher passe en Rust et devient du WebAssembly : import audio d’un côté, calculs de santé de l’autre.',
+    chip: '2 noyaux WASM',
   },
   {
-    id: 'noyau',
-    viz: 'wasm',
-    meta: '03 / Noyau',
-    title: 'Rust → WASM.',
-    text: 'Les calculs de PulseCraft et l’import audio de SpotifyCraft tournent en WebAssembly.',
+    num: '03',
+    title: 'Distribuer',
+    text: 'La même base devient site web, PWA installable et coque Tauri 2 — sans fork ni réécriture.',
+    chip: 'Web · PWA · Tauri',
   },
   {
-    id: 'portabilite',
-    viz: 'platforms',
-    meta: '04 / Portabilité',
-    title: 'Un code, trois distributions.',
-    text: 'Web, PWA installable et coque Tauri 2 : la même base, sans fork ni réécriture.',
+    num: '04',
+    title: 'Vérifier',
+    text: 'Typecheck, tests Vitest et CI à chaque commit. Une app ne rejoint la collection qu’une fois utilisable.',
+    chip: 'À chaque commit',
   },
 ] as const;
 
-function CapabilityVisual({ kind }: { kind: (typeof CAPABILITIES)[number]['viz'] }) {
-  if (kind === 'network') {
-    return (
-      <div className="sc-cap__viz sc-cap__viz--network" aria-hidden>
-        <span>vous</span>
-        <i />
-        <span>/yt</span>
-        <i />
-        <span>YT</span>
-      </div>
-    );
-  }
-  if (kind === 'local') {
-    return (
-      <div className="sc-cap__viz sc-cap__viz--local" aria-hidden>
-        <i />
-        <i />
-        <i />
-        <em>local</em>
-      </div>
-    );
-  }
-  if (kind === 'wasm') {
-    return (
-      <div className="sc-cap__viz sc-cap__viz--wasm" aria-hidden>
-        <span>RUST</span>
-        <b>→</b>
-        <strong>WASM</strong>
-      </div>
-    );
-  }
-  return (
-    <div className="sc-cap__viz sc-cap__viz--platforms" aria-hidden>
-      <span>WEB</span>
-      <span>PWA</span>
-      <span>TAURI</span>
-    </div>
-  );
-}
+/** Ce que chaque app apporte au socle commun. */
+const WORKSHOP_ROLES: Record<string, { role: string; text: string }> = {
+  tubecraft: {
+    role: 'Le réseau',
+    text: 'Un proxy same-origin vers InnerTube, avec cache mémoire, timeout et limite par IP. Aucun secret dans le navigateur.',
+  },
+  spotifycraft: {
+    role: 'Le son',
+    text: 'Un noyau Rust/WASM pour l’import audio, le catalogue iTunes et Spotify en OAuth PKCE quand vous le souhaitez.',
+  },
+  pulsecraft: {
+    role: 'Le calcul',
+    text: 'pulse-core en Rust/WASM, imports Apple Health et Samsung Health, et une coque Tauri 2 pour le natif.',
+  },
+};
+
+/** Trois gestes concrets pour participer, sans formulaire ni compte. */
+const OPEN_DOORS = [
+  {
+    num: '01',
+    title: 'Signaler',
+    text: 'Un bug, une régression, une installation qui échoue. Une issue avec la version, le navigateur et les étapes de reproduction vaut mieux qu’un paragraphe.',
+  },
+  {
+    num: '02',
+    title: 'Proposer',
+    text: 'Une fonction qui manque, une piste d’accessibilité, une traduction. Les idées sont priorisées à la main, jamais vendues.',
+  },
+  {
+    num: '03',
+    title: 'Forker',
+    text: 'Tout est sous MIT. Reprenez une app, changez la direction artistique, publiez votre version : le code est fait pour ça.',
+  },
+] as const;
 
 /** Soleil / lune du bouton de thème, dessiné au trait pour rester net. */
 function ThemeGlyph({ night }: { night: boolean }) {
@@ -318,12 +329,12 @@ const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour="hero"]',
     title: 'Des outils qu’on possède vraiment.',
-    text: 'Bienvenue dans Craftline. La visite dure une minute : elle va vous montrer la collection, les démos, l’architecture et l’installation — sans rien télécharger.',
+    text: 'Bienvenue dans Craftline. La visite dure une minute : elle va vous montrer la collection, les démos, la fabrique et l’installation — sans rien télécharger.',
     duration: 5600,
   },
   {
     target: '[data-tour="tubecraft-demo"]',
-    title: 'Chercher dans TubeCraft.',
+    title: 'Chercher dans Séquence.',
     text: 'La démo passe en scène de recherche : requête tapée, filtres, résultats YouTube et assistance IA. Tout est une vraie maquette animée, pas une capture.',
     demo: { app: 'tubecraft', scene: 'search', hold: true },
     duration: 5200,
@@ -344,22 +355,22 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="spotifycraft-demo"]',
-    title: 'SpotifyCraft, la musique en local.',
+    title: 'Portée, la musique en local.',
     text: 'Même philosophie : extraits officiels, pochettes réelles, Daily Mix calculés sur l’appareil et import de vos propres fichiers.',
     demo: { app: 'spotifycraft', scene: 'home', hold: true },
     duration: 5000,
   },
   {
     target: '[data-tour="pulsecraft-demo"]',
-    title: 'PulseCraft, la santé qui reste chez vous.',
+    title: 'Battement, la santé qui reste chez vous.',
     text: 'Anneaux d’objectifs, journal d’entraînement, sommeil, nutrition et coach IA. Les calculs tournent en Rust/WASM, et les imports Apple Health ou Samsung Health restent dans le navigateur.',
     demo: { app: 'pulsecraft', scene: 'today', hold: true },
     duration: 5400,
   },
   {
-    target: '[data-tour="capot"]',
-    title: 'Le capot est ouvert.',
-    text: 'TubeCraft parle à InnerTube via un proxy local : aucune clé API, aucun secret, un cache mémoire et une limite de requêtes. Le journal défile en direct.',
+    target: '[data-tour="fabrique"]',
+    title: 'Un seul atelier.',
+    text: 'React, TypeScript et Vite pour le socle ; Rust/WASM quand le calcul compte ; web, PWA et Tauri 2 pour la distribution. Les trois apps sortent de la même chaîne.',
     duration: 5200,
   },
   {
@@ -369,9 +380,9 @@ const TOUR_STEPS: TourStep[] = [
     duration: 5400,
   },
   {
-    target: '[data-tour="etude"]',
-    title: 'La suite se décide en public.',
-    text: 'Les prochaines fonctions sont listées à l’étude, avec un aperçu animé. Rien n’est présenté comme terminé avant de l’être.',
+    target: '[data-tour="atelier"]',
+    title: 'La porte est ouverte.',
+    text: 'Signaler, proposer, forker : trois gestes concrets, et un dépôt public par app. Rien n’est priorisé en secret.',
     duration: 5400,
   },
 ];
@@ -395,7 +406,6 @@ export function ShowcaseSite({
   const rootRef = useRef<HTMLDivElement>(null);
   const [night, setNight] = useState(readNight);
   const [copied, setCopied] = useState(false);
-  const [activeIdea, setActiveIdea] = useState(proposals[0]?.id ?? '');
   const [galleryApp, setGalleryApp] = useState<OpenSourceApp | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
@@ -411,7 +421,6 @@ export function ShowcaseSite({
   const tourReturnRef = useRef<HTMLElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLElement>(null);
-  const activeProposal = proposals.find((proposal) => proposal.id === activeIdea) ?? proposals[0];
   const activeSection = useScrollSpy(rootRef, SECTION_IDS);
 
   useReveal(rootRef);
@@ -640,9 +649,9 @@ export function ShowcaseSite({
             <Link
               className="sc-btn sc-btn--ink sc-btn--small sc-nav__cta"
               href={appHref}
-              aria-label="Ouvrir TubeCraft"
+              aria-label="Ouvrir Séquence"
             >
-              <span className="sc-nav__ctaLong">Ouvrir TubeCraft</span>
+              <span className="sc-nav__ctaLong">Ouvrir Séquence</span>
               <span className="sc-nav__ctaShort">Ouvrir</span>
               <span aria-hidden>↗</span>
             </Link>
@@ -722,7 +731,7 @@ export function ShowcaseSite({
 
           {appHref ? (
             <Link className="sc-btn sc-btn--ink sc-mobilemenu__cta" href={appHref}>
-              Ouvrir TubeCraft <span aria-hidden>↗</span>
+              Ouvrir Séquence <span aria-hidden>↗</span>
             </Link>
           ) : (
             <a
@@ -755,8 +764,8 @@ export function ShowcaseSite({
             <span className="sc-rings__axis sc-rings__axis--y" />
           </div>
 
-          {/* Le hero est une page de catalogue : le titre à gauche, l'index des
-              apps à droite. On sait en un coup d'œil qu'il y a trois produits. */}
+          {/* Le hero est centré : le titre occupe l'axe, le catalogue des apps
+              vient dessous. On sait en un coup d'œil qu'il y a trois produits. */}
           <div className="sc-hero__grid">
             <div className="sc-hero__lead">
               <p className="sc-kicker sc-kicker--hero">
@@ -796,17 +805,20 @@ export function ShowcaseSite({
               <p className="sc-hero__lede">
                 Une famille d’applications open source qui reprennent les outils du quotidien —
                 sans compte obligatoire, sans abonnement, sans télémétrie. Trois apps, un même
-                code, un même principe : le logiciel est public, et les données restent chez vous.
+                socle et un même principe : le logiciel est public, et les données restent chez vous.
               </p>
 
               <div className="sc-hero__cta">
+                <Link className="sc-btn sc-btn--ink" href="#collection">
+                  Explorer la collection <span aria-hidden>↓</span>
+                </Link>
                 {appHref ? (
-                  <Link className="sc-btn sc-btn--ink" href={appHref}>
-                    Lancer TubeCraft <span aria-hidden>→</span>
+                  <Link className="sc-btn sc-btn--line" href={appHref}>
+                    Lancer Séquence <span aria-hidden>↗</span>
                   </Link>
                 ) : (
                   <a
-                    className="sc-btn sc-btn--ink"
+                    className="sc-btn sc-btn--line"
                     href={githubHref}
                     target="_blank"
                     rel="noreferrer noopener"
@@ -814,82 +826,22 @@ export function ShowcaseSite({
                     Voir sur GitHub <span aria-hidden>↗</span>
                   </a>
                 )}
-                {tourOffered ? (
-                  <button
-                    type="button"
-                    data-tour-start
-                    className="sc-btn sc-btn--line sc-btn--tour"
-                    onClick={startTour}
-                  >
-                    <span className="sc-btn__play" aria-hidden>
-                      ▶
-                    </span>
-                    Visite guidée
-                  </button>
-                ) : null}
               </div>
 
-              {tourOffered ? null : (
-                <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
-                  <span aria-hidden>↻</span> Revoir la visite guidée
-                </button>
-              )}
+              <button type="button" data-tour-start className="sc-tourlink" onClick={startTour}>
+                <span aria-hidden>{tourOffered ? '▶' : '↻'}</span>{' '}
+                {tourOffered ? 'Visite guidée' : 'Revoir la visite guidée'}
+              </button>
 
               <p className="sc-hero__meta">
                 Open source sur GitHub · Web · Sans compte · Aucun abonnement
               </p>
             </div>
 
-            {/* Le catalogue en un coup d'œil : chaque ligne mène à sa fiche. */}
-            <nav className="sc-launcher" aria-label="Catalogue des applications">
-              <span className="sc-launcher__head">
-                <span>Catalogue</span>
-                <span>{String(apps.length).padStart(2, '0')} applications</span>
-              </span>
-
-              {apps.map((app, index) => (
-                <a
-                  key={app.id}
-                  className="sc-launcher__app"
-                  href={`#app-${app.id}`}
-                  style={{ '--app-accent': app.accent } as CSSProperties}
-                >
-                  <span className="sc-launcher__num" aria-hidden>
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <span className="sc-launcher__icon" aria-hidden>
-                    {app.mark}
-                  </span>
-                  <span className="sc-launcher__text">
-                    <strong>{app.name}</strong>
-                    <em>{app.tagline}</em>
-                  </span>
-                  <span className="sc-launcher__go" aria-hidden>
-                    ↘
-                  </span>
-                </a>
-              ))}
-
-              <a className="sc-launcher__app sc-launcher__app--next" href="#app-suite">
-                <span className="sc-launcher__num" aria-hidden>
-                  +
-                </span>
-                <span className="sc-launcher__icon" aria-hidden>
-                  +
-                </span>
-                <span className="sc-launcher__text">
-                  <strong>La suite</strong>
-                  <em>En préparation</em>
-                </span>
-                <span className="sc-launcher__go" aria-hidden>
-                  ↘
-                </span>
-              </a>
-            </nav>
           </div>
 
-          {/* Planche contact : les vraies vignettes du catalogue, qui débordent
-              du bas du hero. La collection commence déjà sous la ligne de flottaison. */}
+          {/* Vignettes flottantes : les vraies miniatures du catalogue,
+              disposées autour du texte et animées doucement. */}
           <div className="sc-floats" aria-hidden>
             {preview.slice(0, 4).map((video, index) => (
               <span className={`sc-shot sc-shot--${index + 1}`} key={video.id}>
@@ -966,9 +918,15 @@ export function ShowcaseSite({
 
                   <div className="sc-app__body">
                     <h3 className="sc-app__name">
-                      <span className="sc-app__mark" aria-hidden>
-                        {app.mark}
-                      </span>
+                      <img
+                        className="sc-app__mark"
+                        src={app.icon}
+                        alt=""
+                        width={54}
+                        height={54}
+                        loading="lazy"
+                        decoding="async"
+                      />
                       <span className="sc-app__nameText">{app.name}</span>
                     </h3>
                     <p className="sc-app__tagline">{app.tagline}</p>
@@ -1029,30 +987,30 @@ export function ShowcaseSite({
                   >
                     {app.id === 'tubecraft' ? (
                       <DemoFrame
-                        url="tubecraft.app / accueil"
-                        label="TubeCraft"
+                        url="sequence.app / accueil"
+                        label="Séquence"
                         tone="dark"
                         onOpen={() => openGallery(app)}
                       >
-                        <TubeCraftDemo />
+                        <VideoDemo />
                       </DemoFrame>
                     ) : app.id === 'pulsecraft' ? (
                       <DemoFrame
-                        url="pulsecraft.app / aujourd’hui"
-                        label="PulseCraft"
+                        url="battement.app / aujourd’hui"
+                        label="Battement"
                         tone="dark"
                         onOpen={() => openGallery(app)}
                       >
-                        <PulseCraftDemo />
+                        <HealthDemo />
                       </DemoFrame>
                     ) : (
                       <DemoFrame
-                        url="spotifycraft.app / bonjour"
-                        label="SpotifyCraft"
+                        url="portee.app / bonjour"
+                        label="Portée"
                         tone="light"
                         onOpen={() => openGallery(app)}
                       >
-                        <SpotifyCraftDemo />
+                        <MusicDemo />
                       </DemoFrame>
                     )}
                   </div>
@@ -1102,143 +1060,227 @@ export function ShowcaseSite({
           </div>
         </section>
 
-        <section className="sc-section sc-section--band sc-section--manifeste" id="manifeste">
+        <section className="sc-section sc-section--band sc-section--proof" id="preuve">
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">02</span>
-            <span className="sc-label__text">Le manifeste</span>
-            <span className="sc-label__meta">Trois règles, aucune exception</span>
-          </header>
-
-          <div className="sc-manifeste">
-            <h2 className="sc-h2 sc-h2--wide" data-reveal>
-              On ne loue pas un outil. On le <em>possède</em>.
-            </h2>
-            <p className="sc-lede" data-reveal>
-              Pas de compte obligatoire, pas d’abonnement, pas de télémétrie. Trois règles,
-              aucune exception — et elles ne bougeront pas.
-            </p>
-
-            <ol className="sc-principles">
-              <li data-reveal style={{ '--d': '0ms' } as CSSProperties}>
-                <span className="sc-principle__num">A</span>
-                <h3>Le code est le contrat.</h3>
-                <p>
-                  Chaque app est un dépôt public : lisible, forkeable, réparable. Si une fonction
-                  vous manque, vous pouvez l’ajouter — ou payer quelqu’un pour le faire.
-                </p>
-                <a
-                  className="sc-principle__link"
-                  href={githubHref}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  Voir le code <span aria-hidden>↗</span>
-                </a>
-              </li>
-              <li data-reveal style={{ '--d': '90ms' } as CSSProperties}>
-                <span className="sc-principle__num">B</span>
-                <h3>Vos données restent chez vous.</h3>
-                <p>
-                  Historique, réglages, progression : tout vit dans le navigateur. Aucun serveur
-                  Craftline ne récolte ce que vous regardez ou écrivez.
-                </p>
-              </li>
-              <li data-reveal style={{ '--d': '180ms' } as CSSProperties}>
-                <span className="sc-principle__num">C</span>
-                <h3>Pas de péage à l’entrée.</h3>
-                <p>
-                  Pas d’essai qui expire, pas de fonctionnalité derrière un abonnement. Une app
-                  qu’on installe, qu’on utilise, et qu’on garde.
-                </p>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        <section className="sc-section sc-section--capot" id="capot">
-          <header className="sc-label" data-reveal>
-            <span className="sc-label__num">03</span>
-            <span className="sc-label__text">Sous le capot</span>
-            <span className="sc-label__meta">Quatre principes techniques</span>
+            <span className="sc-label__text">La preuve</span>
+            <span className="sc-label__meta">Trois fiches · mêmes lignes</span>
           </header>
 
           <div className="sc-intro" data-reveal>
             <h2 className="sc-h2">
-              Pas de boîte noire. Un <em>capot ouvert</em>.
+              Pas des promesses. Des <em>fiches</em>.
             </h2>
             <p className="sc-lede">
-              TubeCraft parle directement à InnerTube, PulseCraft calcule en Rust/WASM,
-              SpotifyCraft lit vos fichiers en local. Même principe partout : le moins de serveurs
-              possible.
+              Chaque app publie la même fiche d’identité : d’où vient le code, où vivent les
+              données, à qui elle parle. Rien à croire sur parole — tout est dans le dépôt.
             </p>
           </div>
 
-          <div className="sc-capot__media" data-reveal data-tour="capot">
-            <div className="sc-capot__mediaHead">
-              <span>Architecture réelle · TubeCraft</span>
-              <span>navigateur → proxy → InnerTube</span>
-            </div>
-            <UnderTheHood />
+          <div className="sc-proof-grid">
+            {apps.map((app, index) => {
+              const proof = APP_PROOF[app.id];
+              if (!proof) return null;
+              return (
+                <article
+                  className="sc-proof-card"
+                  key={app.id}
+                  data-reveal
+                  style={
+                    {
+                      '--app-accent': app.accent,
+                      '--d': `${index * 80}ms`,
+                    } as CSSProperties
+                  }
+                >
+                  <header className="sc-proof-card__head">
+                    <img
+                      className="sc-proof-card__mark"
+                      src={app.icon}
+                      alt=""
+                      width={38}
+                      height={38}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <h3>{app.name}</h3>
+                    <span className="sc-proof-card__license">{app.license}</span>
+                  </header>
+
+                  <dl>
+                    <div>
+                      <dt>Dépôt</dt>
+                      <dd>
+                        {app.source ? (
+                          <a href={app.source} target="_blank" rel="noreferrer noopener">
+                            Public <span aria-hidden>↗</span>
+                          </a>
+                        ) : (
+                          'Bientôt public'
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Licence</dt>
+                      <dd>{app.license} · code modifiable et redistribuable</dd>
+                    </div>
+                    <div>
+                      <dt>Données</dt>
+                      <dd>{proof.data}</dd>
+                    </div>
+                    <div>
+                      <dt>Réseau</dt>
+                      <dd>{proof.network}</dd>
+                    </div>
+                    <div>
+                      <dt>Compte</dt>
+                      <dd>{proof.account}</dd>
+                    </div>
+                  </dl>
+
+                  <footer className="sc-proof-card__foot">
+                    <span>Aucune donnée revendue</span>
+                    {app.source ? (
+                      <a href={app.source} target="_blank" rel="noreferrer noopener">
+                        Vérifier <span aria-hidden>↗</span>
+                      </a>
+                    ) : null}
+                  </footer>
+                </article>
+              );
+            })}
           </div>
 
-          <div className="sc-cap-grid">
-            {CAPABILITIES.map((capability, index) => (
-              <article
-                className="sc-cap"
-                key={capability.id}
-                data-reveal
-                style={{ '--d': `${index * 70}ms` } as CSSProperties}
-              >
-                <CapabilityVisual kind={capability.viz} />
-                <div className="sc-cap__body">
-                  <span className="sc-cap__meta">{capability.meta}</span>
-                  <h3>{capability.title}</h3>
-                  <p>{capability.text}</p>
-                </div>
-              </article>
-            ))}
+          <div className="sc-proof__howHead" data-reveal>
+            <span>Vérifier vous-même</span>
+            <span>Trois gestes, moins d’une minute</span>
           </div>
 
-          <div className="sc-stats">
-            {[
-              {
-                value: '0',
-                label: 'clé API',
-                text: 'Les métadonnées passent par InnerTube, sans identifiant et sans quota.',
-              },
-              {
-                value: '100 %',
-                label: 'local',
-                text: 'Profils, likes, playlists et reprise de lecture vivent dans le navigateur.',
-              },
-              {
-                value: '0',
-                label: 'tracker',
-                text: 'Pas de cookie publicitaire, pas de script d’analyse, rien à accepter.',
-              },
-              {
-                value: '∞',
-                label: 'forks',
-                text: 'Le code est là pour être lu, modifié et réutilisé, y compris ailleurs.',
-              },
-            ].map((stat, index) => (
-              <article
-                className="sc-stat"
-                key={stat.label}
-                data-reveal
-                style={{ '--d': `${index * 80}ms` } as CSSProperties}
-              >
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-                <p>{stat.text}</p>
-              </article>
-            ))}
-          </div>
+          <ol className="sc-proof__how">
+            <li data-reveal style={{ '--d': '0ms' } as CSSProperties}>
+              <span className="sc-proof__howNum">01</span>
+              <div>
+                <strong>Lisez la licence.</strong>
+                <p>
+                  Chaque dépôt contient son fichier LICENSE. Trois lignes suffisent pour savoir ce
+                  que vous pouvez lire, modifier et republier.
+                </p>
+              </div>
+            </li>
+            <li data-reveal style={{ '--d': '80ms' } as CSSProperties}>
+              <span className="sc-proof__howNum">02</span>
+              <div>
+                <strong>Ouvrez l’onglet Réseau.</strong>
+                <p>
+                  Rechargez l’app : les requêtes sortantes vont vers YouTube, iTunes — ou nulle
+                  part. Aucun domaine d’analyse, aucun cookie publicitaire.
+                </p>
+              </div>
+            </li>
+            <li data-reveal style={{ '--d': '160ms' } as CSSProperties}>
+              <span className="sc-proof__howNum">03</span>
+              <div>
+                <strong>Videz le stockage.</strong>
+                <p>
+                  Effacez les données du site : historique, réglages et progression disparaissent.
+                  C’est la preuve qu’ils n’existaient que chez vous.
+                </p>
+              </div>
+            </li>
+          </ol>
 
           <p className="sc-note" data-reveal>
-            Transparence : {featured ? `${featured.name} est publié sous licence ${featured.license}.` : ''}{' '}
-            Le lecteur reste celui de YouTube, dans une iframe officielle.
+            Relevé en octobre 2026. Si une fiche ne correspond plus au code, c’est un bug : ouvrez
+            une issue. Le lecteur de Séquence reste celui de YouTube, dans une iframe officielle.
           </p>
+        </section>
+
+        <section className="sc-section sc-section--fabrique" id="fabrique">
+          <header className="sc-label" data-reveal>
+            <span className="sc-label__num">03</span>
+            <span className="sc-label__text">La fabrique</span>
+            <span className="sc-label__meta">Un socle · trois distributions</span>
+          </header>
+
+          <div className="sc-intro" data-reveal>
+            <h2 className="sc-h2">
+              Un seul atelier. <em>Trois</em> objets.
+            </h2>
+            <p className="sc-lede">
+              La collection n’est pas trois bases de code qui se ressemblent : c’est un même socle
+              React/TypeScript, des noyaux Rust là où le calcul compte, et trois façons de livrer
+              la même app.
+            </p>
+          </div>
+
+          <div className="sc-shop__flow" data-reveal data-tour="fabrique">
+            {WORKSHOP_STEPS.map((step) => (
+              <div className="sc-shop__step" key={step.num}>
+                <span className="sc-shop__num">{step.num}</span>
+                <strong>{step.title}</strong>
+                <p>{step.text}</p>
+                <span className="sc-shop__chip">{step.chip}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="sc-shop__apps">
+            {apps.map((app, index) => {
+              const role = WORKSHOP_ROLES[app.id];
+              if (!role) return null;
+              return (
+                <article
+                  className="sc-shop__app"
+                  key={app.id}
+                  data-reveal
+                  style={
+                    {
+                      '--app-accent': app.accent,
+                      '--d': `${index * 80}ms`,
+                    } as CSSProperties
+                  }
+                >
+                  <span className="sc-shop__role">{role.role}</span>
+                  <h3>
+                    <img
+                      className="sc-shop__mark"
+                      src={app.icon}
+                      alt=""
+                      width={28}
+                      height={28}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {app.name}
+                  </h3>
+                  <p>{role.text}</p>
+                  {app.source ? (
+                    <a href={app.source} target="_blank" rel="noreferrer noopener">
+                      Lire le dépôt <span aria-hidden>↗</span>
+                    </a>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="sc-shop__facts" data-reveal>
+            <span>
+              <strong>{apps.length}</strong> dépôts publics
+            </span>
+            <span>
+              <strong>2</strong> noyaux WASM
+            </span>
+            <span>
+              <strong>0</strong> serveur à administrer
+            </span>
+            <span>
+              <strong>5</strong> plateformes installables
+            </span>
+            <span>
+              <strong>1</strong> base de code par app
+            </span>
+          </div>
         </section>
 
         <DownloadShowcase
@@ -1248,87 +1290,124 @@ export function ShowcaseSite({
               Installer. <em>Partout.</em>
             </>
           }
-          sectionLede="Choisissez votre app et votre plateforme. L’installation passe par le navigateur — aucun magasin, aucun compte, aucun binaire à vérifier."
+          sectionLede="Choisissez votre app et votre plateforme. Séquence et Battement s’installent depuis le navigateur ; Portée arrive en binaires signés — par TestFlight sur iPhone. Aucun magasin, aucun compte."
           appHref={appHref}
           githubHref={githubHref}
           Link={Link}
           appIds={['tubecraft', 'spotifycraft', 'pulsecraft']}
         />
 
-        <section className="sc-section sc-section--band sc-section--etude" id="etude" data-tour="etude">
+        <section className="sc-section sc-section--band sc-section--atelier" id="atelier" data-tour="atelier">
           <header className="sc-label" data-reveal>
             <span className="sc-label__num">05</span>
-            <span className="sc-label__text">À l’étude</span>
-            <span className="sc-label__meta">{proposals.length} propositions ouvertes</span>
+            <span className="sc-label__text">L’atelier</span>
+            <span className="sc-label__meta">{apps.length} dépôts · trois façons d’aider</span>
           </header>
 
           <div className="sc-intro" data-reveal>
             <h2 className="sc-h2">
-              Ce qui n’est pas encore là. Et qui pourrait <em>l’être</em>.
+              Le code est public. <em>La porte aussi.</em>
             </h2>
             <p className="sc-lede">
-              Des propositions publiques, classées par thème et priorisées à la main. Rien n’est
-              vendu, rien n’est promis avant d’être utilisable.
+              Pas de formulaire ni de communauté payante. Des dépôts GitHub, des issues lisibles et
+              des forks bienvenus — voici les trois gestes qui font avancer la collection.
             </p>
           </div>
 
-          <div className="sc-ideasWrap" data-reveal>
-            <ol className="sc-ideas">
-              {proposals.map((proposal, index) => (
-                <li
-                  key={proposal.id}
-                  className={`sc-idea sc-idea--${proposal.status}${
-                    proposal.id === activeIdea ? ' is-active' : ''
-                  }`}
+          <div className="sc-open__doors">
+            {OPEN_DOORS.map((door, index) => (
+              <article
+                className="sc-open__door"
+                key={door.num}
+                data-reveal
+                style={{ '--d': `${index * 80}ms` } as CSSProperties}
+              >
+                <span className="sc-open__num">{door.num}</span>
+                <h3>{door.title}</h3>
+                <p>{door.text}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="sc-open__ledger" data-reveal>
+            <div>
+              <h3>
+                <i className="sc-open__dot sc-open__dot--yes" aria-hidden />
+                Toujours accepté
+              </h3>
+              <ul>
+                <li>Corrections</li>
+                <li>Accessibilité</li>
+                <li>Tests</li>
+                <li>Traductions</li>
+                <li>Documentation</li>
+              </ul>
+            </div>
+            <div>
+              <h3>
+                <i className="sc-open__dot sc-open__dot--no" aria-hidden />
+                Jamais mergé
+              </h3>
+              <ul>
+                <li>Publicité</li>
+                <li>Compte obligatoire</li>
+                <li>Télémétrie</li>
+                <li>Fonctionnalité payante</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="sc-open__repos">
+            {apps.map((app) =>
+              app.source ? (
+                <a
+                  className="sc-open__repo"
+                  key={app.id}
+                  href={app.source}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  style={{ '--app-accent': app.accent } as CSSProperties}
                 >
-                  <button
-                    type="button"
-                    className="sc-idea__btn"
-                    onMouseEnter={() => setActiveIdea(proposal.id)}
-                    onFocus={() => setActiveIdea(proposal.id)}
-                    onClick={() => setActiveIdea(proposal.id)}
-                    aria-pressed={proposal.id === activeIdea}
-                    aria-label={`Voir l’aperçu : ${proposal.title}`}
-                  >
-                    <span className="sc-idea__num" aria-hidden>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="sc-idea__body">
-                      <strong className="sc-idea__title">{proposal.title}</strong>
-                      <span className="sc-idea__desc">{proposal.summary}</span>
-                    </span>
-                    <span className="sc-idea__side">
-                      <span className="sc-idea__tag">{proposal.tag}</span>
-                      <span className="sc-idea__status">
-                        <i aria-hidden />
-                        {proposalStatusLabel[proposal.status]}
-                      </span>
-                    </span>
-                  </button>
-
-                  {/* sur mobile, l’aperçu s’ouvre directement sous la proposition */}
-                  {proposal.id === activeIdea ? (
-                    <IdeaPreview proposal={proposal} variant="inline" />
-                  ) : null}
-                </li>
-              ))}
-            </ol>
-
-            {activeProposal ? <IdeaPreview proposal={activeProposal} /> : null}
-          </div>
-
-          <div className="sc-ideas__foot" data-reveal>
-            <p>
-              Une idée qui manque ? Elle a sa place ici. Les propositions sont ouvertes, priorisées
-              à la main, et jamais vendues.
-            </p>
+                  <img
+                    className="sc-open__repoMark"
+                    src={app.icon}
+                    alt=""
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <strong>{app.name}</strong>
+                  <em>Dépôt ↗</em>
+                </a>
+              ) : null
+            )}
             <a
-              className="sc-btn sc-btn--line"
-              href={`${githubHref}`}
+              className="sc-open__repo sc-open__repo--profile"
+              href={githubHref}
               target="_blank"
               rel="noreferrer noopener"
             >
-              Proposer une idée <span aria-hidden>↗</span>
+              <span className="sc-open__repoMark" aria-hidden>
+                GH
+              </span>
+              <strong>Profil GitHub</strong>
+              <em>Tout voir ↗</em>
+            </a>
+          </div>
+
+          <div className="sc-open__foot" data-reveal>
+            <p>
+              Une idée qui manque ? Ouvrez une issue dans le dépôt concerné. Les propositions sont
+              publiques, priorisées à la main, et jamais vendues.
+            </p>
+            <a
+              className="sc-btn sc-btn--line"
+              href={githubHref}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Ouvrir GitHub <span aria-hidden>↗</span>
             </a>
           </div>
         </section>
@@ -1347,13 +1426,13 @@ export function ShowcaseSite({
             par <em>une vidéo</em>.
           </h2>
           <p className="sc-final__lede">
-            Ouvrez TubeCraft, lancez une vidéo, quittez la page : le mini-lecteur continue. Les
+            Ouvrez Séquence, lancez une vidéo, quittez la page : le mini-lecteur continue. Les
             prochaines apps sont déjà en préparation sur GitHub.
           </p>
           <div className="sc-final__cta">
             {appHref ? (
               <Link className="sc-btn sc-btn--paper" href={appHref}>
-                Ouvrir TubeCraft <span aria-hidden>→</span>
+                Ouvrir Séquence <span aria-hidden>→</span>
               </Link>
             ) : (
               <a
@@ -1420,10 +1499,10 @@ export function ShowcaseSite({
         </div>
 
         <nav className="sc-footer__links" aria-label="Liens de pied de page">
-          {appHref ? <Link href={appHref}>Accueil TubeCraft</Link> : null}
+          {appHref ? <Link href={appHref}>Accueil Séquence</Link> : null}
           <a href="#collection">La collection</a>
           <a href="#telecharger">Télécharger</a>
-          <a href="#etude">Les propositions</a>
+          <a href="#atelier">Contribuer</a>
           <a href={githubHref} target="_blank" rel="noreferrer noopener">
             GitHub ↗
           </a>

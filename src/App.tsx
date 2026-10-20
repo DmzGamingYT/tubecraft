@@ -104,7 +104,7 @@ export default function App() {
 
 function NotFound() {
   useEffect(() => {
-    document.title = 'Page introuvable — TubeCraft';
+    document.title = 'Page introuvable — Séquence';
   }, []);
 
   return (

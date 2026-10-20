@@ -7,7 +7,7 @@
  * recherches associées.
  *
  * Si le service est lent, bloqué (CORS) ou indisponible, on retombe
- * silencieusement sur la recherche classique de TubeCraft : le proxy de
+ * silencieusement sur la recherche classique de Séquence : le proxy de
  * développement `/yt/api/ai` sert de relais server-side.
  */
 

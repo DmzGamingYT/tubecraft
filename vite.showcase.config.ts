@@ -24,7 +24,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '127.0.0.1',
-    // 5184 est déjà pris par SpotifyCraft en développement (`src/data/apps.ts`).
+    // 5184 est déjà pris par Portée en développement (`src/data/apps.ts`).
     port: 5185,
   },
   preview: {

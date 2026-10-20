@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
  *
  * La visite fait défiler la page jusqu’à chaque étape, met le reste en retrait
  * (spotlight), puis pilote les démos via l’événement `showcase:scene`. La démo
- * TubeCraft reçoit ainsi ses trois scènes : recherche, lecture, mini-lecteur.
+ * Séquence reçoit ainsi ses trois scènes : recherche, lecture, mini-lecteur.
  * Sans `prefers-reduced-motion`, les étapes avancent seules ; sinon (ou après
  * une pause), l’utilisateur garde la main.
  */

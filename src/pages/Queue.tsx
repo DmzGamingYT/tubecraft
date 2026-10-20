@@ -21,7 +21,7 @@ export function QueuePage() {
   const progress = useStore((s) => s.progress);
 
   useEffect(() => {
-    setPageMeta('Lire ensuite — TubeCraft');
+    setPageMeta('Lire ensuite — Séquence');
   }, []);
 
   const items = useMemo(

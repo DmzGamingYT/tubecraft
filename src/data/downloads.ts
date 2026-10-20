@@ -3,25 +3,25 @@
  *
  * Deux apps, deux façons d’installer :
  *
- * - **TubeCraft** n’a pas encore de paquets natifs signés : la voie officielle
+ * - **Séquence** n’a pas encore de paquets natifs signés : la voie officielle
  *   est la web app (PWA). Un shell Tauri 2 est prêt dans le dépôt et se
  *   compile localement, mais aucun .dmg / .exe / .apk public n’est proposé
  *   tant qu’il n’est pas signé — donc pas de faux bouton de téléchargement.
- * - **SpotifyCraft** n’a pas encore de binaires natifs publiés : son dépôt ne
+ * - **Portée** n’a pas encore de binaires natifs publiés : son dépôt ne
  *   contient aucune release. Les plateformes décrivent donc ce qui sera
  *   proposé (`releaseState: 'pending'`), la page ne montre ni version ni
  *   signature, et le bouton renvoie vers le suivi des versions au lieu de
  *   promettre un fichier qui n’existe pas.
- * - **PulseCraft** est une web app comme TubeCraft : elle s’installe depuis le
+ * - **Battement** est une web app comme Séquence : elle s’installe depuis le
  *   navigateur sur les cinq plateformes, depuis son URL publique.
  *
  * Pour ajouter une app, dupliquez une entrée de `downloadApps` : la section
  * s’adapte au nombre de plateformes déclarées.
  */
 
-import pulsecraftIcon from '../assets/apps/pulsecraft.png';
-import spotifycraftIcon from '../assets/apps/spotifycraft.png';
-import tubecraftIcon from '../assets/apps/tubecraft.png';
+import pulsecraftIcon from '../assets/apps/pulsecraft.svg';
+import spotifycraftIcon from '../assets/apps/spotifycraft.svg';
+import tubecraftIcon from '../assets/apps/tubecraft.svg';
 import { pulsecraftWebUrl } from './apps';
 import { remoteAppUrl } from '../lib/url';
 
@@ -63,6 +63,12 @@ export interface DownloadPlatform {
   file?: string;
   /** ce qui protège le binaire sur cette plateforme */
   trust?: string;
+  /**
+   * Canal de distribution d’une app native. `installer` : un fichier se
+   * télécharge (DMG, MSI, APK…) ; `testflight` : iOS, où Apple n’autorise que
+   * les apps signées via TestFlight ou l’App Store — aucun fichier à récupérer.
+   */
+  delivery?: 'installer' | 'testflight';
 }
 
 export type DownloadFactGlyph =
@@ -84,7 +90,7 @@ export interface DownloadFact {
 export interface DownloadApp {
   id: DownloadAppId;
   name: string;
-  /** fin de la phrase de titre, mise en italique : « TubeCraft, *partout* » */
+  /** fin de la phrase de titre, mise en italique : « Séquence, *partout* » */
   emphasis: string;
   /** sous-titre de l’onglet d’app */
   summary: string;
@@ -117,7 +123,7 @@ export interface DownloadApp {
   launchHref?: string | null;
 }
 
-/* ------------------------------------------------------------------ TubeCraft */
+/* ------------------------------------------------------------------ Séquence */
 
 const tubecraftPlatforms: DownloadPlatform[] = [
   {
@@ -128,10 +134,10 @@ const tubecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome, Edge ou Safari 17+',
     tagline: 'Dans le Dock, comme une vraie app.',
     intro:
-      'TubeCraft s’ajoute au Launchpad et au Dock, avec sa propre fenêtre. Aucun DMG à monter, aucune archive à décompresser.',
+      'Séquence s’ajoute au Launchpad et au Dock, avec sa propre fenêtre. Aucun DMG à monter, aucune archive à décompresser.',
     steps: [
       {
-        title: 'Ouvrez TubeCraft',
+        title: 'Ouvrez Séquence',
         text: 'Dans Chrome, Edge ou Safari 17+, depuis ce bouton ou votre navigateur habituel.',
       },
       {
@@ -157,7 +163,7 @@ const tubecraftPlatforms: DownloadPlatform[] = [
       'L’installation crée un raccourci propre dans le menu Démarrer, la barre des tâches et le bureau — sans installeur MSI.',
     steps: [
       {
-        title: 'Ouvrez TubeCraft',
+        title: 'Ouvrez Séquence',
         text: 'Dans Chrome ou Edge, sur ce PC. Le moteur Edge est déjà présent sur Windows 10 et 11.',
       },
       {
@@ -166,7 +172,7 @@ const tubecraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Épinglez-la',
-        text: 'Clic droit sur l’icône → Épingler à la barre des tâches. TubeCraft démarre alors comme n’importe quelle app.',
+        text: 'Clic droit sur l’icône → Épingler à la barre des tâches. Séquence démarre alors comme n’importe quelle app.',
       },
     ],
     requirement: 'Windows 10 ou 11 · Chrome, Edge ou Brave · aucune dépendance',
@@ -180,15 +186,15 @@ const tubecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome, Chromium ou Brave',
     tagline: 'Une entrée dans votre lanceur.',
     intro:
-      'Le navigateur crée une entrée de bureau standard. TubeCraft apparaît dans GNOME, KDE ou XFCE, sans paquet système ni droits root.',
+      'Le navigateur crée une entrée de bureau standard. Séquence apparaît dans GNOME, KDE ou XFCE, sans paquet système ni droits root.',
     steps: [
       {
-        title: 'Ouvrez TubeCraft',
+        title: 'Ouvrez Séquence',
         text: 'Dans Chrome, Chromium ou Brave. Firefox sur Linux ne propose pas encore l’installation PWA.',
       },
       {
         title: 'Installez depuis la barre d’adresse',
-        text: 'Cliquez sur l’icône d’installation (écran avec une flèche), ou menu ⋮ → Installer TubeCraft.',
+        text: 'Cliquez sur l’icône d’installation (écran avec une flèche), ou menu ⋮ → Installer Séquence.',
       },
       {
         title: 'Retrouvez-la dans le lanceur',
@@ -206,10 +212,10 @@ const tubecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome ou Samsung Internet',
     tagline: 'Une icône sur l’écran d’accueil.',
     intro:
-      'TubeCraft s’installe en quelques gestes, s’ouvre en plein écran et garde vos données sur l’appareil.',
+      'Séquence s’installe en quelques gestes, s’ouvre en plein écran et garde vos données sur l’appareil.',
     steps: [
       {
-        title: 'Ouvrez TubeCraft',
+        title: 'Ouvrez Séquence',
         text: 'Dans Chrome ou Samsung Internet, sur votre téléphone ou tablette.',
       },
       {
@@ -232,10 +238,10 @@ const tubecraftPlatforms: DownloadPlatform[] = [
     detail: 'Safari (obligatoire)',
     tagline: 'Sur l’écran d’accueil, plein écran.',
     intro:
-      'Sur iPhone et iPad, l’ajout à l’écran d’accueil se fait depuis Safari. TubeCraft s’ouvre alors comme une app, sans interface de navigateur.',
+      'Sur iPhone et iPad, l’ajout à l’écran d’accueil se fait depuis Safari. Séquence s’ouvre alors comme une app, sans interface de navigateur.',
     steps: [
       {
-        title: 'Ouvrez TubeCraft dans Safari',
+        title: 'Ouvrez Séquence dans Safari',
         text: 'Sur iPhone ou iPad. Chrome et Firefox sur iOS ne peuvent pas installer de web app.',
       },
       {
@@ -244,7 +250,7 @@ const tubecraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Choisissez « Sur l’écran d’accueil »',
-        text: 'Puis « Ajouter ». L’icône TubeCraft rejoint votre écran d’accueil et s’ouvre en plein écran.',
+        text: 'Puis « Ajouter ». L’icône Séquence rejoint votre écran d’accueil et s’ouvre en plein écran.',
       },
     ],
     requirement: 'iOS ou iPadOS 15+ · Safari · ~4 Mo',
@@ -252,7 +258,7 @@ const tubecraftPlatforms: DownloadPlatform[] = [
   },
 ];
 
-/* --------------------------------------------------------------- SpotifyCraft */
+/* --------------------------------------------------------------- Portée */
 
 const spotifycraftPlatforms: DownloadPlatform[] = [
   {
@@ -263,7 +269,7 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
     detail: 'DMG universel · Apple silicon & Intel',
     tagline: 'Un vrai binaire, dans le Dock.',
     intro:
-      'SpotifyCraft est une application native : elle démarre sans navigateur, garde sa fenêtre et ses raccourcis, et lit vos fichiers locaux directement.',
+      'Portée est une application native : elle démarre sans navigateur, garde sa fenêtre et ses raccourcis, et lit vos fichiers locaux directement.',
     steps: [
       {
         title: 'Téléchargez le DMG',
@@ -271,7 +277,7 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Glissez dans Applications',
-        text: 'Ouvrez l’image disque, puis déposez SpotifyCraft à côté de vos autres applications.',
+        text: 'Ouvrez l’image disque, puis déposez Portée à côté de vos autres applications.',
       },
       {
         title: 'Lancez l’app',
@@ -291,7 +297,7 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
     detail: 'MSI ou .exe · Windows 10/11 64 bits',
     tagline: 'Une application, pas un onglet.',
     intro:
-      'L’installeur pose SpotifyCraft dans Programmes, crée un raccourci dans le menu Démarrer et associe les formats audio pris en charge.',
+      'L’installeur pose Portée dans Programmes, crée un raccourci dans le menu Démarrer et associe les formats audio pris en charge.',
     steps: [
       {
         title: 'Téléchargez l’installeur',
@@ -303,7 +309,7 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Lancez depuis le menu Démarrer',
-        text: 'SpotifyCraft s’ouvre dans sa propre fenêtre, avec ses raccourcis et sa file d’attente.',
+        text: 'Portée s’ouvre dans sa propre fenêtre, avec ses raccourcis et sa file d’attente.',
       },
     ],
     requirement: 'Windows 10 ou 11 · 64 bits · aucune dépendance',
@@ -327,7 +333,7 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Rendez-le exécutable',
-        text: 'Clic droit → Propriétés → « Exécuter comme un programme », ou `chmod +x SpotifyCraft.AppImage`.',
+        text: 'Clic droit → Propriétés → « Exécuter comme un programme », ou `chmod +x Portée.AppImage`.',
       },
       {
         title: 'Lancez-le',
@@ -339,12 +345,70 @@ const spotifycraftPlatforms: DownloadPlatform[] = [
     file: 'AppImage x86_64',
     trust: 'Binaire reproductible · empreinte SHA-256 publiée',
   },
+  {
+    id: 'android',
+    name: 'Android',
+    short: 'Android',
+    family: 'mobile',
+    detail: 'APK signé · Android 9+',
+    tagline: 'Votre musique en poche, hors ligne.',
+    intro:
+      'La même app native que sur le bureau, compilée pour Android : lecture en arrière-plan, commandes sur l’écran verrouillé et fichiers importés qui restent sur l’appareil.',
+    steps: [
+      {
+        title: 'Téléchargez l’APK',
+        text: 'Sur la page des versions, prenez le fichier .apk de la dernière publication.',
+      },
+      {
+        title: 'Autorisez l’installation',
+        text: 'Android demande de confirmer une installation hors magasin : acceptez pour ce fichier, puis installez.',
+      },
+      {
+        title: 'Ouvrez Portée',
+        text: 'La bibliothèque se charge sur l’appareil, et la lecture continue quand vous verrouillez l’écran.',
+      },
+    ],
+    requirement: 'Android 9 ou plus récent · arm64 et armv7 · ~30 Mo',
+    note: 'Aucun Play Store : l’APK sera signé, publié sur GitHub, et accompagné de son empreinte SHA-256 pour vérifier le fichier.',
+    file: 'APK signé',
+    trust: 'Signature de release prévue · empreinte SHA-256 publiée',
+    delivery: 'installer',
+  },
+  {
+    id: 'ios',
+    name: 'iPhone',
+    short: 'iOS',
+    family: 'mobile',
+    detail: 'TestFlight · iOS 16+',
+    tagline: 'Sur iPhone, par TestFlight.',
+    intro:
+      'Apple n’autorise pas l’installation d’une app hors magasin : sur iPhone et iPad, la version native passera donc par TestFlight, qui installe l’app signée sur l’appareil.',
+    steps: [
+      {
+        title: 'Installez TestFlight',
+        text: 'Depuis l’App Store : c’est l’app gratuite d’Apple qui reçoit les bêtas signées.',
+      },
+      {
+        title: 'Rejoignez la bêta',
+        text: 'Le lien TestFlight sera publié avec la première version ; il s’ouvre directement dans l’app.',
+      },
+      {
+        title: 'Lancez Portée',
+        text: 'L’app rejoint l’écran d’accueil et lit la musique stockée sur l’iPhone.',
+      },
+    ],
+    requirement: 'iOS ou iPadOS 16+ · TestFlight · ~40 Mo',
+    note: 'Aucun fichier .ipa à télécharger : iOS n’installe que des apps signées, via TestFlight ou l’App Store.',
+    file: 'TestFlight',
+    trust: 'Signée et distribuée par Apple via TestFlight',
+    delivery: 'testflight',
+  },
 ];
 
-/* ------------------------------------------------------------------ PulseCraft */
+/* ------------------------------------------------------------------ Battement */
 
 /**
- * PulseCraft suit la même voie que TubeCraft : une web app installable sur les
+ * Battement suit la même voie que Séquence : une web app installable sur les
  * cinq plateformes, servie dans un sous-dossier du même hébergement. Les
  * étapes sont donc volontairement proches — c’est le navigateur qui installe,
  * pas un paquet signé.
@@ -358,10 +422,10 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome, Edge ou Safari 17+',
     tagline: 'Votre suivi dans le Dock, vos données sur la machine.',
     intro:
-      'PulseCraft s’installe depuis le navigateur : une icône dans le Launchpad, sa propre fenêtre, et votre suivi déjà chargé — il reste dans le navigateur, pas dans un cloud.',
+      'Battement s’installe depuis le navigateur : une icône dans le Launchpad, sa propre fenêtre, et votre suivi déjà chargé — il reste dans le navigateur, pas dans un cloud.',
     steps: [
       {
-        title: 'Ouvrez PulseCraft',
+        title: 'Ouvrez Battement',
         text: 'Dans Chrome, Edge ou Safari 17+, depuis ce bouton ou votre navigateur habituel.',
       },
       {
@@ -387,7 +451,7 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
       'L’installation crée un raccourci dans le menu Démarrer et la barre des tâches. Rien n’est écrit ailleurs que dans le profil du navigateur.',
     steps: [
       {
-        title: 'Ouvrez PulseCraft',
+        title: 'Ouvrez Battement',
         text: 'Dans Chrome ou Edge, sur ce PC. Le moteur Edge est déjà présent sur Windows 10 et 11.',
       },
       {
@@ -410,15 +474,15 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome, Chromium ou Brave',
     tagline: 'Une entrée dans votre lanceur.',
     intro:
-      'Le navigateur crée une entrée de bureau standard : PulseCraft apparaît dans GNOME, KDE ou XFCE, sans paquet système ni droits root.',
+      'Le navigateur crée une entrée de bureau standard : Battement apparaît dans GNOME, KDE ou XFCE, sans paquet système ni droits root.',
     steps: [
       {
-        title: 'Ouvrez PulseCraft',
+        title: 'Ouvrez Battement',
         text: 'Dans Chrome, Chromium ou Brave. Firefox sur Linux ne propose pas encore l’installation PWA.',
       },
       {
         title: 'Installez depuis la barre d’adresse',
-        text: 'Cliquez sur l’icône d’installation (écran avec une flèche), ou menu ⋮ → Installer PulseCraft.',
+        text: 'Cliquez sur l’icône d’installation (écran avec une flèche), ou menu ⋮ → Installer Battement.',
       },
       {
         title: 'Retrouvez-la dans le lanceur',
@@ -436,10 +500,10 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
     detail: 'Chrome ou Samsung Internet',
     tagline: 'Une icône sur l’écran d’accueil.',
     intro:
-      'PulseCraft s’installe en quelques gestes, s’ouvre en plein écran et garde votre suivi sur l’appareil — pratique pour noter une séance à la sortie de la salle.',
+      'Battement s’installe en quelques gestes, s’ouvre en plein écran et garde votre suivi sur l’appareil — pratique pour noter une séance à la sortie de la salle.',
     steps: [
       {
-        title: 'Ouvrez PulseCraft',
+        title: 'Ouvrez Battement',
         text: 'Dans Chrome ou Samsung Internet, sur votre téléphone ou tablette.',
       },
       {
@@ -462,10 +526,10 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
     detail: 'Safari (obligatoire)',
     tagline: 'Sur l’écran d’accueil, plein écran.',
     intro:
-      'Sur iPhone et iPad, l’ajout à l’écran d’accueil passe par Safari. PulseCraft s’ouvre alors comme une app, sans interface de navigateur.',
+      'Sur iPhone et iPad, l’ajout à l’écran d’accueil passe par Safari. Battement s’ouvre alors comme une app, sans interface de navigateur.',
     steps: [
       {
-        title: 'Ouvrez PulseCraft dans Safari',
+        title: 'Ouvrez Battement dans Safari',
         text: 'Sur iPhone ou iPad. Chrome et Firefox sur iOS ne peuvent pas installer de web app.',
       },
       {
@@ -474,7 +538,7 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
       },
       {
         title: 'Choisissez « Sur l’écran d’accueil »',
-        text: 'Puis « Ajouter ». L’icône PulseCraft rejoint votre écran d’accueil et s’ouvre en plein écran.',
+        text: 'Puis « Ajouter ». L’icône Battement rejoint votre écran d’accueil et s’ouvre en plein écran.',
       },
     ],
     requirement: 'iOS ou iPadOS 15+ · Safari',
@@ -487,7 +551,7 @@ const pulsecraftPlatforms: DownloadPlatform[] = [
 export const downloadApps: DownloadApp[] = [
   {
     id: 'tubecraft',
-    name: 'TubeCraft',
+    name: 'Séquence',
     emphasis: 'partout',
     summary: 'Web app · 5 plateformes',
     icon: tubecraftIcon,
@@ -495,7 +559,7 @@ export const downloadApps: DownloadApp[] = [
     mode: 'web',
     self: true,
     lede:
-      'Une seule app, cinq plateformes. Pas d’installeur à décompresser : le navigateur crée une icône, une fenêtre et un raccourci — puis TubeCraft se met à jour toute seule.',
+      'Une seule app, cinq plateformes. Pas d’installeur à décompresser : le navigateur crée une icône, une fenêtre et un raccourci — puis Séquence se met à jour toute seule.',
     badges: ['Sans magasin', 'Sans compte', 'Mise à jour automatique', 'Données locales'],
     platforms: tubecraftPlatforms,
     facts: [
@@ -530,31 +594,31 @@ export const downloadApps: DownloadApp[] = [
   },
   {
     id: 'spotifycraft',
-    name: 'SpotifyCraft',
-    emphasis: 'sur le bureau',
-    summary: 'Native · 3 systèmes',
+    name: 'Portée',
+    emphasis: 'sur le bureau et en poche',
+    summary: 'Native · 5 systèmes',
     icon: spotifycraftIcon,
     accent: '#0f9d4f',
     mode: 'native',
     // aucune release sur le dépôt : rien n’est encore téléchargeable
     releaseState: 'pending',
-    formats: ['DMG', 'MSI', 'AppImage'],
+    formats: ['DMG', 'MSI', 'AppImage', 'APK', 'TestFlight'],
     lede:
-      'Prévue comme une vraie application : un binaire signé, une fenêtre native, et votre musique qui reste sur la machine. macOS, Windows et Linux, sans magasin ni compte — les installeurs ne sont pas encore publiés.',
+      'Prévue comme une vraie application : un binaire signé, une fenêtre native, et votre musique qui reste sur la machine. macOS, Windows, Linux, Android — et sur iPhone par TestFlight — sans magasin ni compte : les installeurs ne sont pas encore publiés.',
     badges: ['Hors magasin', 'Données locales', 'Open source', 'Installeurs à venir'],
     platforms: spotifycraftPlatforms,
     facts: [
       {
-        value: '3',
+        value: '5',
         label: 'systèmes',
         glyph: 'devices',
-        text: 'Un binaire prévu pour macOS, Windows et Linux.',
+        text: 'Un binaire pour macOS, Windows, Linux et Android ; TestFlight sur iPhone.',
       },
       {
         value: '↧',
         label: 'natif',
         glyph: 'download',
-        text: 'DMG, MSI et AppImage prévus : l’app démarrera sans navigateur.',
+        text: 'DMG, MSI, AppImage et APK prévus : l’app démarre sans navigateur.',
       },
       {
         value: '✓',
@@ -570,14 +634,14 @@ export const downloadApps: DownloadApp[] = [
       },
     ],
     note:
-      'Les installeurs ne sont pas encore publiés : le dépôt et le suivi des versions sont ouverts, et cette page sera mise à jour au premier binaire signé.',
+      'Les installeurs ne sont pas encore publiés : le dépôt et le suivi des versions sont ouverts, et cette page sera mise à jour au premier binaire signé. Sur iPhone, la version native arrivera par TestFlight : iOS n’installe aucune app hors magasin.',
     // la liste des versions existe déjà ; /latest renverrait sur une page vide
     releasesHref: 'https://github.com/DmzGamingYT/spotifycraft/releases',
     sourceHref: 'https://github.com/DmzGamingYT/spotifycraft',
   },
   {
     id: 'pulsecraft',
-    name: 'PulseCraft',
+    name: 'Battement',
     emphasis: 'sur cinq plateformes',
     summary: 'Web app · 5 plateformes',
     icon: pulsecraftIcon,
@@ -585,7 +649,7 @@ export const downloadApps: DownloadApp[] = [
     mode: 'web',
     launchHref: remoteAppUrl(import.meta.env.VITE_PULSECRAFT_URL, 5186, pulsecraftWebUrl),
     lede:
-      'Même installation que TubeCraft, pour un usage tout autre : anneaux, séances, sommeil et nutrition, avec un coach qui ne lit que des données agrégées. Cinq plateformes, aucune donnée envoyée.',
+      'Même installation que Séquence, pour un usage tout autre : anneaux, séances, sommeil et nutrition, avec un coach qui ne lit que des données agrégées. Cinq plateformes, aucune donnée envoyée.',
     badges: ['Sans magasin', 'Sans compte', 'Données locales', 'Imports Apple Health'],
     platforms: pulsecraftPlatforms,
     facts: [
@@ -615,7 +679,7 @@ export const downloadApps: DownloadApp[] = [
       },
     ],
     note:
-      'PulseCraft est servi comme web app : l’installation crée une icône et une fenêtre, sans magasin ni compte. Le noyau de calcul (Rust/WASM) et les imports de fichiers restent sur l’appareil.',
+      'Battement est servi comme web app : l’installation crée une icône et une fenêtre, sans magasin ni compte. Le noyau de calcul (Rust/WASM) et les imports de fichiers restent sur l’appareil.',
     sourceHref: 'https://github.com/DmzGamingYT/pulsecraft',
   },
 ];

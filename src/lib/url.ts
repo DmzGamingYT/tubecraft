@@ -16,7 +16,7 @@ export function watchUrl(videoId: string): string {
 }
 
 /**
- * URL publique d’une app servie hors de ce dépôt (SpotifyCraft, PulseCraft…).
+ * URL publique d’une app servie hors de ce dépôt (Portée, Battement…).
  *
  * Une variable `VITE_…` a toujours la priorité ; en développement on vise le
  * serveur local pour que le bouton lance vraiment quelque chose, et en

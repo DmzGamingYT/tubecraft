@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "TubeCraft",
+  "productName": "Sequence",
   "version": "0.1.0",
   "identifier": "fr.tubecraft.desktop",
   "build": {
@@ -20,8 +20,8 @@
     "targets": "all",
     "category": "Entertainment",
     "shortDescription": "YouTube, en plus calme et sans compte.",
-    "longDescription": "TubeCraft est un client YouTube open source : recherche, lecture, Shorts, abonnements, playlists et commentaires, avec un thème sombre et des données locales.",
-    "copyright": "TubeCraft — licence MIT",
+    "longDescription": "Séquence est un client YouTube open source : recherche, lecture, Shorts, abonnements, playlists et commentaires, avec un thème sombre et des données locales.",
+    "copyright": "Séquence — licence MIT",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { SP_MIXES, SP_TRACKS, YT_THUMBS } from './media';
+import { MIXES, TRACKS, YT_THUMBS } from './media';
 
 /**
  * Scènes courtes de la galerie d'une app : accueil, recherche, Shorts,
@@ -41,7 +41,7 @@ export function TubeHomeScene() {
     <div className="gx gx--tchome" aria-hidden>
       <div className="gx__tbar">
         <span className="gx__brand">
-          <b>▶</b> TubeCraft <i>FR</i>
+          <b>▶</b> Séquence <i>FR</i>
         </span>
         <span className="gx__searchPill">Rechercher</span>
         <span className="gx__avatar" />
@@ -79,7 +79,7 @@ export function TubeSearchScene() {
     <div className="gx gx--tcsearch" aria-hidden>
       <div className="gx__tbar">
         <span className="gx__brand">
-          <b>▶</b> TubeCraft <i>FR</i>
+          <b>▶</b> Séquence <i>FR</i>
         </span>
         <span className="gx__queryBar">
           <span className="gx__mag" />
@@ -188,22 +188,22 @@ export function TubeMiniScene() {
   );
 }
 
-export function SpotifyNowScene() {
+export function MusicNowScene() {
   return (
     <div className="gx gx--spnow" aria-hidden>
       <span
         className="gx__nowBg"
-        style={{ backgroundImage: `url(${SP_TRACKS[0].cover})` } as CSSProperties}
+        style={{ backgroundImage: `url(${TRACKS[0].cover})` } as CSSProperties}
       />
       <div className="gx__nowCover">
-        <img src={SP_TRACKS[0].cover} alt="" loading="lazy" decoding="async" />
+        <img src={TRACKS[0].cover} alt="" loading="lazy" decoding="async" />
         <span className="gx__nowBadge">♪ extrait 30 s</span>
       </div>
 
       <div className="gx__nowPanel">
         <span className="gx__eyebrow">En lecture · catalogue iTunes</span>
-        <strong className="gx__nowTitle">{SP_TRACKS[0].title}</strong>
-        <em className="gx__nowArtist">{SP_TRACKS[0].artist}</em>
+        <strong className="gx__nowTitle">{TRACKS[0].title}</strong>
+        <em className="gx__nowArtist">{TRACKS[0].artist}</em>
 
         <div className="gx__lyrics">
           <span>Paroles synchronisées</span>
@@ -231,15 +231,15 @@ export function SpotifyNowScene() {
   );
 }
 
-export function SpotifyQueueScene() {
+export function MusicQueueScene() {
   return (
     <div className="gx gx--spqueue" aria-hidden>
       <div className="gx__qhead">
         <span className="gx__qart">
-          <i style={{ backgroundImage: `url(${SP_MIXES[1].covers[0]})` }} />
-          <i style={{ backgroundImage: `url(${SP_MIXES[1].covers[1]})` }} />
-          <i style={{ backgroundImage: `url(${SP_MIXES[1].covers[2]})` }} />
-          <i style={{ backgroundImage: `url(${SP_MIXES[1].covers[3]})` }} />
+          <i style={{ backgroundImage: `url(${MIXES[1].covers[0]})` }} />
+          <i style={{ backgroundImage: `url(${MIXES[1].covers[1]})` }} />
+          <i style={{ backgroundImage: `url(${MIXES[1].covers[2]})` }} />
+          <i style={{ backgroundImage: `url(${MIXES[1].covers[3]})` }} />
         </span>
         <span>
           <b>Mix Pop</b>
@@ -249,7 +249,7 @@ export function SpotifyQueueScene() {
       </div>
 
       <ul className="gx__qlist">
-        {SP_TRACKS.map((track, index) => (
+        {TRACKS.map((track, index) => (
           <li className={index === 0 ? 'is-on' : undefined} key={track.title}>
             <span className="gx__qnum">
               {index === 0 ? (
@@ -275,7 +275,7 @@ export function SpotifyQueueScene() {
   );
 }
 
-export function SpotifyEqScene() {
+export function MusicEqScene() {
   const bands = [32, 64, 125, 250, 500, 1, 2, 4, 8, 16];
   const heights = [42, 58, 36, 66, 49, 72, 54, 63, 45, 58];
 
@@ -311,7 +311,7 @@ export function SpotifyEqScene() {
   );
 }
 
-export function SpotifyImportScene() {
+export function MusicImportScene() {
   return (
     <div className="gx gx--spimport" aria-hidden>
       <div className="gx__drop">

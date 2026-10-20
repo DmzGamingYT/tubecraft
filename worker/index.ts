@@ -18,7 +18,7 @@ import {
 } from '../server/ytProxy';
 
 /**
- * TubeCraft sur Cloudflare Workers (Freebuff Sites).
+ * Séquence sur Cloudflare Workers (Freebuff Sites).
  *
  * - `/yt/api/*` : même contrat que le proxy Vite de développement, avec cache
  *   mémoire par isolate et limite de requêtes ;

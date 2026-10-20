@@ -87,9 +87,9 @@ const COLLECTION = SHELL(`
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px">
       <div style="display:flex;gap:12px">
         ${[
-          ['#ff2d46', 'TC'],
-          ['#1ed760', 'SP'],
-          ['#c9ff3d', 'PC'],
+          ['#ff2d46', 'SE'],
+          ['#1ed760', 'PO'],
+          ['#c9ff3d', 'BA'],
         ]
           .map(
             ([bg, txt]) => `<div style="width:54px;height:54px;border-radius:3px;background:${bg};display:grid;place-items:center;font-size:16px;font-weight:700;color:#0c0c0d">${txt}</div>`
@@ -97,7 +97,7 @@ const COLLECTION = SHELL(`
           .join('')}
       </div>
       <div class="mono" style="color:#6d6961;text-align:right">
-        TubeCraft · SpotifyCraft · PulseCraft<br>
+        Séquence · Portée · Battement<br>
         <span style="color:#0c0c0d">Open source</span> · Sans compte · Sans télémétrie
       </div>
     </div>
@@ -106,13 +106,13 @@ const COLLECTION = SHELL(`
   <div style="position:absolute;left:0;right:0;bottom:0;height:6px;background:#e5402a"></div>
 `);
 
-const TUBECRAFT = SHELL(`
+const SEQUENCE = SHELL(`
   <div class="ring" style="width:700px;height:700px;right:-180px;top:-300px"></div>
 
   <div style="position:absolute;inset:64px 72px;display:flex;flex-direction:column;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:16px">
       ${MARK}
-      <div style="font-size:30px;font-weight:600;letter-spacing:-.03em">TubeCraft<span class="accent">.</span></div>
+      <div style="font-size:30px;font-weight:600;letter-spacing:-.03em">Séquence<span class="accent">.</span></div>
     </div>
 
     <div style="max-width:900px">
@@ -136,7 +136,7 @@ const TUBECRAFT = SHELL(`
 
 const TARGETS = [
   { html: COLLECTION, out: resolve(appRoot, 'showcase/public/og-craftline.png') },
-  { html: TUBECRAFT, out: resolve(appRoot, 'public/og-tubecraft.png') },
+  { html: SEQUENCE, out: resolve(appRoot, 'public/og-sequence.png') },
 ];
 
 const browser = await chromium.launch();

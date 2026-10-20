@@ -21,7 +21,7 @@ export function Shorts() {
   useLockBodyScroll(true);
 
   useEffect(() => {
-    setPageMeta('Shorts — TubeCraft');
+    setPageMeta('Shorts — Séquence');
   }, []);
 
   // repli : si le catalogue n'a pas de Shorts, on en cherche en direct

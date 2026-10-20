@@ -470,7 +470,7 @@ export function PlayerHostProvider({ children }: { children: ReactNode }) {
       if (!win) throw new Error('Fenêtre Picture-in-Picture indisponible');
       const opened = win;
       copyStyles(opened.document);
-      opened.document.title = sessionRef.current?.video.title ?? 'TubeCraft';
+      opened.document.title = sessionRef.current?.video.title ?? 'Séquence';
       // Échap ferme la fenêtre ; `pagehide` ramène alors le lecteur dans la page.
       opened.document.addEventListener('keydown', (event: KeyboardEvent) => {
         if (event.key === 'Escape') opened.close();

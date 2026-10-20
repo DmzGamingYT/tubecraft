@@ -35,10 +35,10 @@ const HEIGHTS = { 1440: 900, 1280: 800, 834: 1112, 390: 844 };
 const STOPS = [
   { name: 'hero', selector: '.sc-hero' },
   { name: 'collection', selector: '#collection' },
-  { name: 'manifeste', selector: '#manifeste' },
-  { name: 'capot', selector: '#capot' },
+  { name: 'preuve', selector: '#preuve' },
+  { name: 'fabrique', selector: '#fabrique' },
   { name: 'telecharger', selector: '#telecharger' },
-  { name: 'etude', selector: '#etude' },
+  { name: 'atelier', selector: '#atelier' },
   { name: 'final', selector: '.sc-final' },
 ];
 

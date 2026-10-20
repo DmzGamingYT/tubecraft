@@ -7,7 +7,7 @@ import {
   type DownloadPlatformId,
 } from '../../data/downloads';
 import { useInstallPrompt } from '../../lib/pwa';
-import { YT_THUMBS } from '../showcase/media';
+import { MIXES, TRACKS, YT_THUMBS } from '../showcase/media';
 
 /**
  * Page / section « Télécharger ».
@@ -39,7 +39,7 @@ interface Props {
   /** Introduction de la section vitrine (sinon le texte de l’app). */
   sectionLede?: string;
   /**
-   * Apps proposées, dans l’ordre d’affichage. La route interne de TubeCraft
+   * Apps proposées, dans l’ordre d’affichage. La route interne de Séquence
    * n’en montre qu’une ; la vitrine présente la collection entière.
    */
   appIds?: DownloadAppId[];
@@ -106,10 +106,15 @@ function PlatformGlyph({ id }: { id: DownloadPlatformId }) {
 
   if (id === 'linux') {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="2.6" y="3.6" width="18.8" height="16.8" rx="4" stroke="currentColor" strokeWidth="1.7" />
-        <path d="m7 9 2.6 3L7 15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12.4 15.4H17" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        {/* Tux, le manchot Linux — pas un terminal générique. */}
+        <path d="M12 2.2c-2.2 0-3.7 1.8-3.7 4.2 0 1.2.3 2.1.3 3 0 .8-.5 1.6-1.2 2.6-.9 1.3-1.8 2.9-1.8 4.5 0 1.7 1 2.8 2.5 2.8.7 0 1.3-.2 1.9-.5.4-.2.8-.3 1.2-.3s.8.1 1.2.3c.6.3 1.2.5 1.9.5 1.5 0 2.5-1.1 2.5-2.8 0-1.6-.9-3.2-1.8-4.5-.7-1-1.2-1.8-1.2-2.6 0-.9.3-1.8.3-3 0-2.4-1.5-4.2-3.7-4.2Z" />
+        <ellipse cx="8.8" cy="20.8" rx="2.2" ry="1.1" />
+        <ellipse cx="15.2" cy="20.8" rx="2.2" ry="1.1" />
+        <ellipse cx="12" cy="15.2" rx="3.4" ry="4.2" fill="var(--dl-glyph-cut, var(--dl-bg))" />
+        <circle cx="10.4" cy="5.4" r=".8" fill="var(--dl-glyph-cut, var(--dl-bg))" />
+        <circle cx="13.6" cy="5.4" r=".8" fill="var(--dl-glyph-cut, var(--dl-bg))" />
+        <path d="M10.9 7.3h2.2L12 8.7Z" fill="#f5a623" />
       </svg>
     );
   }
@@ -117,17 +122,21 @@ function PlatformGlyph({ id }: { id: DownloadPlatformId }) {
   if (id === 'android') {
     return (
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M7.2 6.1 5.9 3.9a.6.6 0 0 1 1-.6l1.4 2.2A8.7 8.7 0 0 1 12 4.8c1.3 0 2.6.3 3.7.7l1.4-2.2a.6.6 0 0 1 1 .6l-1.3 2.2A7.1 7.1 0 0 1 20 11H4a7.1 7.1 0 0 1 3.2-4.9Zm1.9 2.5a.8.8 0 1 0 0-1.6.8.8 0 0 0 0 1.6Zm5.8 0a.8.8 0 1 0 0-1.6.8.8 0 0 0 0 1.6ZM4 12.2h16v5.1a2.2 2.2 0 0 1-2.2 2.2H6.2A2.2 2.2 0 0 1 4 17.3v-5.1Zm-2.4.2a1.3 1.3 0 0 1 2.6 0v3.4a1.3 1.3 0 0 1-2.6 0v-3.4Zm18.2 0a1.3 1.3 0 0 1 2.6 0v3.4a1.3 1.3 0 0 1-2.6 0v-3.4ZM7.4 20.7v2a1.2 1.2 0 0 1-2.4 0v-2h2.4Zm11.6 0v2a1.2 1.2 0 0 1-2.4 0v-2H19Z" />
+        {/* Tête du robot Android : antennes, yeux, bas plat. */}
+        <path d="M12 4.2c-4.2 0-7.6 3.4-7.6 7.6V18h15.2v-6.2c0-4.2-3.4-7.6-7.6-7.6Z" />
+        <path d="m7.2 4.6-1.1-2M16.8 4.6l1.1-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="9.2" cy="10.2" r=".95" fill="var(--dl-bg)" />
+        <circle cx="14.8" cy="10.2" r=".95" fill="var(--dl-bg)" />
       </svg>
     );
   }
 
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="5.2" y="1.8" width="13.6" height="20.4" rx="3.2" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M9.4 2.2h5.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M10.4 4.2h3.2a.8.8 0 0 1 0 1.6h-3.2a.8.8 0 0 1 0-1.6Z" fill="currentColor" />
-      <path d="M11 19.4h2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      {/* iPhone : contour, haut-parleur et bouton d’accueil. */}
+      <rect x="6.4" y="1.8" width="11.2" height="20.4" rx="2.9" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M10.4 4.9h3.2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M10.5 19.2h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -165,137 +174,802 @@ function MockVideo({ video, small = false }: { video: (typeof MOCK_VIDEOS)[numbe
   );
 }
 
-function DeviceMock({ platform }: { platform: DownloadPlatform }) {
-  const mobile = platform.family === 'mobile';
+/* ------------------------------------------------- écrans & chrome appareil */
 
-  if (mobile) {
+type NavKind =
+  | 'home'
+  | 'shorts'
+  | 'subs'
+  | 'library'
+  | 'activity'
+  | 'moon'
+  | 'apple'
+  | 'user';
+
+function NavGlyph({ kind }: { kind: NavKind }) {
+  const base = { viewBox: '0 0 24 24', 'aria-hidden': true } as const;
+
+  if (kind === 'home') {
     return (
-      <div className={`dlm dlm--mobile dlm--${platform.id}`} aria-hidden>
-        <div className="dlm__phone">
-          <span className="dlm__notch" />
-          <div className="dlm__status">
-            <span>9:41</span>
-            <span className="dlm__statusRight">
-              <i />
-              <i />
-              <i />
-            </span>
-          </div>
+      <svg {...base} fill="currentColor">
+        <path d="M4 11.4 12 4l8 7.4V20h-5.4v-5.2h-5.2V20H4v-8.6Z" />
+      </svg>
+    );
+  }
+  if (kind === 'shorts') {
+    return (
+      <svg {...base} fill="currentColor">
+        <rect x="4.6" y="3.4" width="14.8" height="17.2" rx="4.2" />
+        <path d="m10 8.8 5.2 3.2L10 15.2V8.8Z" fill="var(--dl-bg)" />
+      </svg>
+    );
+  }
+  if (kind === 'subs') {
+    return (
+      <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <path d="M4.5 7h15M4.5 12h15M4.5 17h9" />
+        <circle cx="18.5" cy="17" r="1.8" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  if (kind === 'library') {
+    return (
+      <svg {...base} fill="currentColor">
+        <path d="M6 3.8h12v16.4l-6-3.9-6 3.9V3.8Z" />
+      </svg>
+    );
+  }
+  if (kind === 'activity') {
+    return (
+      <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3.2 12h3.9l2.2-5.4 4.1 10.8 2.2-5.4h5.2" />
+      </svg>
+    );
+  }
+  if (kind === 'moon') {
+    return (
+      <svg {...base} fill="currentColor">
+        <path d="M20.2 14.8A8.8 8.8 0 0 1 9.2 3.8a8.8 8.8 0 1 0 11 11Z" />
+      </svg>
+    );
+  }
+  if (kind === 'apple') {
+    return (
+      <svg {...base} fill="currentColor">
+        <path d="M12.2 7.2c1.5 0 2.7.8 3.4 1.5.9-.8 2.1-1.4 3.4-1.4 0 5.8-2.2 10.5-6.8 10.5S5.4 13.1 5.4 7.3c1.3 0 2.5.6 3.4 1.4.7-.7 1.9-1.5 3.4-1.5Z" />
+        <path d="M12 6.9c0-1.8.9-3.3 2.7-4.1.1 1.9-.9 3.4-2.7 4.1Z" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="12" cy="8.2" r="3.2" />
+      <path d="M5.4 20c.6-4 3.2-6 6.6-6s6 2 6.6 6" />
+    </svg>
+  );
+}
 
-          <div className="dlm__papp">
-            <div className="dlm__ptop">
-              <span className="dlm__pbrand">
-                <b>▶</b> TubeCraft
-              </span>
-              <span className="dlm__pavatar" />
-            </div>
-            <div className="dlm__psearch">Rechercher</div>
-            <div className="dlm__pchips">
-              <span className="is-on">Toutes</span>
-              <span>Animation</span>
-              <span>Musique</span>
-            </div>
-            <div className="dlm__pgrid">
-              {MOCK_VIDEOS.slice(0, 4).map((video) => (
-                <MockVideo key={video.title} video={video} small />
-              ))}
-            </div>
-            <div className="dlm__pmini">
-              <span className="dlm__pminiThumb">
-                <img src={YT_THUMBS.spring} alt="" loading="lazy" decoding="async" />
-              </span>
-              <span className="dlm__pminiText">
-                <b>Spring — Blender Open Movie</b>
-                <em>mini-lecteur</em>
-              </span>
-              <span className="dlm__pminiBtn">❚❚</span>
-              <span className="dlm__pminiBar">
-                <i />
-              </span>
-            </div>
-          </div>
+function Rail({ items }: { items: NavKind[] }) {
+  return (
+    <aside className="dlm__rail" aria-hidden>
+      {items.map((kind, index) => (
+        <span key={kind} className={index === 0 ? 'is-on' : undefined}>
+          <NavGlyph kind={kind} />
+        </span>
+      ))}
+    </aside>
+  );
+}
 
-          <div className="dlm__pnav">
-            <span className="is-on">⌂</span>
-            <span>▤</span>
-            <span>▷</span>
-            <span>◉</span>
-          </div>
-          <span className="dlm__homebar" />
-        </div>
-        <span className="dlm__deviceLabel">
+function BottomNav({ items }: { items: NavKind[] }) {
+  return (
+    <div className="dlm__pnav" aria-hidden>
+      {items.map((kind, index) => (
+        <span key={kind} className={index === 0 ? 'is-on' : undefined}>
+          <NavGlyph kind={kind} />
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Barre système de chaque OS : Dock macOS, barre des tâches Windows, lanceur
+ * GNOME. Le but n’est pas d’imiter pixel par pixel mais que chaque version se
+ * reconnaisse au premier coup d’œil.
+ */
+function PlatformDock({ platform, app }: { platform: DownloadPlatform; app: DownloadApp }) {
+  const appIcon = (
+    <span className="dlm__dockApp is-open">
+      <img src={app.icon} alt="" width={28} height={28} />
+    </span>
+  );
+
+  if (platform.id === 'windows') {
+    return (
+      <div className="dlm__dock dlm__dock--windows" aria-hidden>
+        <span className="dlm__start">
+          <PlatformGlyph id="windows" />
+        </span>
+        <span className="dlm__dockSearch">
+          <svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.3" stroke="currentColor" strokeWidth="1.5" /><path d="m10.2 10.2 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+        </span>
+        {appIcon}
+        <span className="dlm__clock">21:16</span>
+      </div>
+    );
+  }
+
+  if (platform.id === 'linux') {
+    return (
+      <div className="dlm__dock dlm__dock--linux" aria-hidden>
+        <span className="dlm__start">
+          <PlatformGlyph id="linux" />
+        </span>
+        <span className="dlm__dockDivider" />
+        {appIcon}
+        <span className="dlm__workspaces">
+          <i className="is-on" />
           <i />
-          {platform.id === 'ios' ? 'iPhone · Safari' : 'Android · Chrome'}
         </span>
       </div>
     );
   }
 
+  return <div className="dlm__dock dlm__dock--macos" aria-hidden>{appIcon}</div>;
+}
+
+function VideoDesktop({ app }: { app: DownloadApp }) {
   return (
-    <div className={`dlm dlm--desktop dlm--${platform.id}`} aria-hidden>
-      <div className="dlm__browser">
+    <div className="dlm__app dlm__app--tube">
+      <div className="dlm__top">
+        <span className="dlm__brand">
+          <img className="dlm__appMark" src={app.icon} alt="" />
+          Séquence <i>FR</i>
+        </span>
+        <span className="dlm__search">Rechercher</span>
+        <span className="dlm__avatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+
+      <div className="dlm__body">
+        <Rail items={['home', 'shorts', 'subs', 'library']} />
+        <div className="dlm__content">
+          <div className="dlm__chips">
+            <span className="is-on">Toutes</span>
+            <span>Animation</span>
+            <span>Musique</span>
+            <span>Science</span>
+          </div>
+          <div className="dlm__grid">
+            {MOCK_VIDEOS.map((video) => (
+              <MockVideo key={video.title} video={video} />
+            ))}
+          </div>
+          <div className="dlm__mini">
+            <span className="dlm__miniThumb">
+              <img src={YT_THUMBS.spring} alt="" loading="lazy" decoding="async" />
+            </span>
+            <span className="dlm__miniText">
+              <b>Spring — Blender Open Movie</b>
+              <em>mini-lecteur persistant</em>
+            </span>
+            <span className="dlm__miniBar">
+              <i />
+            </span>
+            <span className="dlm__miniBtn">❚❚</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VideoMobile({ app }: { app: DownloadApp }) {
+  return (
+    <div className="dlm__papp dlm__papp--tube">
+      <div className="dlm__ptop">
+        <span className="dlm__pbrand">
+          <img className="dlm__appMark" src={app.icon} alt="" /> Séquence
+        </span>
+        <span className="dlm__pavatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+      <div className="dlm__psearch">Rechercher</div>
+      <div className="dlm__pchips">
+        <span className="is-on">Toutes</span>
+        <span>Animation</span>
+        <span>Musique</span>
+      </div>
+      <div className="dlm__pfeature">
+        <MockVideo video={MOCK_VIDEOS[0]} />
+        <span className="dlm__pfeatureBar" aria-hidden>
+          <i />
+        </span>
+      </div>
+      <div className="dlm__plist">
+        {MOCK_VIDEOS.slice(1, 3).map((video) => (
+          <MockVideo key={video.title} video={video} small />
+        ))}
+      </div>
+      <div className="dlm__pshelf">
+        <span className="dlm__pshelfHead">Continuer à regarder</span>
+        <span className="dlm__pshelfRow">
+          {MOCK_VIDEOS.slice(2, 4).map((video) => (
+            <span className="dlm__pshelfCard" key={video.title}>
+              <span className="dlm__pshelfThumb">
+                <img src={video.thumb} alt="" loading="lazy" decoding="async" />
+                <em>{video.duration}</em>
+                <span className="dlm__pshelfBar">
+                  <i />
+                </span>
+              </span>
+              <b>{video.title.replace(' — Blender Open Movie', '')}</b>
+            </span>
+          ))}
+        </span>
+      </div>
+      <div className="dlm__pmini">
+        <span className="dlm__pminiThumb">
+          <img src={YT_THUMBS.spring} alt="" loading="lazy" decoding="async" />
+        </span>
+        <span className="dlm__pminiText">
+          <b>Spring — Blender Open Movie</b>
+          <em>mini-lecteur</em>
+        </span>
+        <span className="dlm__pminiBtn">❚❚</span>
+      </div>
+      <BottomNav items={['home', 'shorts', 'subs', 'library']} />
+    </div>
+  );
+}
+
+const PULSE_RINGS = [
+  { value: '84%', ring: '#c9ff3d', main: '420', unit: 'kcal' },
+  { value: '100%', ring: '#3ddc91', main: '32', unit: 'min' },
+  { value: '90%', ring: '#ffb84d', main: '9', unit: 'h' },
+];
+
+function PulseRings({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`dlp__rings${compact ? ' dlp__rings--compact' : ''}`}>
+      {PULSE_RINGS.map((ring) => (
+        <span
+          className="dlp__ring"
+          key={ring.unit}
+          style={{ '--p': ring.value, '--ring': ring.ring } as CSSProperties}
+        >
+          <span>
+            <b>{ring.main}</b>
+            <em>{ring.unit}</em>
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function HealthDesktop({ app }: { app: DownloadApp }) {
+  return (
+    <div className="dlm__app dlm__app--pulse">
+      <div className="dlm__top">
+        <span className="dlm__brand">
+          <img className="dlm__appMark" src={app.icon} alt="" />
+          Battement <i>AUJOURD’HUI</i>
+        </span>
+        <span className="dlp__date">Lun. 19 octobre</span>
+        <span className="dlm__avatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+
+      <div className="dlm__body">
+        <Rail items={['home', 'activity', 'moon', 'apple']} />
+        <div className="dlm__content dlp__content">
+          <div className="dlp__head">
+            <b>Bonjour, Alessio.</b>
+            <span>3 objectifs sur 4 tenus cette semaine.</span>
+          </div>
+          <PulseRings />
+          <div className="dlp__stats">
+            <span><b>8 420</b><em>pas</em></span>
+            <span><b>7 h 32</b><em>sommeil</em></span>
+            <span><b>72,4</b><em>kg</em></span>
+          </div>
+          <div className="dlp__cards">
+            <div className="dlp__card">
+              <span>Dernière séance</span>
+              <b>Course · 5,2 km</b>
+              <em>32 min · 412 kcal</em>
+              <span className="dlp__spark" aria-hidden>
+                {[34, 48, 40, 62, 55, 78, 68, 88, 74, 96].map((height, index) => (
+                  <i key={index} style={{ height: `${height}%` }} />
+                ))}
+              </span>
+            </div>
+            <div className="dlp__card">
+              <span>Sommeil</span>
+              <b>7 h 32</b>
+              <em>Qualité 86 %</em>
+              <span className="dlp__bars" aria-hidden>
+                {[42, 68, 54, 82, 74, 92, 66].map((height, index) => (
+                  <i key={index} style={{ height: `${height}%` }} />
+                ))}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HealthMobile({ app }: { app: DownloadApp }) {
+  return (
+    <div className="dlm__papp dlp__papp">
+      <div className="dlm__ptop">
+        <span className="dlm__pbrand">
+          <img className="dlm__appMark" src={app.icon} alt="" /> Battement
+        </span>
+        <span className="dlm__pavatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+      <div className="dlp__pdate">Aujourd’hui · 19 octobre</div>
+      <PulseRings compact />
+      <div className="dlp__pstats">
+        <span><b>8 420</b><em>pas</em></span>
+        <span><b>7 h 32</b><em>sommeil</em></span>
+        <span><b>1 840</b><em>kcal</em></span>
+      </div>
+      <div className="dlp__pcard">
+        <span>Dernière séance</span>
+        <b>Course · 5,2 km</b>
+        <em>32 min · 412 kcal</em>
+        <span className="dlp__spark" aria-hidden>
+          {[34, 52, 44, 70, 58, 84, 72, 96].map((height, index) => (
+            <i key={index} style={{ height: `${height}%` }} />
+          ))}
+        </span>
+      </div>
+      <div className="dlp__pcard">
+        <span>Sommeil</span>
+        <b>7 h 32</b>
+        <em>Qualité 86 % · 4 cycles</em>
+        <span className="dlp__bars" aria-hidden>
+          {[42, 68, 54, 82, 74, 92, 66].map((height, index) => (
+            <i key={index} style={{ height: `${height}%` }} />
+          ))}
+        </span>
+      </div>
+      <div className="dlp__pcard">
+        <span>Nutrition</span>
+        <b>112 g protéines</b>
+        <em>204 g glucides · 62 g lipides</em>
+      </div>
+      <div className="dlp__pcard">
+        <span>Cette semaine</span>
+        <b>4 séances · 2 h 08</b>
+        <span className="dlp__pweek" aria-hidden>
+          {[36, 72, 8, 54, 88, 8, 62].map((height, index) => (
+            <i
+              key={index}
+              className={height < 10 ? 'is-rest' : undefined}
+              style={{ height: `${height}%` }}
+            />
+          ))}
+        </span>
+      </div>
+      <div className="dlp__pcoach">
+        <span>Coach</span>
+        <b>Demain · footing 30 min</b>
+        <em>Zone 2 · récupération</em>
+      </div>
+      <BottomNav items={['home', 'activity', 'moon', 'apple']} />
+    </div>
+  );
+}
+
+/**
+ * Même parti pris que sur le bureau : la version mobile montre l’écran de
+ * l’app, pas son icône — mix, titres et mini-lecteur, dans le cadre du
+ * téléphone.
+ */
+function PortéeMobile({ app }: { app: DownloadApp }) {
+  return (
+    <div className="dlm__papp dlm__papp--spot">
+      <div className="dlm__ptop">
+        <span className="dlm__pbrand">
+          <img className="dlm__appMark" src={app.icon} alt="" /> Portée
+        </span>
+        <span className="dlm__pavatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+
+      <div className="dlm__pspotGreet">
+        <b>Bonsoir</b>
+        <em>Vos mix du moment</em>
+      </div>
+
+      <div className="dlm__pspotMixes">
+        {MIXES.slice(0, 2).map((mix) => (
+          <span className="dlm__pspotMix" key={mix.name}>
+            <span className="dlm__pspotCover">
+              <img src={mix.covers[0]} alt="" loading="lazy" decoding="async" />
+            </span>
+            <b>{mix.name}</b>
+          </span>
+        ))}
+      </div>
+
+      <span className="dlm__pspotHead">Titres populaires</span>
+      <div className="dlm__pspotList">
+        {TRACKS.slice(0, 3).map((track, index) => (
+          <span className="dlm__pspotRow" key={track.title}>
+            <em className="dlm__pspotNum">{String(index + 1).padStart(2, '0')}</em>
+            <img src={track.cover} alt="" loading="lazy" decoding="async" />
+            <span className="dlm__pspotText">
+              <b>{track.title}</b>
+              <em>{track.artist}</em>
+            </span>
+          </span>
+        ))}
+      </div>
+
+      <span className="dlm__pspotHead">Récemment écouté</span>
+      <div className="dlm__pspotShelf">
+        {TRACKS.slice(3).map((track) => (
+          <span className="dlm__pspotTile" key={track.title}>
+            <img src={track.cover} alt="" loading="lazy" decoding="async" />
+            <b>{track.title}</b>
+          </span>
+        ))}
+      </div>
+
+      <div className="dlm__pmini">
+        <span className="dlm__pminiThumb">
+          <img src={TRACKS[0].cover} alt="" loading="lazy" decoding="async" />
+        </span>
+        <span className="dlm__pminiText">
+          <b>{TRACKS[0].title}</b>
+          <em>{TRACKS[0].artist}</em>
+        </span>
+        <span className="dlm__pminiBtn">❚❚</span>
+      </div>
+      <BottomNav items={['home', 'library', 'user']} />
+    </div>
+  );
+}
+
+function PortéeDesktop({ app }: { app: DownloadApp }) {
+  return (
+    <div className="dlm__app dlm__app--spotify">
+      <div className="dlm__spotTop">
+        <span className="dlm__spotArrows" aria-hidden>
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="m6 3 5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <span className="dlm__spotSearch">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden>
+            <circle cx="7" cy="7" r="4.1" stroke="currentColor" strokeWidth="1.5" />
+            <path d="m10.1 10.1 3.1 3.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          Rechercher
+        </span>
+        <span className="dlm__avatar">
+          <NavGlyph kind="user" />
+        </span>
+      </div>
+
+      <div className="dlm__spotBody">
+        <aside className="dlm__spotSide">
+          <span className="dlm__spotBrand">
+            <img src={app.icon} alt="" />
+            Portée
+          </span>
+          <span className="is-on">Accueil</span>
+          <span>Rechercher</span>
+          <span>Bibliothèque</span>
+          <span className="dlm__spotRule" />
+          <span className="dlm__spotSideLabel">Vos mix</span>
+          {MIXES.map((mix) => (
+            <span className="dlm__spotSideItem" key={mix.name}>
+              {mix.name}
+            </span>
+          ))}
+        </aside>
+
+        <div className="dlm__spotMain">
+          <div className="dlm__spotGreet">
+            <b>Bonsoir</b>
+            <span>Vos mix du moment</span>
+          </div>
+
+          <div className="dlm__spotMixes">
+            {MIXES.map((mix) => (
+              <span className="dlm__spotMix" key={mix.name}>
+                <span className="dlm__spotCovers">
+                  {mix.covers.map((cover) => (
+                    <img key={cover} src={cover} alt="" loading="lazy" decoding="async" />
+                  ))}
+                </span>
+                <b>{mix.name}</b>
+                <em>{mix.meta}</em>
+              </span>
+            ))}
+          </div>
+
+          <div className="dlm__spotTracks">
+            <span className="dlm__spotTracksHead">Titres populaires</span>
+            {TRACKS.slice(0, 4).map((track, index) => (
+              <span className="dlm__spotTrack" key={track.title}>
+                <em className="dlm__spotTrackNum">{String(index + 1).padStart(2, '0')}</em>
+                <img src={track.cover} alt="" loading="lazy" decoding="async" />
+                <span className="dlm__spotTrackText">
+                  <b>{track.title}</b>
+                  <em>{track.artist}</em>
+                </span>
+                <em className="dlm__spotTrackTime">{track.duration}</em>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="dlm__spotBar">
+        <img className="dlm__spotBarCover" src={TRACKS[0].cover} alt="" loading="lazy" decoding="async" />
+        <span className="dlm__spotBarText">
+          <b>{TRACKS[0].title}</b>
+          <em>{TRACKS[0].artist}</em>
+        </span>
+        <span className="dlm__spotControls" aria-hidden>
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <path d="M6.2 3.4 2.4 8l3.8 4.6V3.4Zm6.2 0L8.6 8l3.8 4.6V3.4Z" />
+          </svg>
+          <svg className="is-play" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" opacity=".16" />
+            <path d="M9.2 7.4 17 12l-7.8 4.6V7.4Z" />
+          </svg>
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <path d="M9.8 3.4 13.6 8l-3.8 4.6V3.4Zm-6.2 0L7.4 8l-3.8 4.6V3.4Z" />
+          </svg>
+        </span>
+        <span className="dlm__spotProgress" aria-hidden>
+          <i />
+        </span>
+        <span className="dlm__spotTime">1:12</span>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------------------------- chrome de fenêtre par OS */
+
+function WindowChrome({
+  platform,
+  app,
+  kind,
+  url,
+  tag,
+}: {
+  platform: DownloadPlatform;
+  app: DownloadApp;
+  kind: 'web' | 'native';
+  url: string;
+  tag?: ReactNode;
+}) {
+  const installed = (
+    <span className="dlm__installed">
+      <i /> Installée
+    </span>
+  );
+
+  const controls = (
+    <span className={`dlm__winControls dlm__winControls--${platform.id}`} aria-hidden>
+      <i>–</i>
+      <i>□</i>
+      <i>×</i>
+    </span>
+  );
+
+  if (platform.id === 'macos') {
+    return (
+      <div className={`dlm__chrome dlm__chrome--mac dlm__chrome--${kind}`}>
         <span className="dlm__dots">
           <i />
           <i />
           <i />
         </span>
-        <span className="dlm__url">tubecraft.app / accueil</span>
-        <span className="dlm__installed">
-          <i />
-          Installée
+        {kind === 'web' ? (
+          <span className="dlm__url">{url}</span>
+        ) : (
+          <span className="dlm__chromeTitle">{app.name}</span>
+        )}
+        <span className="dlm__winRight">
+          {tag}
+          {kind === 'web' ? installed : null}
         </span>
       </div>
+    );
+  }
 
-      <div className="dlm__app">
-        <div className="dlm__top">
-          <span className="dlm__brand">
-            <b>▶</b> TubeCraft <i>FR</i>
+  if (platform.id === 'windows') {
+    return (
+      <div className={`dlm__chrome dlm__chrome--win dlm__chrome--${kind}`}>
+        <span className="dlm__titleRow">
+          <span className="dlm__tab">
+            <img src={app.icon} alt="" />
+            {app.name}
           </span>
-          <span className="dlm__search">Rechercher</span>
-          <span className="dlm__avatar" />
-        </div>
-
-        <div className="dlm__body">
-          <aside className="dlm__rail">
-            <span className="is-on" />
-            <span />
-            <span />
-            <span />
-          </aside>
-          <div className="dlm__content">
-            <div className="dlm__chips">
-              <span className="is-on">Toutes</span>
-              <span>Animation</span>
-              <span>Musique</span>
-              <span>Science</span>
-            </div>
-            <div className="dlm__grid">
-              {MOCK_VIDEOS.map((video) => (
-                <MockVideo key={video.title} video={video} />
-              ))}
-            </div>
-            <div className="dlm__mini">
-              <span className="dlm__miniThumb">
-                <img src={YT_THUMBS.spring} alt="" loading="lazy" decoding="async" />
-              </span>
-              <span className="dlm__miniText">
-                <b>Spring — Blender Open Movie</b>
-                <em>mini-lecteur persistant</em>
-              </span>
-              <span className="dlm__miniBar">
-                <i />
-              </span>
-              <span className="dlm__miniBtn">❚❚</span>
-            </div>
-          </div>
-        </div>
+          <span className="dlm__winRight">
+            {tag}
+            {controls}
+          </span>
+        </span>
+        {kind === 'web' ? (
+          <span className="dlm__addressRow">
+            <span className="dlm__shield" aria-hidden>
+              <svg viewBox="0 0 16 16" fill="none">
+                <path d="M8 1.8 13 3.4v4.2c0 3-2.1 5.4-5 6.6-2.9-1.2-5-3.6-5-6.6V3.4L8 1.8Z" stroke="currentColor" strokeWidth="1.3" />
+                <path d="m5.8 8 1.6 1.6L10.5 6.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span className="dlm__url">{url}</span>
+            {installed}
+          </span>
+        ) : null}
       </div>
+    );
+  }
 
+  return (
+    <div className={`dlm__chrome dlm__chrome--linux dlm__chrome--${kind}`}>
+      <span className="dlm__titleRow">
+        <span className="dlm__tab">
+          <img src={app.icon} alt="" />
+          {app.name}
+        </span>
+        <span className="dlm__winRight">
+          {tag}
+          {kind === 'native' ? (
+            <span className="dlm__winControls dlm__winControls--close" aria-hidden>
+              <i>×</i>
+            </span>
+          ) : (
+            controls
+          )}
+        </span>
+      </span>
+      {kind === 'web' ? (
+        <span className="dlm__addressRow">
+          <span className="dlm__url">{url}</span>
+          {installed}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function DesktopFrame({
+  platform,
+  app,
+  kind = 'web',
+  tag,
+  label,
+  children,
+}: {
+  platform: DownloadPlatform;
+  app: DownloadApp;
+  kind?: 'web' | 'native';
+  tag?: ReactNode;
+  label?: string;
+  children: ReactNode;
+}) {
+  const url =
+    app.id === 'pulsecraft'
+      ? 'battement.app / aujourd’hui'
+      : app.id === 'spotifycraft'
+        ? 'portee.app / bibliothèque'
+        : 'sequence.app / accueil';
+  const caption =
+    label ??
+    (platform.id === 'macos'
+      ? 'Fenêtre macOS · Dock'
+      : platform.id === 'windows'
+        ? 'Fenêtre Windows · barre des tâches'
+        : 'Fenêtre Linux · lanceur');
+
+  return (
+    <div className={`dlm dlm--desktop dlm--${platform.id}`} aria-hidden>
+      <div className="dlm__window">
+        <WindowChrome platform={platform} app={app} kind={kind} url={url} tag={tag} />
+        {children}
+      </div>
+      <PlatformDock platform={platform} app={app} />
       <span className="dlm__deviceLabel">
         <i />
-        {platform.id === 'macos' ? 'Fenêtre macOS · Dock' : platform.id === 'windows' ? 'Fenêtre Windows · barre des tâches' : 'Fenêtre Linux · lanceur'}
+        {caption}
       </span>
     </div>
+  );
+}
+
+/* ----------------------------------------------------- barre d’état mobile */
+
+function StatusGlyphs() {
+  return (
+    <span className="dlm__statusIcons" aria-hidden>
+      <svg className="dlm__signal" viewBox="0 0 18 12" fill="currentColor">
+        <rect x="0" y="7.4" width="2.6" height="4.6" rx=".7" />
+        <rect x="4" y="5.2" width="2.6" height="6.8" rx=".7" />
+        <rect x="8" y="3" width="2.6" height="9" rx=".7" />
+        <rect x="12" y=".8" width="2.6" height="11.2" rx=".7" />
+      </svg>
+      <svg className="dlm__wifi" viewBox="0 0 16 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M1.7 4.7a9.3 9.3 0 0 1 12.6 0" />
+        <path d="M4.1 7.3a6 6 0 0 1 7.8 0" />
+        <circle cx="8" cy="10.1" r=".9" fill="currentColor" stroke="none" />
+      </svg>
+      <svg className="dlm__battery" viewBox="0 0 26 12" fill="none">
+        <rect x=".6" y=".6" width="21.8" height="10.8" rx="3" stroke="currentColor" strokeWidth="1.2" opacity=".5" />
+        <rect x="2.4" y="2.4" width="14.4" height="7.2" rx="1.8" fill="currentColor" />
+        <path d="M24 4.2v3.6a2 2 0 0 0 0-3.6Z" fill="currentColor" opacity=".5" />
+      </svg>
+    </span>
+  );
+}
+
+function PhoneFrame({
+  platform,
+  label,
+  children,
+}: {
+  platform: DownloadPlatform;
+  /** légende du cadre : le canal diffère entre web app et app native */
+  label?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`dlm dlm--mobile dlm--${platform.id}`} aria-hidden>
+      <div className="dlm__phone">
+        <span className="dlm__notch" />
+        <div className="dlm__status">
+          <span>{platform.id === 'ios' ? '9:41' : '21:16'}</span>
+          <StatusGlyphs />
+        </div>
+        {children}
+        <span className="dlm__homebar" />
+      </div>
+      <span className="dlm__deviceLabel">
+        <i />
+        {label ?? (platform.id === 'ios' ? 'iPhone · Safari' : 'Android · Chrome')}
+      </span>
+    </div>
+  );
+}
+
+function DeviceMock({ app, platform }: { app: DownloadApp; platform: DownloadPlatform }) {
+  const pulse = app.id === 'pulsecraft';
+
+  if (platform.family === 'mobile') {
+    return (
+      <PhoneFrame platform={platform}>
+        {pulse ? <HealthMobile app={app} /> : <VideoMobile app={app} />}
+      </PhoneFrame>
+    );
+  }
+
+  return (
+    <DesktopFrame platform={platform} app={app}>
+      {pulse ? <HealthDesktop app={app} /> : <VideoDesktop app={app} />}
+    </DesktopFrame>
   );
 }
 
@@ -308,44 +982,59 @@ function DeviceMock({ platform }: { platform: DownloadPlatform }) {
 function NativeMock({ app, platform }: { app: DownloadApp; platform: DownloadPlatform }) {
   const pending = app.releaseState === 'pending';
 
-  return (
-    <div className="dln" aria-hidden>
-      <div className="dln__win">
-        <div className="dln__bar">
-          <span className="dlm__dots">
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className="dln__title">{app.name}</span>
-          <span className="dln__barTag">{platform.short}</span>
-        </div>
+  /* Une app native sur téléphone n’a pas de fenêtre : on garde le même
+     aperçu dépouillé (icône, nom, canal de distribution) dans un cadre de
+     téléphone, pour ne pas montrer un Dock macOS sur un écran Android. */
+  if (platform.family === 'mobile') {
+    const testflight = platform.delivery === 'testflight';
 
+    return (
+      <PhoneFrame
+        platform={platform}
+        label={
+          testflight
+            ? `iPhone · TestFlight${pending ? ' · aperçu' : ''}`
+            : `Android · APK${pending ? ' · aperçu' : ''}`
+        }
+      >
+        {app.id === 'spotifycraft' ? (
+          <PortéeMobile app={app} />
+        ) : (
+          <div className="dln__body dln__body--phone">
+            <span className="dln__icon">
+              <img src={app.icon} alt="" width={132} height={132} loading="lazy" decoding="async" />
+            </span>
+            <strong className="dln__name">{app.name}</strong>
+            <span className="dln__meta">{platform.file ?? platform.detail}</span>
+            {pending ? <span className="dlm__previewTag">Aperçu · non publié</span> : null}
+          </div>
+        )}
+      </PhoneFrame>
+    );
+  }
+
+  return (
+    <DesktopFrame
+      platform={platform}
+      app={app}
+      kind="native"
+      tag={
+        pending ? <span className="dlm__previewTag">Aperçu · non publié</span> : null
+      }
+      label={`Application native · ${platform.short}${pending ? ' · aperçu' : ''}`}
+    >
+      {app.id === 'spotifycraft' ? (
+        <PortéeDesktop app={app} />
+      ) : (
         <div className="dln__body">
           <span className="dln__icon">
             <img src={app.icon} alt="" width={132} height={132} loading="lazy" decoding="async" />
           </span>
           <strong className="dln__name">{app.name}</strong>
-          <span className="dln__meta">
-            {pending
-              ? `Format prévu · ${platform.file ?? platform.detail}`
-              : `Version ${app.version} · ${platform.file ?? platform.detail}`}
-          </span>
-          {pending ? (
-            <span className="dln__trust dln__trust--pending">
-              Pas encore publié · à chaque version ensuite
-            </span>
-          ) : (
-            <span className="dln__trust">{platform.trust}</span>
-          )}
+          <span className="dln__meta">{platform.file ?? platform.detail}</span>
         </div>
-      </div>
-
-      <span className="dlm__deviceLabel">
-        <i />
-        {`Application native · ${platform.short}`}
-      </span>
-    </div>
+      )}
+    </DesktopFrame>
   );
 }
 
@@ -381,7 +1070,7 @@ export function DownloadShowcase({
   const launchHref = app.self ? appHref : (app.launchHref ?? null);
   /**
    * L’invite d’installation ne concerne que l’app servie par cette page : on ne
-   * peut pas installer PulseCraft depuis la page de TubeCraft.
+   * peut pas installer Battement depuis la page de Séquence.
    */
   const canPrompt =
     Boolean(app.self) &&
@@ -430,7 +1119,7 @@ export function DownloadShowcase({
     const outcome = await promptInstall();
     setInstallNote(
       outcome === 'accepted'
-        ? 'TubeCraft est installée. Vous pouvez la lancer depuis votre Dock, votre menu Démarrer ou votre écran d’accueil.'
+        ? 'Séquence est installée. Vous pouvez la lancer depuis votre Dock, votre menu Démarrer ou votre écran d’accueil.'
         : outcome === 'dismissed'
           ? 'Installation annulée. Vous pouvez la relancer quand vous voulez.'
           : 'L’installation n’est pas disponible pour le moment : suivez les étapes ci-dessous.'
@@ -726,7 +1415,7 @@ export function DownloadShowcase({
             {app.mode === 'native' ? (
               <NativeMock app={app} platform={active} />
             ) : (
-              <DeviceMock platform={active} />
+              <DeviceMock app={app} platform={active} />
             )}
           </div>
         </div>

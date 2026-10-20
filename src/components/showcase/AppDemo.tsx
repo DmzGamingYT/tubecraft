@@ -7,7 +7,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { SP_MIXES, SP_TRACKS, YT_THUMBS as TC_THUMBS } from './media';
+import { MIXES, TRACKS, YT_THUMBS as TC_THUMBS } from './media';
 
 /**
  * Démos animées des interfaces, intégrées à la vitrine.
@@ -139,7 +139,7 @@ export function DemoFrame({ url, label, tone = 'dark', children, onOpen }: DemoF
   );
 }
 
-/* ------------------------------------------------------------------ TubeCraft */
+/* ------------------------------------------------------------------ Séquence */
 
 type TubeScene = 'search' | 'playback' | 'mini';
 
@@ -178,7 +178,7 @@ function TubeTopBar({ query }: { query?: string }) {
     <div className="tc__bar">
       <div className="tc__brand">
         <span className="tc__mark">▶</span>
-        TubeCraft
+        Séquence
         <span className="tc__fr">FR</span>
       </div>
       <div className={`tc__search${query ? ' tc__search--typing' : ''}`}>
@@ -421,7 +421,7 @@ function TubeMiniScene() {
   );
 }
 
-export function TubeCraftDemo({
+export function VideoDemo({
   initialScene = 'search',
   cycle = true,
 }: {
@@ -467,10 +467,10 @@ export function TubeCraftDemo({
     );
     runtime?.setUrl(
       scene === 'search'
-        ? 'tubecraft.app / recherche?q=blender+spring'
+        ? 'sequence.app / recherche?q=blender+spring'
         : scene === 'playback'
-          ? 'tubecraft.app / watch?v=WhWc3b3KhnY'
-          : 'tubecraft.app / accueil — mini-lecteur'
+          ? 'sequence.app / watch?v=WhWc3b3KhnY'
+          : 'sequence.app / accueil — mini-lecteur'
     );
   }, [scene, runtime?.setStatus, runtime?.setUrl]);
 
@@ -508,9 +508,9 @@ export function TubeCraftDemo({
   );
 }
 
-/* ---------------------------------------------------------------- SpotifyCraft */
+/* ---------------------------------------------------------------- Portée */
 
-export function SpotifyCraftDemo() {
+export function MusicDemo() {
   return (
     <div className="sp" aria-hidden>
       <div className="sp__bar">
@@ -535,7 +535,7 @@ export function SpotifyCraftDemo() {
           <div className="sp__sub">Vos Daily Mix, calculés en local.</div>
 
           <div className="sp__mixes">
-            {SP_MIXES.map((mix, index) => (
+            {MIXES.map((mix, index) => (
               <div className={`sp__mix${index === 1 ? ' sp__mix--hover' : ''}`} key={mix.name}>
                 <span className="sp__art">
                   {mix.covers.map((cover) => (
@@ -553,7 +553,7 @@ export function SpotifyCraftDemo() {
             Pop du moment <span>›</span>
           </div>
           <div className="sp__shelf">
-            {SP_TRACKS.slice(0, 4).map((track) => (
+            {TRACKS.slice(0, 4).map((track) => (
               <div className="sp__album" key={track.title}>
                 <span className="sp__cover">
                   <img src={track.cover} alt="" loading="lazy" decoding="async" />
@@ -568,11 +568,11 @@ export function SpotifyCraftDemo() {
 
       <div className="sp__player">
         <span className="sp__playerArt">
-          <img src={SP_MIXES[2].covers[0]} alt="" loading="lazy" decoding="async" />
+          <img src={MIXES[2].covers[0]} alt="" loading="lazy" decoding="async" />
         </span>
         <span className="sp__now">
-          <strong>{SP_TRACKS[0].title}</strong>
-          <em>{SP_TRACKS[0].artist} · extrait 30 s</em>
+          <strong>{TRACKS[0].title}</strong>
+          <em>{TRACKS[0].artist} · extrait 30 s</em>
         </span>
         <span className="sp__controls">
           <i>⏮</i>
@@ -593,14 +593,14 @@ export function SpotifyCraftDemo() {
   );
 }
 
-/* ------------------------------------------------------------------- PulseCraft */
+/* ------------------------------------------------------------------- Battement */
 
 type PulseScene = 'today' | 'activity' | 'sleep' | 'coach' | 'progress';
 
 const PULSE_SCENES: { id: PulseScene; label: string; short: string; url: string }[] = [
-  { id: 'today', label: 'Tableau de bord', short: 'Aujourd’hui', url: 'pulsecraft.app / aujourd’hui' },
-  { id: 'activity', label: 'Journal', short: 'Activité', url: 'pulsecraft.app / activité' },
-  { id: 'coach', label: 'Coach IA', short: 'Coach', url: 'pulsecraft.app / coach' },
+  { id: 'today', label: 'Tableau de bord', short: 'Aujourd’hui', url: 'battement.app / aujourd’hui' },
+  { id: 'activity', label: 'Journal', short: 'Activité', url: 'battement.app / activité' },
+  { id: 'coach', label: 'Coach IA', short: 'Coach', url: 'battement.app / coach' },
 ];
 
 const PULSE_RAIL = ['◉', '≡', '☾', '◆', '✦'];
@@ -903,7 +903,7 @@ function PulseProgressScene() {
   );
 }
 
-export function PulseCraftDemo({
+export function HealthDemo({
   initialScene = 'today',
   cycle = true,
 }: {
@@ -943,7 +943,7 @@ export function PulseCraftDemo({
     runtime?.setStatus(
       current ? `${String(PULSE_SCENES.indexOf(current) + 1).padStart(2, '0')} / 03 · ${current.label}` : ''
     );
-    runtime?.setUrl(current?.url ?? 'pulsecraft.app / aujourd’hui');
+    runtime?.setUrl(current?.url ?? 'battement.app / aujourd’hui');
   }, [scene, runtime?.setStatus, runtime?.setUrl]);
 
   return (
@@ -951,7 +951,7 @@ export function PulseCraftDemo({
       <div className="pc__top">
         <span className="pc__brand">
           <span className="pc__brandicon" aria-hidden />
-          PulseCraft
+          Battement
         </span>
         <span className="pc__topdate">dimanche 18 octobre</span>
         <span className="pc__avatar">AL</span>

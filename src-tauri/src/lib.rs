@@ -98,7 +98,7 @@ pub fn run() {
                 "main",
                 WebviewUrl::External(start_url.parse().expect("URL de démarrage invalide")),
             )
-            .title("TubeCraft")
+            .title("Séquence")
             .inner_size(1440.0, 900.0)
             .min_inner_size(960.0, 640.0)
             .center()
@@ -117,5 +117,5 @@ pub fn run() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("erreur au lancement de TubeCraft");
+        .expect("erreur au lancement de Séquence");
 }

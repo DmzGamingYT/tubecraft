@@ -106,7 +106,7 @@ export function ShortcutsHelp({ onClose }: Props) {
           </button>
         </div>
         <p className="shortcuts__note">
-          Les touches de lecture agissent sur le lecteur TubeCraft ; quand le focus est dans la
+          Les touches de lecture agissent sur le lecteur Séquence ; quand le focus est dans la
           vidéo YouTube, ce sont les raccourcis de YouTube qui s’appliquent.
         </p>
 

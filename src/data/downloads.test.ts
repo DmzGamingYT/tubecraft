@@ -12,7 +12,8 @@ describe('apps téléchargeables', () => {
     expect(downloadApps.length).toBeGreaterThan(1);
 
     for (const app of downloadApps) {
-      expect(app.icon).toMatch(/\.png/);
+      // Vite peut servir l’icône vectorielle en URL ou l’inliner en data URI.
+      expect(app.icon).toMatch(/^data:image\/svg\+xml|\.svg(\?|$)/);
       expect(app.platforms.length).toBeGreaterThan(0);
       expect(app.facts).toHaveLength(4);
       expect(app.emphasis.length).toBeGreaterThan(0);
@@ -54,13 +55,23 @@ describe('apps téléchargeables', () => {
     }
   });
 
-  it('ne promet un binaire qu’aux apps natives publiées', () => {
+  it('ne promet un binaire qu’aux apps natives publiées, et aucun installeur sur iOS', () => {
     for (const app of downloadApps) {
       if (app.mode !== 'native') continue;
 
       expect(app.releasesHref).toMatch(/^https:\/\/github\.com\/.+\/releases/);
       expect(app.platforms.every((platform) => platform.file)).toBe(true);
-      expect(app.platforms.map((platform) => platform.id)).not.toContain('ios');
+
+      // iOS n’installe que des apps signées via TestFlight ou l’App Store :
+      // l’entrée iPhone est légitime, mais elle ne doit jamais annoncer un
+      // fichier à télécharger.
+      for (const platform of app.platforms) {
+        if (platform.id === 'ios') {
+          expect(platform.delivery).toBe('testflight');
+        } else {
+          expect(platform.delivery ?? 'installer').toBe('installer');
+        }
+      }
 
       if (app.releaseState === 'pending') {
         // rien de publié : ni version annoncée, ni lien direct vers une release
@@ -74,8 +85,8 @@ describe('apps téléchargeables', () => {
   });
 
   it('retombe sur la première app pour un identifiant inconnu', () => {
-    expect(findDownloadApp('spotifycraft').name).toBe('SpotifyCraft');
-    expect(findDownloadApp('pulsecraft').name).toBe('PulseCraft');
+    expect(findDownloadApp('spotifycraft').name).toBe('Portée');
+    expect(findDownloadApp('pulsecraft').name).toBe('Battement');
     expect(findDownloadApp('inconnue' as never)).toBe(downloadApps[0]);
   });
 });

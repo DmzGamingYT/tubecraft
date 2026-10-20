@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-label="La collection Craftline : TubeCraft, SpotifyCraft et PulseCraft">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-label="La collection Craftline : Séquence, Portée et Battement">
   <defs>
     <linearGradient id="tc" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ff1f45"/><stop offset="1" stop-color="#c90023"/>
@@ -13,14 +13,14 @@
 
   <rect width="1280" height="340" rx="18" fill="#0c0c0f"/>
 
-  <!-- TubeCraft -->
+  <!-- Séquence -->
   <g transform="translate(24,24)">
     <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
     <g transform="translate(28,28)">
       <rect width="56" height="56" rx="16" fill="url(#tc)"/>
       <path d="M21 17 L39 28 L21 39 Z" fill="#ffffff"/>
     </g>
-    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">TubeCraft</text>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">Séquence</text>
     <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">YouTube, en open source :</text>
     <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">recherche, lecteur, Shorts,</text>
     <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">abonnements, mini-lecteur.</text>
@@ -32,7 +32,7 @@
     <text x="28" y="264" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#8b8578">Ce dépôt · MIT · 0 clé API</text>
   </g>
 
-  <!-- SpotifyCraft -->
+  <!-- Portée -->
   <g transform="translate(444,24)">
     <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
     <g transform="translate(28,28)">
@@ -43,7 +43,7 @@
         <path d="M19 37.5 C25 35.5 31 36.5 35.5 39"/>
       </g>
     </g>
-    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">SpotifyCraft</text>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">Portée</text>
     <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">La musique, sans le nuage :</text>
     <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">extraits officiels, paroles,</text>
     <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">égaliseur, vos propres MP3.</text>
@@ -55,14 +55,14 @@
     <text x="28" y="264" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="13" fill="#8b8578">Dépôt séparé · DMG · MSI · AppImage</text>
   </g>
 
-  <!-- PulseCraft -->
+  <!-- Battement -->
   <g transform="translate(864,24)">
     <rect width="392" height="292" rx="18" fill="#111116" stroke="#26262b"/>
     <g transform="translate(28,28)">
       <rect width="56" height="56" rx="16" fill="url(#pu)"/>
       <path d="M12 30 h7 l4-11 6 22 5-15 3 4 h7" fill="none" stroke="#0b0b0c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
-    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">PulseCraft</text>
+    <text x="104" y="66" font-family="Inter, -apple-system, 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="700" fill="#f4f2ec">Battement</text>
     <text x="28" y="120" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">Vos données de santé restent</text>
     <text x="28" y="142" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">chez vous : objectifs, séances,</text>
     <text x="28" y="164" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="15" fill="#b9b3a8">sommeil, nutrition, coach IA.</text>

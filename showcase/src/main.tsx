@@ -13,7 +13,7 @@ import { preview } from './preview';
 /**
  * Site vitrine autonome (build : `npm run build:showcase`).
  *
- * - `VITE_APP_URL` : URL publique de TubeCraft. Sans elle, la vitrine renvoie
+ * - `VITE_APP_URL` : URL publique de Séquence. Sans elle, la vitrine renvoie
  *   vers GitHub au lieu de proposer un lien mort.
  * - Les liens internes de la vitrine sont de simples ancres (pas de routeur).
  */

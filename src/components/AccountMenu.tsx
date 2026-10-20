@@ -272,7 +272,7 @@ export function AccountMenu() {
 
             {view === 'providers' ? (
               <>
-                <h2 className="auth__title">Se connecter à TubeCraft</h2>
+                <h2 className="auth__title">Se connecter à Séquence</h2>
                 <p className="auth__sub">
                   Accédez à vos abonnements, à vos playlists et à votre historique.
                 </p>

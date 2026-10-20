@@ -45,7 +45,7 @@ interface Props {
   video: Video;
   /** seconde de reprise */
   startAt?: number;
-  /** enchainer automatiquement sur la vidéo suivante de TubeCraft */
+  /** enchainer automatiquement sur la vidéo suivante de Séquence */
   autoplayNext: boolean;
   onEnded?: () => void;
   /** segments SponsorBlock à sauter */
@@ -89,7 +89,7 @@ const SPONSOR_LABELS: Record<string, string> = {
 };
 
 /**
- * Lecteur YouTube officiel (iframe + API IFrame). TubeCraft ne gère que :
+ * Lecteur YouTube officiel (iframe + API IFrame). Séquence ne gère que :
  * - la reprise de lecture (?t= / position mémorisée) ;
  * - la sauvegarde espacée de la position (moins d'écritures localStorage) ;
  * - l'enchaînement vers la suggestion suivante ;

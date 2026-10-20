@@ -6,13 +6,13 @@ import { setPageMeta } from '../lib/meta';
 
 /**
  * Page « Télécharger » de l’app : la même expérience que la section de la
- * vitrine, mais dans le chrome TubeCraft, avec l’installation PWA active.
+ * vitrine, mais dans le chrome Séquence, avec l’installation PWA active.
  */
 export function Download() {
   useEffect(() => {
     setPageMeta(
-      'Télécharger TubeCraft — macOS, Windows, Linux, Android, iPhone',
-      'Installez TubeCraft comme une application sur macOS, Windows, Linux, Android et iPhone. Sans magasin, sans compte, mise à jour automatique.'
+      'Télécharger Séquence — macOS, Windows, Linux, Android, iPhone',
+      'Installez Séquence comme une application sur macOS, Windows, Linux, Android et iPhone. Sans magasin, sans compte, mise à jour automatique.'
     );
   }, []);
 
