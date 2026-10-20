@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Séquence">
+  <title>Séquence (maskable)</title>
+  <defs>
+    <linearGradient id="sq-tile-m" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#ff4056"/>
+      <stop offset="0.52" stop-color="#f02540"/>
+      <stop offset="1" stop-color="#c9152d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#sq-tile-m)"/>
+  <g transform="translate(512 512) scale(0.78) translate(-512 -512)">
+    <rect x="216" y="216" width="592" height="592" rx="118" fill="none" stroke="#0c0c0d" stroke-opacity="0.42" stroke-width="34"/>
+    <path d="M456 404 664 512 456 620Z" fill="#0c0c0d" stroke="#0c0c0d" stroke-width="44" stroke-linejoin="round"/>
+  </g>
+</svg>

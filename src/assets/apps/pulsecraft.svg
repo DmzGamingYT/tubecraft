@@ -1,6 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="512" height="512">
-  <rect width="128" height="128" rx="30" fill="#c9ff3d"/>
-  <circle cx="64" cy="64" r="32" fill="#0c0c0d"/>
-  <path d="M38 64h14l6-18 12 36 6-18h14" fill="none" stroke="#c9ff3d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="1" y="1" width="126" height="126" rx="29" fill="none" stroke="#0c0c0d" stroke-opacity=".18" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Battement">
+  <title>Battement</title>
+  <defs>
+    <linearGradient id="bt-tile" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#dcff7a"/>
+      <stop offset="0.52" stop-color="#c9ff3d"/>
+      <stop offset="1" stop-color="#a3dd21"/>
+    </linearGradient>
+    <linearGradient id="bt-sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="0.46" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="232" fill="url(#bt-tile)"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#bt-sheen)"/>
+
+  <!-- une ligne de pouls, large et franche : lisible même à 16 px -->
+  <path
+    d="M196 522h170l64-142 88 300 78-358 66 200h166"
+    fill="none"
+    stroke="#0c0c0d"
+    stroke-width="76"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
 </svg>

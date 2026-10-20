@@ -987,7 +987,9 @@
   font-weight:600;
   letter-spacing:0;
   text-transform:none;
-  color:var(--app-accent, var(--sc-accent));
+  /* l'accent seul ne tient pas le contraste sur le papier (le lime de
+     Battement tombe à ~1,3:1) : on le rabat vers l'encre, la teinte reste */
+  color:color-mix(in srgb, var(--app-accent, var(--sc-accent)) 42%, var(--sc-ink));
   border-bottom:1px solid currentColor;
   padding-bottom:2px
 }

@@ -1,9 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="512" height="512">
-  <rect width="128" height="128" rx="30" fill="#1ed760"/>
-  <circle cx="64" cy="64" r="32" fill="#f2f0ea"/>
-  <circle cx="64" cy="64" r="26" fill="#0c0c0d"/>
-  <circle cx="64" cy="64" r="16" fill="none" stroke="#f2f0ea" stroke-opacity=".22" stroke-width="2.5"/>
-  <circle cx="64" cy="64" r="6" fill="#f2f0ea"/>
-  <path d="M74 43a24 24 0 0 1 10 14" fill="none" stroke="#f2f0ea" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>
-  <rect x="1" y="1" width="126" height="126" rx="29" fill="none" stroke="#0c0c0d" stroke-opacity=".18" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Portée">
+  <title>Portée</title>
+  <defs>
+    <linearGradient id="pt-tile" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#2ce07d"/>
+      <stop offset="0.52" stop-color="#15b95a"/>
+      <stop offset="1" stop-color="#0b7f3d"/>
+    </linearGradient>
+    <linearGradient id="pt-sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="0.46" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="232" fill="url(#pt-tile)"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#pt-sheen)"/>
+
+  <!-- la portée : quatre lignes, présentes mais discrètes -->
+  <g stroke="#0c0c0d" stroke-opacity="0.3" stroke-width="26" stroke-linecap="round">
+    <path d="M262 372h500"/>
+    <path d="M262 462h500"/>
+    <path d="M262 552h500"/>
+    <path d="M262 642h500"/>
+  </g>
+
+  <!-- la note : une tête pleine, une hampe, un crochet -->
+  <g fill="#0c0c0d">
+    <ellipse cx="462" cy="566" rx="58" ry="43" transform="rotate(-20 462 566)"/>
+    <rect x="507" y="330" width="28" height="246" rx="14"/>
+    <path d="M535 330c68 20 96 68 86 129-22-42-52-64-86-72Z"/>
+  </g>
 </svg>
